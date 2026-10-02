@@ -1,0 +1,75 @@
+:root {
+  --vf-orange: #f97316;
+  --vf-orange-dark: #ea580c;
+  --vf-orange-soft: #fff7ed;
+  --vf-red: #ef4444;
+  --vf-red-soft: #fef2f2;
+  --vf-gradient: linear-gradient(135deg, #f97316, #ef4444);
+  --vf-dark: #18181b;
+  --vf-text: #27272a;
+  --vf-muted: #71717a;
+  --vf-light-muted: #a1a1aa;
+  --vf-border: #e4e4e7;
+  --vf-border-light: #f1f1f2;
+  --vf-surface: #ffffff;
+  --vf-background: #fafafa;
+}
+
+.content-card {
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: var(--vf-surface);
+  border: 1px solid var(--vf-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.025);
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.primary-button {
+  padding: 11px 16px;
+  color: #ffffff;
+  background: var(--vf-gradient);
+  border: 1px solid transparent;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.16);
+}
+
+.primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(239, 68, 68, 0.22);
+}
+
+.secondary-button {
+  padding: 9px 14px;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border: 1px solid #fed7aa;
+}
+
+.secondary-button:hover {
+  background: #ffedd5;
+  border-color: #fdba74;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border: 1px solid #fed7aa;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

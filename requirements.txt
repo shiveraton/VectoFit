@@ -1,0 +1,36 @@
+# core framework
+Django==5.1.*
+djangorestframework==3.15.*
+djangorestframework-simplejwt==5.3.*
+django-cors-headers==4.4.*
+
+# database
+psycopg2-binary==2.9.*
+
+# environment
+django-environ==0.11.*
+
+# computer vision
+opencv-python==4.10.*
+mediapipe==0.10.*
+Pillow==10.4.*                # ImageField support if storing thumbnails/images
+
+# numerical/biomechanics computations
+numpy==1.26.*
+scipy==1.13.*
+filterpy==1.4.*
+
+# ML
+xgboost==2.1.*
+scikit-learn==1.5.*
+joblib==1.4.*
+
+# data processing
+pandas==2.2.*
+
+# visualization (development/training only)
+matplotlib==3.9.*
+
+# testing
+pytest==8.3.*
+pytest-django==4.9.*
