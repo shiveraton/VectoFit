@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "prefabPath": "C:\\Users\\Jhedver\\.gradle\\caches\\modules-2\\files-2.1\\com.google.prefab\\cli\\2.1.0\\aa32fec809c44fa531f01dcfb739b5b3304d3050\\cli-2.1.0-all.jar",
+  "packages": [
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-nitro-image\\android\\build\\intermediates\\prefab_package\\debug\\prefab",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-nitro-modules\\android\\build\\intermediates\\prefab_package\\debug\\prefab",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-vision-camera\\android\\build\\intermediates\\prefab_package\\debug\\prefab",
+    "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\8cbd9de9b0e37345cefa1e98d7917898\\transformed\\react-android-0.86.3-debug\\prefab",
+    "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\80f1279535d13c5b3a92e7ce4fe298aa\\transformed\\hermes-android-250829098.0.17-debug\\prefab",
+    "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\d4c696bcd5014eac3cc714eabdf0a1f8\\transformed\\fbjni-0.7.0\\prefab"
+  ]
+}
