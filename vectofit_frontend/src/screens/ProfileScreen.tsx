@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import authStore from "../stores/authStore";
+import useAuthStore from "../stores/useAuthStore";
 import styles from "../styles/ProfileScreenStyles";
 import { COLORS } from "../styles/HomeScreenStyles";
 import { capitalize } from "../utils/formatters";
 
 const ProfileScreen = () => {
-  const { user, logout } = authStore();
+  const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();

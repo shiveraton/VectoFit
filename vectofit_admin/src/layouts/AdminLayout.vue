@@ -17,13 +17,7 @@
 
           <RouterLink to="/dataset" class="nav-link"> Datasets </RouterLink>
 
-          <RouterLink to="/features" class="nav-link"> Features </RouterLink>
-
           <RouterLink to="/training" class="nav-link"> Training </RouterLink>
-
-          <RouterLink to="/evaluation" class="nav-link">
-            Evaluation
-          </RouterLink>
 
           <RouterLink to="/models" class="nav-link"> Models </RouterLink>
         </div>

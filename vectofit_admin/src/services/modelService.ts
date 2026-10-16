@@ -1,74 +1,72 @@
-export type DeploymentStatus = "inactive" | "building" | "active" | "failed";
-export type Environment = "staging" | "production";
+import client from "../config/client";
 
-export interface ModelVersion {
-  id: string;
-  version: string;
-  createdAt: string;
-  gitCommit: string;
-  trainingJobId: string;
-  artifactUri: string;
-  accuracy: number;
-  latencyMs: number;
-  status: DeploymentStatus;
-  environment?: Environment;
-  endpointUrl?: string;
-}
-
-export interface Model {
-  id: string;
+export interface ModelRegistryRecord {
+  id: number;
   name: string;
-  description: string;
-  framework: string;
-  updatedAt: string;
-  versions: ModelVersion[];
+  version: string;
+  training_job: number;
+  algorithm: string;
+  metrics: Record<string, unknown>;
+  is_active: boolean;
+  created_at: string;
 }
 
-export interface DeployPayload {
-  modelId: string;
-  versionId: string;
-  environment: Environment;
-  minReplicas: number;
-  maxReplicas: number;
-}
+export interface ModelState {
+  id: number;
+  name: string;
+  version: string;
+  algorithm: string;
+  is_active: boolean;
+  created_at: string;
+  artifact_available: boolean;
 
-export interface SummaryCardData {
-  readonly label: string;
-  readonly value: string | number;
-  readonly description: string;
-  readonly icon: string;
-  readonly variant?: "samples" | "incorrect" | "correct" | "version";
+  training: {
+    job_id: number;
+    status: string;
+    dataset_names: string[];
+    sample_count: number;
+    train_count: number;
+    test_count: number;
+    split_strategy: string;
+    random_seed: number;
+    created_at: string;
+    started_at: string | null;
+    completed_at: string | null;
+  };
+
+  features: {
+    selected: string[];
+    importances: Record<string, number>;
+  };
+
+  evaluation: {
+    accuracy: number | null;
+    balanced_accuracy: number | null;
+    precision: number | null;
+    recall: number | null;
+    f1: number | null;
+    confusion_matrix: number[][];
+    overall_class_distribution: Record<string, number>;
+    train_class_distribution: Record<string, number>;
+    test_class_distribution: Record<string, number>;
+  };
+
+  feature_warnings: string[];
 }
 
 export const modelService = {
-  async getModels(): Promise<Model[]> {
-    const response = await fetch("/api/v1/models");
-    if (!response.ok) {
-      throw new Error("Failed to fetch model registry");
-    }
-    return response.json();
+  async getModels(): Promise<ModelRegistryRecord[]> {
+    const response =
+      await client.get<ModelRegistryRecord[]>("/training/models/");
+
+    return response.data;
   },
 
-  async deployVersion(payload: DeployPayload): Promise<void> {
-    const response = await fetch(`/api/v1/models/${payload.modelId}/deploy`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error("Deployment failed");
-    }
-  },
-
-  async undeployVersion(modelId: string, versionId: string): Promise<void> {
-    const response = await fetch(
-      `/api/v1/models/${modelId}/versions/${versionId}/undeploy`,
-      {
-        method: "POST",
-      },
+  async getModelState(id: number): Promise<ModelState> {
+    const response = await client.get<ModelState>(
+      `/training/models/${id}/state/`,
     );
-    if (!response.ok) {
-      throw new Error("Undeployment failed");
-    }
+
+    return response.data;
   },
 };

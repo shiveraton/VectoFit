@@ -2,6 +2,8 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -11,9 +13,42 @@ from .serializers import ProfileSerializer, UserSerializer, RegisterSerializer, 
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Profile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if Profile.objects.filter(user=self.request.user).exists():
+            raise ValidationError({
+                "detail": "A profile already exists for this user."
+            })
+
+        serializer.save(user=self.request.user)
+
+    @action(
+        detail=False,
+        methods=["get", "patch"],
+        url_path="current"
+    )
+    def current(self, request):
+        profile, _ = Profile.objects.get_or_create(
+            user=request.user,
+            defaults={"email": request.user.email},
+        )
+
+        if request.method == "PATCH":
+            serializer = self.get_serializer(
+                profile,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            serializer = self.get_serializer(profile)
+
+        return Response(serializer.data)
 
 class CurrentUserViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]

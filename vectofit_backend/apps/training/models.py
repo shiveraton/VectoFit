@@ -35,16 +35,16 @@ class TrainingJob(models.Model):
 
     random_seed = models.IntegerField(
         default=42,
-        help_text="Seed for the train/test split and model initialisation.",
+        help_text="Seed for the train/test split and model initialization.",
     )
 
     split_strategy = models.CharField(
         max_length=32,
-        default="group_by_dataset",
+        default="group_by_participant",
         help_text=(
-            "How the held-out test set was formed. 'group_by_dataset' keeps all "
-            "repetitions from the same source dataset on one side of the split "
-            "to avoid leaking correlated samples."
+            "How the held-out test set was formed. 'group_by_participant' keeps "
+            "all repetitions from the same research participant on one side of "
+            "the split to avoid subject-level data leakage."
         ),
     )
 

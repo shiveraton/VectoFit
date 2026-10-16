@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import type { CreateDatasetPayload } from "../../services/datasetService";
+
+import type { Participant } from "../../services/participantService";
+
 import { ref, watch } from "vue";
 
 const props = defineProps<{
   isOpen: boolean;
   isSubmitting: boolean;
   form: CreateDatasetPayload;
+  participants: Participant[];
 }>();
 
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "submit"): void;
+  (e: "create-participant"): void;
 }>();
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -91,6 +96,51 @@ const handleFileChange = (e: Event) => {
               required
             />
             <span v-if="fileError" class="field-error">{{ fileError }}</span>
+          </div>
+
+          <div class="form-group">
+            <div class="participant-selector">
+              <select
+                id="dataset-participant"
+                v-model="form.participant"
+                required
+              >
+                <option :value="null" disabled>Select participant</option>
+
+                <option
+                  v-for="participant in participants"
+                  :key="participant.id"
+                  :value="participant.id"
+                >
+                  {{ participant.participant_code }}
+                </option>
+              </select>
+
+              <button
+                type="button"
+                class="add-participant-button"
+                title="Create participant"
+                @click="$emit('create-participant')"
+              >
+                +
+              </button>
+            </div>
+
+            <span v-if="participants.length === 0" class="field-hint">
+              No participants are available.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="dataset-view-angle">View Angle</label>
+            <select id="dataset-view-angle" v-model="form.view_angle" required>
+              <option :value="null" disabled>
+                Select the associated view angle
+              </option>
+              <option :value="1">Diagonal/45°</option>
+              <option :value="2">Frontal</option>
+              <option :value="3">Sagittal</option>
+            </select>
           </div>
 
           <div class="modal-footer">
@@ -229,5 +279,30 @@ const handleFileChange = (e: Event) => {
   background: #f4f4f5;
   border: 1px solid var(--vf-border, #e4e4e7);
   color: var(--vf-text, #27272a);
+}
+
+.required-mark {
+  color: #ef4444;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 10px;
+}
+
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--vf-border, #e4e4e7);
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #fafafa;
+  color: var(--vf-text, #27272a);
+  outline: none;
+}
+
+.form-group select:focus {
+  border-color: var(--vf-orange, #f97316);
+  background: #ffffff;
 }
 </style>

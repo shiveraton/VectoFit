@@ -1,3 +1,9 @@
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\AsyncStorageSpec-generated.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\react\renderer\components\AsyncStorageSpec\ComponentDescriptors.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\react\renderer\components\AsyncStorageSpec\EventEmitters.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\react\renderer\components\AsyncStorageSpec\Props.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\react\renderer\components\AsyncStorageSpec\ShadowNodes.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\AsyncStorageSpec_autolinked_build\CMakeFiles\react_codegen_AsyncStorageSpec.dir\react\renderer\components\AsyncStorageSpec\States.cpp.o
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\VectorIconsIonicons_autolinked_build\CMakeFiles\react_codegen_VectorIconsIonicons.dir\VectorIconsIonicons-generated.cpp.o
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\VectorIconsIonicons_autolinked_build\CMakeFiles\react_codegen_VectorIconsIonicons.dir\react\renderer\components\VectorIconsIonicons\ComponentDescriptors.cpp.o
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\VectorIconsIonicons_autolinked_build\CMakeFiles\react_codegen_VectorIconsIonicons.dir\react\renderer\components\VectorIconsIonicons\EventEmitters.cpp.o
@@ -22,3 +28,9 @@ D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\RNVectorIconsSpec_autolinked_build\CMakeFiles\react_codegen_RNVectorIconsSpec.dir\react\renderer\components\RNVectorIconsSpec\Props.cpp.o
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\RNVectorIconsSpec_autolinked_build\CMakeFiles\react_codegen_RNVectorIconsSpec.dir\react\renderer\components\RNVectorIconsSpec\ShadowNodes.cpp.o
 D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\RNVectorIconsSpec_autolinked_build\CMakeFiles\react_codegen_RNVectorIconsSpec.dir\react\renderer\components\RNVectorIconsSpec\States.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\react\renderer\components\rnworklets\ComponentDescriptors.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\react\renderer\components\rnworklets\EventEmitters.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\react\renderer\components\rnworklets\Props.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\react\renderer\components\rnworklets\ShadowNodes.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\react\renderer\components\rnworklets\States.cpp.o
+D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\212l1z73\armeabi-v7a\rnworklets_autolinked_build\CMakeFiles\react_codegen_rnworklets.dir\rnworklets-generated.cpp.o

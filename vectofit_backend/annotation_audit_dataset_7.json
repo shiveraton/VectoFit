@@ -1,0 +1,242 @@
+[
+  {
+    "timestamp_utc": "2026-10-05T07:30:49.548268+00:00",
+    "dataset_id": 7,
+    "sample_id": 23,
+    "rep_number": 6,
+    "start_frame": 168,
+    "end_frame": 249,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T07:30:59.307309+00:00",
+    "dataset_id": 7,
+    "sample_id": 24,
+    "rep_number": 7,
+    "start_frame": 249,
+    "end_frame": 308,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T07:31:12.097240+00:00",
+    "dataset_id": 7,
+    "sample_id": 25,
+    "rep_number": 8,
+    "start_frame": 308,
+    "end_frame": 368,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T07:31:20.727259+00:00",
+    "dataset_id": 7,
+    "sample_id": 26,
+    "rep_number": 9,
+    "start_frame": 368,
+    "end_frame": 421,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T07:31:30.396954+00:00",
+    "dataset_id": 7,
+    "sample_id": 27,
+    "rep_number": 10,
+    "start_frame": 421,
+    "end_frame": 476,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T07:59:35.415782+00:00",
+    "dataset_id": 7,
+    "sample_id": 23,
+    "rep_number": 6,
+    "start_frame": 168,
+    "end_frame": 249,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "criteria": {
+      "depth": true,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:13:02.821873+00:00",
+    "dataset_id": 7,
+    "sample_id": 23,
+    "rep_number": 6,
+    "start_frame": 168,
+    "end_frame": 249,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "criteria": {
+      "depth": true,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:13:19.434928+00:00",
+    "dataset_id": 7,
+    "sample_id": 24,
+    "rep_number": 7,
+    "start_frame": 249,
+    "end_frame": 308,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "criteria": {
+      "depth": true,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:13:30.873608+00:00",
+    "dataset_id": 7,
+    "sample_id": 25,
+    "rep_number": 8,
+    "start_frame": 308,
+    "end_frame": 368,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "criteria": {
+      "depth": true,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:14:03.940843+00:00",
+    "dataset_id": 7,
+    "sample_id": 26,
+    "rep_number": 9,
+    "start_frame": 368,
+    "end_frame": 421,
+    "action": "label_incorrect",
+    "is_correct": false,
+    "error_label": "insufficient_depth",
+    "criteria": {
+      "depth": false,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:14:37.992765+00:00",
+    "dataset_id": 7,
+    "sample_id": 27,
+    "rep_number": 10,
+    "start_frame": 421,
+    "end_frame": 476,
+    "action": "label_correct",
+    "is_correct": true,
+    "error_label": "",
+    "criteria": {
+      "depth": true,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:15:13.310856+00:00",
+    "dataset_id": 7,
+    "sample_id": 28,
+    "rep_number": 11,
+    "start_frame": 476,
+    "end_frame": 533,
+    "action": "label_incorrect",
+    "is_correct": false,
+    "error_label": "insufficient_depth",
+    "criteria": {
+      "depth": false,
+      "knee": true,
+      "trunk": true,
+      "symmetry": true,
+      "foot": true,
+      "completion": true
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:39:02.311499+00:00",
+    "dataset_id": 7,
+    "sample_id": 29,
+    "rep_number": 12,
+    "start_frame": 533,
+    "end_frame": 584,
+    "action": "clear_label",
+    "is_correct": null,
+    "error_label": "",
+    "criteria": {
+      "depth": null,
+      "knee": null,
+      "trunk": null,
+      "symmetry": null,
+      "foot": null,
+      "completion": null
+    },
+    "annotator": "admin_jhed"
+  },
+  {
+    "timestamp_utc": "2026-10-05T08:39:04.001568+00:00",
+    "dataset_id": 7,
+    "sample_id": 29,
+    "rep_number": 12,
+    "start_frame": 533,
+    "end_frame": 584,
+    "action": "clear_label",
+    "is_correct": null,
+    "error_label": "",
+    "criteria": {
+      "depth": null,
+      "knee": null,
+      "trunk": null,
+      "symmetry": null,
+      "foot": null,
+      "completion": null
+    },
+    "annotator": "admin_jhed"
+  }
+]

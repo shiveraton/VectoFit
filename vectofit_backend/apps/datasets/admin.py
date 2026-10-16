@@ -1,6 +1,30 @@
 from django.contrib import admin
-from .models import Dataset, DatasetSample
+from .models import Dataset, DatasetSample, Participant, ViewAngle
 
+
+@admin.register(Participant)
+class ParticipantAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "participant_code",
+        "created_at",
+    )
+    search_fields = (
+        "participant_code",
+    )
+
+@admin.register(ViewAngle)
+class ViewAngleAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "angle_variant",
+    )
+    list_filter = (
+        "angle_variant",
+    )
+    search_fields = (
+        "angle_variant",
+    )
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):

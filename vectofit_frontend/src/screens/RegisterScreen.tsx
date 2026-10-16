@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
-import authStore from "../stores/authStore";
+import useAuthStore from "../stores/useAuthStore";
 import { authStyles as styles } from "../styles/RegisterScreenStyles";
 
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "Register">;
@@ -22,7 +22,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const register = authStore((state) => state.register);
+  const register = useAuthStore((state) => state.register);
 
   const handleRegister = async () => {
     const trimmedIdentifier = identifier.trim();

@@ -8,10 +8,8 @@ from apps.analytics.services.features import (
 )
 from apps.datasets.models import Dataset, DatasetSample
 
-
 class DatasetNotUsableError(Exception):
     pass
-
 
 class SampleSet:
     def __init__(self, features, rows, labels, groups, feature_names, warnings, errors):
@@ -54,6 +52,7 @@ def _load_labelled_samples(dataset):
         DatasetSample.objects.select_related(
             "rep_assessment__session",
             "rep_assessment__session__body_profile",
+            "dataset_video__participant"
         )
         .filter(dataset=dataset, is_correct__isnull=False)
         .order_by("id")
@@ -78,8 +77,20 @@ def build_samples(datasets, selected_features):
         found_any = False
 
         for sample, frames, session in _load_labelled_samples(dataset):
+            if sample.dataset_video_id:
+                participant_id = (
+                    sample.dataset_video.participant_id
+                )
+            else:
+                participant_id = dataset.participant_id
+
+            if participant_id is None:
+                errors.append(
+                    f"Dataset {dataset.pk} sample ({sample.pk}) has no participant assigned."
+                )
+                continue
+
             found_any = True
-            group_id = f"session-{session.pk}"
 
             try:
                 features = extract_rep_features(
@@ -88,13 +99,14 @@ def build_samples(datasets, selected_features):
                     scale_factor=_scale_factor_for_session(session),
                 )
                 row = to_feature_row(features, selected_features)
+
             except FeatureExtractionError as exc:
                 errors.append(f"Dataset {dataset.pk} sample {sample.pk}: {exc}")
                 continue
 
             rows.append(row)
             labels.append(1 if sample.is_correct else 0)
-            groups.append(group_id)
+            groups.append(f"participant-{participant_id}")
 
             for warning in features.get("_warnings", []):
                 if warning not in warnings:

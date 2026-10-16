@@ -10,8 +10,8 @@ set that the model was not fitted on, and if that split is impossible the
 function raises rather than reporting a number that would be meaningless.
 """
 
-import io
-
+import os
+import tempfile
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
@@ -26,8 +26,6 @@ from xgboost import XGBClassifier
 
 from .data_loader import SampleSet, group_split
 
-#: Deliberately plain baseline. Hyperparameter tuning is explicitly deferred
-#: until there is a reproducible baseline to compare against.
 BASELINE_HYPERPARAMETERS = {
     "n_estimators": 200,
     "max_depth": 4,
@@ -46,7 +44,6 @@ class InsufficientDataError(Exception):
 
 
 def resolve_hyperparameters(overrides=None):
-    """Merge caller-supplied hyperparameters over the baseline."""
     params = dict(BASELINE_HYPERPARAMETERS)
     if overrides:
         unknown = set(overrides) - set(BASELINE_HYPERPARAMETERS)
@@ -60,7 +57,6 @@ def resolve_hyperparameters(overrides=None):
 
 
 def _check_split_viability(sample_set, train_idx, test_idx, labels):
-    """Refuse to evaluate on a split that cannot be scientifically trusted."""
     if not train_idx or not test_idx:
         raise InsufficientDataError(
             "The group split produced an empty train or test set. This happens "
@@ -95,11 +91,6 @@ def _check_split_viability(sample_set, train_idx, test_idx, labels):
 
 
 def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42):
-    """Fit a baseline XGBoost classifier and score it on held-out data.
-
-    Returns a dict with the fitted estimator, the metrics, the split indices
-    and the column names, ready for artifact persistence and API response.
-    """
     if not isinstance(sample_set, SampleSet):
         raise TypeError("train_and_evaluate expects a SampleSet.")
 
@@ -126,8 +117,8 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
     model = XGBClassifier(
         **params,
         random_state=seed,
-        eval_metric=params.get("eval_metric", "logloss"),
     )
+
     model.fit(X[train_idx], y[train_idx])
 
     y_pred = model.predict(X[test_idx])
@@ -173,7 +164,6 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
 
 
 def _distribution(values):
-    """Class counts as a JSON-safe mapping."""
     return {
         str(int(label)): int(np.sum(values == label))
         for label in np.unique(values)
@@ -181,14 +171,41 @@ def _distribution(values):
 
 
 def serialize_model(model):
-    """Serialise the fitted estimator to bytes (XGBoost native JSON)."""
-    buffer = io.BytesIO()
-    model.save_model(buffer)
-    return buffer.getvalue()
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".json",
+            delete=False,
+        ) as temp_file:
+            temp_path = temp_file.name
+
+        model.save_model(temp_path)
+
+        with open(temp_path, "rb") as file:
+            return file.read()
+
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 
 def load_model(artifact):
-    """Rebuild an estimator from bytes produced by :func:`serialize_model`."""
-    estimator = XGBClassifier()
-    estimator.load_model(io.BytesIO(artifact))
-    return estimator
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".json",
+            delete=False,
+        ) as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(artifact)
+
+        estimator = XGBClassifier()
+        estimator.load_model(temp_path)
+
+        return estimator
+
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)

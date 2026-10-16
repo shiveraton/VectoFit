@@ -1,214 +1,493 @@
-import React, { useState } from 'react';
-import styles from '../styles/MorphologicalCalibrationScreenStyles';
-import { View, Text, Pressable } from 'react-native';
-import { Camera } from 'react-native-vision-camera';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import type { LayoutChangeEvent } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  useCameraDevice,
+  useCameraPermission,
+} from "react-native-vision-camera";
+import { useIsFocused } from "@react-navigation/native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-type MorphologicalCalibrationScreenProps = NativeStackScreenProps<
-    RootStackParamList,
-    'MorphologicalCalibration'
+import type { BodyProfileData, RootStackParamList } from "../navigation/types";
+import { useMorphologicalCalibration } from "../features/calibration/hooks/useMorphologicalCalibration";
+import type { FrameSize } from "../features/calibration/hooks/useMorphologicalCalibration";
+
+import { CalibrationCamera } from "../components/morphology/CalibrationCamera";
+import { LandmarkOverlay } from "../components/morphology/LandmarkOverlay";
+import { CalibrationProgress } from "../components/morphology/CalibrationProgress";
+import { CalibrationResult } from "../components/morphology/CalibrationResult";
+import styles, {
+  CALIBRATION_COLORS,
+} from "../styles/MorphologicalCalibrationScreenStyles";
+
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "MorphologicalCalibration"
 >;
 
-interface User {
-    name: string;
-    age: number;
-    weight: number;
-    height: number;
+export type CalibrationPosition = "front" | "side" | "45_degree";
+
+export type CalibrationStatus =
+  | "idle"
+  | "aligning"
+  | "holding"
+  | "processing"
+  | "success"
+  | "error";
+
+export interface CameraStatus {
+  camera_is_active: boolean;
+  person_is_detected: boolean;
+  body_fully_visible: boolean;
+  landmark_confidence: number;
 }
 
-interface MorphologicalData {
-    left_lower_limb: number;
-    right_lower_limb: number;
-    trunk: number;
+export interface Landmark {
+  x_coordinate: number;
+  y_coordinate: number;
+  z_coordinate: number;
+  visibility: number;
 }
 
-interface CameraStatus {
-    camera_is_active: boolean;
-    person_is_detected: boolean;
-    body_fully_visible: boolean;
-    landmark_confidence: number;
+export interface Landmarks {
+  left_shoulder: Landmark;
+  right_shoulder: Landmark;
+  left_hip: Landmark;
+  right_hip: Landmark;
+  left_knee: Landmark;
+  right_knee: Landmark;
+  left_ankle: Landmark;
+  right_ankle: Landmark;
 }
 
-interface Landmark {
-    x_coordinate: number;
-    y_coordinate: number;
-    z_coordinate: number;
-    visibility: number;
+export interface MorphologicalData {
+  left_lower_limb: number;
+  right_lower_limb: number;
+  trunk: number;
 }
 
-interface Landmarks {
-    left_shoulder: Landmark;
-    right_shoulder: Landmark;
-    left_hip: Landmark;
-    right_hip: Landmark;
-    left_knee: Landmark;
-    right_knee: Landmark;
-    left_ankle: Landmark;
-    right_ankle: Landmark;
+interface ViewPortSize {
+  width: number;
+  height: number;
 }
 
-{/*
-interface MorphologicalAnalysis {
-    lower_limb_symmetry: number;
-    trunk_to_lower_limb_ratio: number;
-    body_proportion_score: number;
+const POSITION_OPTIONS: Array<{
+  value: CalibrationPosition;
+  label: string;
+  accessibilityLabel: string;
+}> = [
+  { value: "front", label: "FRONT", accessibilityLabel: "Front view" },
+  { value: "side", label: "SIDE", accessibilityLabel: "Side view" },
+  { value: "45_degree", label: "45°", accessibilityLabel: "45 degree view" },
+];
+
+function hasValidBodyProfile(
+  profile?: BodyProfileData | null,
+): profile is BodyProfileData {
+  if (!profile) return false;
+
+  return [
+    profile.shoulder_width,
+    profile.hip_width,
+    profile.left_femur,
+    profile.right_femur,
+    profile.left_tibia,
+    profile.right_tibia,
+  ].every((value) => Number.isFinite(value) && value > 0);
 }
-*/}
 
-type CalibrationPosition = | 'front' | 'side' | '45_degree';
+function isBusy(status: CalibrationStatus) {
+  return status === "processing";
+}
 
-export default function MorphologicalCalibrationScreen ({
-    route,
+export default function MorphologicalCalibrationScreen({
+  route,
+  navigation,
+}: Props) {
+  const passedBodyProfileData = route.params?.bodyProfileData;
+  const bodyProfileData = hasValidBodyProfile(passedBodyProfileData)
+    ? passedBodyProfileData
+    : undefined;
 
-}: MorphologicalCalibrationScreenProps) {
-    
-    const [ user, setUser ] = useState<User>({
-        name: "",
-        age: 0,
-        weight: 0,
-        height: 0,
-    });
+  const [cameraFacing, setCameraFacing] = useState<"front" | "back">("front");
+  const [calibrationPosition, setCalibrationPosition] =
+    useState<CalibrationPosition>("front");
+  const [viewportSize, setViewportSize] = useState<ViewPortSize>({
+    width: 0,
+    height: 0,
+  });
 
-    const [ morphological_data ] = useState<MorphologicalData>({
-        left_lower_limb: 0,
-        right_lower_limb: 0,
-        trunk: 0,
-    });
+  const { height: windowHeight } = useWindowDimensions();
+  const isCompactScreen = windowHeight < 760;
+  const device = useCameraDevice(cameraFacing);
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const isFocused = useIsFocused();
 
-    const [ camera_status ] = useState<CameraStatus> ({
-        camera_is_active: false,
-        person_is_detected: false,
-        body_fully_visible: false,
-        landmark_confidence: 0,
-    });
+  const {
+    status,
+    feedback,
+    progress,
+    cameraStatus,
+    landmarks,
+    morphologicalData,
+    startCalibration,
+    resetCalibration,
+    frameOutput,
+    frameSize,
+  } = useMorphologicalCalibration(bodyProfileData);
 
-    const [ landmark ] = useState<Landmark> ({
-        x_coordinate: 0,
-        y_coordinate: 0,
-        z_coordinate: 0,
-        visibility: 0,
-    });
+  useEffect(() => {
+    if (!hasPermission) {
+      void requestPermission();
+    }
+  }, [hasPermission, requestPermission]);
 
-    const [ landmarks ] = useState<Landmarks> ({
-        left_shoulder: landmark,
-        right_shoulder: landmark,
-        left_hip: landmark,
-        right_hip: landmark,
-        left_knee: landmark,
-        right_knee: landmark,
-        left_ankle: landmark,
-        right_ankle: landmark,
-    });
+  const isCapturing = status === "aligning" || status === "holding";
+  const isProcessing = isBusy(status);
+  const isHolding = status === "holding";
+  const isSuccessful = status === "success" && Boolean(morphologicalData);
 
-    {/*
-    const [ morphological_analysis ] = useState<MorphologicalAnalysis> ({
-        lower_limb_symmetry: 0,
-        trunk_to_lower_limb_ratio: 0,
-        body_proportion_score: 0,
-    })
-    */}
+  const hasExistingProfile = useMemo(
+    () =>
+      hasValidBodyProfile(bodyProfileData) ||
+      morphologicalData !== null ||
+      status === "error",
+    [bodyProfileData, morphologicalData, status],
+  );
 
-    const [ calibration_position, setCalibrationPosition ] = useState<CalibrationPosition>('front');
+  const trackingLabel = cameraStatus.body_fully_visible
+    ? "Full body visible"
+    : cameraStatus.person_is_detected
+      ? "Person detected · step back"
+      : "Keep head and feet in frame";
 
-    return (
-        <View style={styles.parentContainer}>
-            <Text style={styles.headerContainer}>Morphological Calibration</Text>
-            <Text>Let us customize your body type.</Text>
-            <Text>Stand in the frame to extract your body landmarks.</Text>
-            <Text></Text>
-        </View>
+  const handleToggleCameraFacing = useCallback(() => {
+    if (isCapturing || isProcessing) return;
+    setCameraFacing((current) => (current === "front" ? "back" : "front"));
+  }, [isCapturing, isProcessing]);
+
+  const requestCalibration = useCallback(() => {
+    if (!hasPermission || !device) {
+      Alert.alert(
+        "Camera not ready",
+        "Grant camera access and wait for the preview to initialize.",
+      );
+      return;
+    }
+
+    if (hasExistingProfile) {
+      Alert.alert(
+        "Recalibrate BodyProfile?",
+        "A valid body profile or a previous calibration attempt may exist. Continuing may replace stored measurements. Cancel to preserve the current state.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Continue",
+            style: "destructive",
+            onPress: startCalibration,
+          },
+        ],
+      );
+      return;
+    }
+
+    startCalibration();
+  }, [device, hasExistingProfile, hasPermission, startCalibration]);
+
+  const handlePositionChange = useCallback(
+    (position: CalibrationPosition) => {
+      if (isProcessing || position === calibrationPosition) return;
+      setCalibrationPosition(position);
+      if (status !== "success") resetCalibration();
+    },
+    [calibrationPosition, isProcessing, resetCalibration, status],
+  );
+
+  const handleCyclePosition = useCallback(() => {
+    if (isCapturing || isProcessing) return;
+
+    const currentIndex = POSITION_OPTIONS.findIndex(
+      (option) => option.value === calibrationPosition,
     );
-}
 
-interface CameraPreviewProps {
-    camera_status: CameraStatus;
-}
+    const nextOption =
+      POSITION_OPTIONS[(currentIndex + 1) % POSITION_OPTIONS.length];
 
-function CameraPreview({ camera_status }: CameraPreviewProps) {
-    return (
-        <View style={styles.childContainer}>
-            <Text>User in Frame</Text>
-            <Text>{camera_status.camera_is_active ? 'Active' : 'Inactive'}</Text>
-            <Text>{camera_status.person_is_detected ? 'Detected' : 'Not Detected'}</Text>
-            <Text>{camera_status.body_fully_visible ? 'Fully Visible' : 'Incomplete'}</Text>
-            <Text>{camera_status.landmark_confidence}</Text>
-        </View>
+    setCalibrationPosition(nextOption.value);
+
+    if (status !== "success") {
+      resetCalibration();
+    }
+  }, [
+    calibrationPosition,
+    isCapturing,
+    isProcessing,
+    resetCalibration,
+    status,
+  ]);
+
+  const currentPosition =
+    POSITION_OPTIONS.find((option) => option.value === calibrationPosition) ??
+    POSITION_OPTIONS[0];
+
+  const handleStageLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setViewportSize((current) =>
+      current.width === width && current.height === height
+        ? current
+        : { width, height },
     );
-}
+  }, []);
 
-interface LandmarkDetectionProps {
-    landmarks: Landmarks;
-}
-
-function LandmarkDetection({ landmarks }: LandmarkDetectionProps ) {
+  if (!hasPermission) {
     return (
-        <View style={styles.childContainer}>
-            <Text>Left Shoulder X: {landmarks.left_shoulder.x_coordinate}</Text>
-            <Text>Right Shoulder X: {landmarks.right_shoulder.x_coordinate}</Text>
-            <Text>Left Shoulder Y: {landmarks.left_shoulder.y_coordinate}</Text>
-            <Text>Right Shoulder Y: {landmarks.right_shoulder.y_coordinate}</Text>
-            <Text>Left Shoulder Z: {landmarks.left_shoulder.z_coordinate}</Text>
-            <Text>Right Shoulder Z: {landmarks.right_shoulder.z_coordinate}</Text>
-            <Text>Left Shoulder Visibility: {landmarks.left_shoulder.visibility}</Text>
-            <Text>Right Shoulder Visibility: {landmarks.right_shoulder.visibility}</Text>
-
-            <Text>Left Hip X: {landmarks.left_hip.x_coordinate}</Text>
-            <Text>Right Hip X: {landmarks.right_hip.x_coordinate}</Text>
-            <Text>Left Hip Y: {landmarks.left_hip.y_coordinate}</Text>
-            <Text>Right Hip Y: {landmarks.right_hip.y_coordinate}</Text>
-            <Text>Left Hip Z: {landmarks.left_hip.z_coordinate}</Text>
-            <Text>Right Hip Z: {landmarks.right_hip.z_coordinate}</Text>
-            <Text>Left Hip Visibility: {landmarks.left_hip.visibility}</Text>
-            <Text>Right Hip Visibility: {landmarks.right_hip.visibility}</Text>
-
-            <Text>Left Knee X: {landmarks.left_knee.x_coordinate}</Text>
-            <Text>Right Knee X: {landmarks.right_knee.x_coordinate}</Text>
-            <Text>Left Knee Y: {landmarks.left_knee.y_coordinate}</Text>
-            <Text>Right Knee Y: {landmarks.right_knee.y_coordinate}</Text>
-            <Text>Left Knee Z: {landmarks.left_knee.z_coordinate}</Text>
-            <Text>Right Knee Z: {landmarks.right_knee.z_coordinate}</Text>
-            <Text>Left Knee Visibility: {landmarks.left_knee.visibility}</Text>
-            <Text>Right Knee Visibility: {landmarks.right_knee.visibility}</Text>
-
-            <Text>Left Ankle X: {landmarks.left_ankle.x_coordinate}</Text>
-            <Text>Right Ankle X: {landmarks.right_ankle.x_coordinate}</Text>
-            <Text>Left Ankle Y: {landmarks.left_ankle.y_coordinate}</Text>
-            <Text>Right Ankle Y: {landmarks.right_ankle.y_coordinate}</Text>
-            <Text>Left Ankle Z: {landmarks.left_ankle.z_coordinate}</Text>
-            <Text>Right Ankle Z: {landmarks.right_ankle.z_coordinate}</Text>
-            <Text>Left Ankle Visibility: {landmarks.left_ankle.visibility}</Text>
-            <Text>Right Ankle Visibility: {landmarks.right_ankle.visibility}</Text>
-        </View>
+      <SafeAreaView style={styles.centerContent} edges={["top", "bottom"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={CALIBRATION_COLORS.background}
+        />
+        <Text style={styles.permissionTitle}>Camera permission needed</Text>
+        <Text style={styles.emptyStateText}>
+          VectoFit needs camera access to detect your pose and calibrate body
+          measurements.
+        </Text>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => void requestPermission()}
+          accessibilityRole="button"
+        >
+          <Text style={styles.actionButtonText}>Grant permission</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     );
-}
+  }
 
-interface CalibrationPositionProps {
-    calibration_position: CalibrationPosition;
-    landmark: Landmark;
-}
-
-function CalibrationPosition({ calibration_position, landmark }: CalibrationPositionProps) {
+  if (!device) {
     return (
-        <View>
-            <Text>Current Position: {calibration_position}</Text>
-        </View>
+      <SafeAreaView style={styles.centerContent} edges={["top", "bottom"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={CALIBRATION_COLORS.background}
+        />
+        <ActivityIndicator size="large" color={CALIBRATION_COLORS.primary} />
+        <Text style={styles.emptyStateText}>Initializing camera…</Text>
+      </SafeAreaView>
     );
-}
+  }
 
-{/*
-interface MorphologicalAnalysisProps {
-    morphological_analysis: MorphologicalAnalysis;
-}
+  const frame: FrameSize = frameSize;
 
-function MorphologicalAnalysis({ morphological_analysis }: MorphologicalAnalysisProps) {
-    return (
-        <View style={styles.childContainer}>
-            <Text>Your Body Measurements</Text>
-            <Text>Lower Limb Symmetry: {morphological_analysis.lower_limb_symmetry}</Text>
-            <Text>Trunk-Lower Limb Ratio: {morphological_analysis.trunk_to_lower_limb_ratio}</Text>
-            <Text>Body Proportion Score: {morphological_analysis.body_proportion_score}</Text>
+  return (
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={CALIBRATION_COLORS.background}
+      />
+
+      <View style={styles.screen}>
+        <View style={styles.cameraStage} onLayout={handleStageLayout}>
+          <CalibrationCamera
+            device={device}
+            isActive={isFocused && hasPermission}
+            frameOutput={frameOutput}
+            containerStyle={styles.cameraFill}
+          >
+            <LandmarkOverlay
+              landmarks={landmarks}
+              isValid={isHolding || status === "success"}
+              viewportWidth={viewportSize.width}
+              viewportHeight={viewportSize.height}
+              frameWidth={frame.width}
+              frameHeight={frame.height}
+              mirrored={cameraFacing === "front"}
+            />
+
+            <View
+              style={[
+                styles.topOverlay,
+                isCompactScreen && styles.topOverlayCompact,
+              ]}
+              pointerEvents="box-none"
+            >
+              <View style={styles.headerRow}>
+                <View style={styles.titleGroup}>
+                  <Text style={styles.eyebrow}>VECTOFIT · BODY PROFILE</Text>
+                  <Text style={styles.screenTitle} numberOfLines={1}>
+                    Morphological Calibration
+                  </Text>
+                </View>
+              </View>
+
+              {/*
+              <View style={styles.positionSelectorContainer}>
+                {POSITION_OPTIONS.map((option) => {
+                  const isSelected = calibrationPosition === option.value;
+                  return (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={[
+                        styles.positionPill,
+                        isSelected && styles.positionPillActive,
+                      ]}
+                      onPress={() => handlePositionChange(option.value)}
+                      disabled={isProcessing}
+                      accessibilityRole="button"
+                      accessibilityLabel={option.accessibilityLabel}
+                      accessibilityState={{ selected: isSelected }}
+                    >
+                      <Text
+                        style={[
+                          styles.positionPillText,
+                          isSelected && styles.positionPillTextActive,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View> */}
+            </View>
+
+            <View
+              style={[
+                styles.bottomOverlay,
+                isCompactScreen && styles.bottomOverlayCompact,
+              ]}
+              pointerEvents="box-none"
+            >
+              <View style={styles.statusPillsRow}>
+                <View
+                  style={[
+                    styles.trackingPill,
+                    cameraStatus.body_fully_visible && styles.trackingPillReady,
+                    !cameraStatus.body_fully_visible &&
+                      cameraStatus.person_is_detected &&
+                      styles.trackingPillWarning,
+                  ]}
+                  accessibilityLiveRegion="polite"
+                >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      cameraStatus.body_fully_visible && styles.statusDotGood,
+                      !cameraStatus.body_fully_visible &&
+                        cameraStatus.person_is_detected &&
+                        styles.statusDotWarning,
+                    ]}
+                  />
+                  <Text style={styles.statusPillText} numberOfLines={1}>
+                    {trackingLabel}
+                  </Text>
+                </View>
+
+                <View style={styles.confidencePill}>
+                  <Text style={styles.confidenceText}>
+                    {Math.round(cameraStatus.landmark_confidence * 100)}% pose
+                  </Text>
+                </View>
+              </View>
+
+              {isCapturing || isProcessing ? (
+                <View style={styles.progressWrapper}>
+                  <View style={styles.progressTextRow}>
+                    <Text style={styles.progressLabel}>
+                      {isProcessing
+                        ? "Saving measurements…"
+                        : isHolding
+                          ? "Hold still"
+                          : "Aligning pose"}
+                    </Text>
+                    <Text style={styles.progressPercent}>
+                      {Math.round(progress * 100)}%
+                    </Text>
+                  </View>
+                  <CalibrationProgress progress={progress} />
+                </View>
+              ) : null}
+
+              {status === "success" && morphologicalData ? (
+                <CalibrationResult
+                  data={morphologicalData}
+                  onContinue={() => navigation.goBack()}
+                  onRetry={requestCalibration}
+                />
+              ) : (
+                <View style={styles.actionRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.angleSwitcherButton,
+                      (isCapturing || isProcessing) &&
+                        styles.actionButtonDisabled,
+                    ]}
+                    onPress={handleCyclePosition}
+                    disabled={isCapturing || isProcessing}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Camera angle: ${currentPosition.accessibilityLabel}. Tap to switch angle`}
+                    accessibilityHint="Cycles between front, side, and 45 degree views"
+                  >
+                    <Text style={styles.angleSwitcherEyebrow}>VIEW</Text>
+                    <Text style={styles.angleSwitcherText}>
+                      {currentPosition.label}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {isCapturing ? (
+                    <TouchableOpacity
+                      style={[
+                        styles.actionButton,
+                        styles.secondaryActionButton,
+                      ]}
+                      onPress={resetCalibration}
+                      disabled={isProcessing}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.actionButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={[
+                        styles.actionButton,
+                        isProcessing && styles.actionButtonDisabled,
+                      ]}
+                      onPress={requestCalibration}
+                      disabled={isProcessing}
+                      accessibilityRole="button"
+                    >
+                      {isProcessing ? (
+                        <ActivityIndicator color={CALIBRATION_COLORS.text} />
+                      ) : (
+                        <Text style={styles.actionButtonText}>
+                          {status === "error" ? "Try again" : "Calibrate"}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {!isCapturing &&
+              !isProcessing &&
+              !isSuccessful &&
+              status !== "error" &&
+              !cameraStatus.body_fully_visible ? (
+                <Text style={styles.framingHint} numberOfLines={2}>
+                  Step back until your head and feet are visible.
+                </Text>
+              ) : null}
+            </View>
+          </CalibrationCamera>
         </View>
-    );
+      </View>
+    </SafeAreaView>
+  );
 }
-*/}

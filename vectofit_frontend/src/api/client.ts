@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Platform } from "react-native";
-import useAuthStore from "../stores/authStore";
+import useAuthStore from "../stores/useAuthStore";
 
 const PORT = "8000";
 

@@ -12,6 +12,30 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
 endif()
 
+# react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/AsyncStorageSpec-generated.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
+# react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/ComponentDescriptors.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/EventEmitters.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/Props.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/ShadowNodes.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/react/renderer/components/AsyncStorageSpec/States.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
 # react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-vector-icons/ionicons/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/@react-native-vector-icons/ionicons/android/build/generated/source/codegen/jni/*.cpp")
 set(OLD_GLOB
@@ -128,6 +152,43 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
 endif()
 
+# rnsvg_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:10 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/rnsvg.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rnsvg_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:10 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGImageShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGImageState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGLayoutableShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGShadowNodes.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rnsvg_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:11 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/*cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ComponentDescriptors.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/EventEmitters.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/Props.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ShadowNodes.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/States.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
 # react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/*.cpp")
 set(OLD_GLOB
@@ -146,6 +207,30 @@ set(OLD_GLOB
   "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/react/renderer/components/RNVectorIconsSpec/Props.cpp"
   "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/react/renderer/components/RNVectorIconsSpec/ShadowNodes.cpp"
   "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/react/renderer/components/RNVectorIconsSpec/States.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
+# react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/rnworklets-generated.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/arm64-v8a/CMakeFiles/cmake.verify_globs")
+endif()
+
+# react_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/ComponentDescriptors.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/EventEmitters.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/Props.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/ShadowNodes.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/react/renderer/components/rnworklets/States.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

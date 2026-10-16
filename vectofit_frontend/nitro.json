@@ -1,0 +1,24 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["vectofit"],
+  "ios": {
+    "iosModuleName": "VectoFit"
+  },
+  "android": {
+    "androidNamespace": ["vectofit"],
+    "androidCxxLibName": "VectoFit"
+  },
+  "autolinking": {
+    "PoseLandmarkerPlugin": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridPoseLandmarkerPlugin"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridPoseLandmarkerPlugin"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules/**"]
+}

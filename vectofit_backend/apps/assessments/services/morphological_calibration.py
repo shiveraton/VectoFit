@@ -13,6 +13,7 @@ import math
 import numpy as np
 import json
 from pose_estimator import PoseEstimator
+from typing import Any
 
 mp_pose = mp.solutions.pose
 pose_detector = mp_pose.Pose()
