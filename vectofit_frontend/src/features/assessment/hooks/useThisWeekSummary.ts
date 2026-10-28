@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getAssessmentSessions,
   type AssessmentSession,
-} from "../services/assessmentSession";
+} from "../services/sessionStructure";
 
 export interface DayActivity {
   date: Date;

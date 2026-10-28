@@ -1,26 +1,24 @@
-import re
-import zipfile
-import uuid
 import json
-from collections import Counter
+import logging
+import re
+import uuid
+import zipfile
+from datetime import timedelta
 from pathlib import Path, PurePosixPath
+
+logger = logging.getLogger(__name__)
+UPLOAD_CHUNK_SIZE = 4 * 1024 * 1024
+
 from django.conf import settings
 from django.utils import timezone
-from datetime import timedelta
 from rest_framework.exceptions import ValidationError
 
-STAGING_DIR = (
-    Path(settings.MEDIA_ROOT) / "dataset_import_staging"
-)
+STAGING_DIR = Path(settings.MEDIA_ROOT) / "dataset_import_staging"
 
-MAX_ARCHIVE_BYTES = getattr(
-    settings,
-    "DATASET_IMPORT_MAX_ARCHIVE_BYTES", 4 * 1024**3
-)
+MAX_ARCHIVE_BYTES = getattr(settings, "DATASET_IMPORT_MAX_ARCHIVE_BYTES", 4 * 1024**3)
 
 MAX_UNCOMPRESSED_BYTES = getattr(
-    settings,
-    "DATASET_IMPORT_MAX_UNCOMPRESSED_BYTES", 20 * 1024**3
+    settings, "DATASET_IMPORT_MAX_UNCOMPRESSED_BYTES", 20 * 1024**3
 )
 
 MAX_ARCHIVE_ENTRIES = 1000
@@ -89,10 +87,7 @@ def _angle_for_component(component):
     if (
         "diagonal" in tokens
         or compact in {"45", "45deg", "45degree", "45degrees"}
-        or (
-            "45" in tokens
-            and bool(tokens & {"deg", "degree", "degrees"})
-        )
+        or ("45" in tokens and bool(tokens & {"deg", "degree", "degrees"}))
     ):
         return "diagonal"
 
@@ -152,19 +147,14 @@ def _participant_from_path(parts):
     stem = PurePosixPath(parts[-1]).stem
     tokens = _tokens(stem)
 
-    remaining = [
-        token for token in tokens
-        if token not in METADATA_TOKENS
-    ]
+    remaining = [token for token in tokens if token not in METADATA_TOKENS]
 
     if (
         len(remaining) >= 2
         and remaining[0] in {"participant", "subject", "sub"}
         and remaining[1].isdigit()
     ):
-        return _normalize_participant_code(
-            f"P{remaining[1]}"
-        )
+        return _normalize_participant_code(f"P{remaining[1]}")
 
     return _normalize_participant_code("_".join(remaining))
 
@@ -176,18 +166,14 @@ def inspect_archive(archive_path):
     try:
         archive = zipfile.ZipFile(archive_path, "r")
     except (zipfile.BadZipFile, OSError) as exc:
-        result["errors"].append(
-            f"Cannot read ZIP archive: {exc}"
-        )
+        result["errors"].append(f"Cannot read ZIP archive: {exc}")
         return result
 
     with archive:
         archive_entries = archive.infolist()
 
         if len(archive_entries) > MAX_ARCHIVE_ENTRIES:
-            result["errors"].append(
-                "The archive contains way too many entries."
-            )
+            result["errors"].append("The archive contains way too many entries.")
             return result
 
         total_uncompressed = 0
@@ -198,8 +184,7 @@ def inspect_archive(archive_path):
 
             if total_uncompressed > MAX_UNCOMPRESSED_BYTES:
                 result["errors"].append(
-                    "The archive exceeds the configured "
-                    "uncompressed-size limit."
+                    "The archive exceeds the configured uncompressed-size limit."
                 )
                 break
 
@@ -213,9 +198,7 @@ def inspect_archive(archive_path):
                 or "\\" in raw_path
                 or ".." in PurePosixPath(raw_path).parts
             ):
-                result["errors"].append(
-                    f"Unsafe archive path: {raw_path}"
-                )
+                result["errors"].append(f"Unsafe archive path: {raw_path}")
                 continue
 
             path = PurePosixPath(raw_path)
@@ -225,26 +208,20 @@ def inspect_archive(archive_path):
                 continue
 
             if raw_path in seen_paths:
-                result["errors"].append(
-                    f"Duplicate archive entry: {raw_path}"
-                )
+                result["errors"].append(f"Duplicate archive entry: {raw_path}")
                 continue
 
             seen_paths.add(raw_path)
 
             if len(raw_path) > 255:
-                result["errors"].append(
-                    f"Archive path is too long: {raw_path}"
-                )
+                result["errors"].append(f"Archive path is too long: {raw_path}")
                 continue
 
             labels = set()
             angles = set()
 
             for component in path.parts:
-                labels.update(
-                    _labels_for_component(component)
-                )
+                labels.update(_labels_for_component(component))
 
                 angle = _angle_for_component(component)
                 if angle:
@@ -264,9 +241,7 @@ def inspect_archive(archive_path):
                 )
                 continue
 
-            participant_code = _participant_from_path(
-                list(path.parts)
-            )
+            participant_code = _participant_from_path(list(path.parts))
 
             if not participant_code:
                 result["errors"].append(
@@ -278,14 +253,16 @@ def inspect_archive(archive_path):
             label = next(iter(labels))
             angle = next(iter(angles))
 
-            valid_entries.append({
-                "archive_path": raw_path,
-                "filename": path.name,
-                "participant_code": participant_code,
-                "view_angle": angle,
-                "source_label": label,
-                "size_bytes": info.file_size,
-            })
+            valid_entries.append(
+                {
+                    "archive_path": raw_path,
+                    "filename": path.name,
+                    "participant_code": participant_code,
+                    "view_angle": angle,
+                    "source_label": label,
+                    "size_bytes": info.file_size,
+                }
+            )
 
     valid_entries.sort(
         key=lambda item: (
@@ -299,9 +276,7 @@ def inspect_archive(archive_path):
     result["files"] = valid_entries
     result["file_count"] = len(valid_entries)
 
-    participants = {
-        item["participant_code"] for item in valid_entries
-    }
+    participants = {item["participant_code"] for item in valid_entries}
 
     result["participant_count"] = len(participants)
 
@@ -312,9 +287,7 @@ def inspect_archive(archive_path):
         result["by_label"][label_key] += 1
 
     if not valid_entries:
-        result["errors"].append(
-            "No supported video files were found in the archive."
-        )
+        result["errors"].append("No supported video files were found in the archive.")
 
     observed = {
         (
@@ -342,14 +315,11 @@ def inspect_archive(archive_path):
 
     if result["ignored_file_count"]:
         result["warnings"].append(
-            f"{result['ignored_file_count']} non-video file(s) "
-            "will be ignored."
+            f"{result['ignored_file_count']} non-video file(s) will be ignored."
         )
 
     if not any(result["by_label"].values()):
-        result["errors"].append(
-            "No labelled video files could be identified."
-        )
+        result["errors"].append("No labelled video files could be identified.")
 
     return result
 
@@ -366,11 +336,10 @@ def staged_archive_path(token):
     safe_token = UUID(str(token)).hex
     return staging_directory() / f"{safe_token}.zip"
 
+
 def create_archive_preview(*, uploaded_file, user):
     if uploaded_file.size > MAX_ARCHIVE_BYTES:
-        raise ValidationError({
-            "zip_file": "The ZIP archive exceeds the size limit."
-        })
+        raise ValidationError({"zip_file": "The ZIP archive exceeds the size limit."})
 
     directory = staging_directory()
     token = uuid.uuid4()
@@ -384,20 +353,20 @@ def create_archive_preview(*, uploaded_file, user):
         total_size = 0
 
         with temporary_path.open("wb") as destination:
-            for chunk in uploaded_file.chunks():
+            for chunk in uploaded_file.chunks(chunk_size=UPLOAD_CHUNK_SIZE):
                 total_size += len(chunk)
 
                 if total_size > MAX_ARCHIVE_BYTES:
-                    raise ValidationError({
-                        "zip_file": "The ZIP archive exceeds the size limit."
-                    })
+                    raise ValidationError(
+                        {"zip_file": "The ZIP archive exceeds the size limit."}
+                    )
 
                 destination.write(chunk)
 
         if not zipfile.is_zipfile(temporary_path):
-            raise ValidationError({
-                "zip_file": "The uploaded file is not a valid ZIP archive."
-            })
+            raise ValidationError(
+                {"zip_file": "The uploaded file is not a valid ZIP archive."}
+            )
 
         manifest = inspect_archive(temporary_path)
 
@@ -414,18 +383,21 @@ def create_archive_preview(*, uploaded_file, user):
         expires_at = timezone.now() + PREVIEW_TTL
 
         with metadata_temp.open("w", encoding="utf-8") as file:
-            json.dump({
-                "user_id": user.pk,
-                "expires_at": expires_at.timestamp(),
-                "manifest": manifest,
-                "videos": videos,
-            }, file)
+            json.dump(
+                {
+                    "user_id": user.pk,
+                    "expires_at": expires_at.timestamp(),
+                    "manifest": manifest,
+                    "videos": videos,
+                },
+                file,
+            )
 
         temporary_path.replace(archive_path)
         metadata_temp.replace(metadata_path)
 
         return {
-            "token": str(token),
+            "upload_token": str(token),
             "expires_at": expires_at.timestamp(),
             "manifest": manifest,
         }

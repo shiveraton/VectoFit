@@ -1,4 +1,9 @@
-import { ref, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
+import {
+  modelService,
+  type ModelRegistryRecord,
+  type ModelState,
+} from "../services/modelService";
 
 export interface EvaluationModel {
   id: string;
@@ -11,14 +16,13 @@ export interface EvaluationModel {
 export interface EvaluationMetric {
   id: string;
   name: string;
+  category: string;
   description: string;
   selected: boolean;
-  category: "form" | "kinematics" | "accuracy" | "performance";
 }
 
 export interface EvaluationRecord {
   id: string;
-  modelId: string;
   modelName: string;
   datasetName: string;
   score: number;
@@ -27,226 +31,171 @@ export interface EvaluationRecord {
   duration: string;
 }
 
-export interface WorkflowStep {
-  stepNumber: number;
-  title: string;
-  description: string;
-  status: "completed" | "active" | "pending";
-}
-
-export interface SummaryCardData {
-  label: string;
-  value: string | number;
-  description: string;
-  icon: string;
-  variant?: "version" | "samples" | "incorrect" | "correct";
-  statusIcon?: boolean;
-}
-
 export function useEvaluation() {
-  const selectedDataset = ref<Record<string, any> | null>(null);
-  const selectedModelId = ref<string | null>(null);
-  const evaluations = ref<EvaluationRecord[]>([]);
+  const models = ref<ModelRegistryRecord[]>([]);
+  const modelState = ref<ModelState | null>(null);
+  const selectedModelId = ref<number | null>(null);
 
-  const models = ref<EvaluationModel[]>([
-    {
-      id: "model-v2-4",
-      name: "SquatVectorNet-v2.4",
-      version: "2.4.0",
-      type: "ResNet3D Pose",
-      accuracy: 94.2,
-    },
-    {
-      id: "model-v2-3",
-      name: "SquatVectorNet-v2.3",
-      version: "2.3.1",
-      type: "MediaPipe Custom",
-      accuracy: 91.8,
-    },
-    {
-      id: "model-v1-0",
-      name: "BaselineKinematics-v1",
-      version: "1.0.0",
-      type: "Linear Biomechanics",
-      accuracy: 85.5,
-    },
-  ]);
+  const isLoading = ref(false);
+  const isStateLoading = ref(false);
+  const error = ref<string | null>(null);
 
-  const metrics = ref<EvaluationMetric[]>([
-    {
-      id: "hip_knee_angle",
-      name: "Hip & Knee Flexion Angle",
-      description: "Measures joint angle compliance during lowest squat depth.",
-      selected: true,
-      category: "kinematics",
-    },
-    {
-      id: "barbell_path_dev",
-      name: "Barbell Path Deviation",
-      description:
-        "Tracks horizontal displacement relative to mid-foot baseline.",
-      selected: true,
-      category: "form",
-    },
-    {
-      id: "valgus_collapse",
-      name: "Knee Valgus Detection",
-      description:
-        "Flags inward knee collapse during concentric movement phase.",
-      selected: true,
-      category: "form",
-    },
-    {
-      id: "pose_confidence",
-      name: "3D Keypoint Confidence",
-      description: "Evaluates keypoint tracking reliability under occlusion.",
-      selected: false,
-      category: "accuracy",
-    },
-  ]);
+  const messageFromError = (err: unknown, fallback: string): string => {
+    if (typeof err === "object" && err !== null && "response" in err) {
+      const response = (err as { response?: { data?: unknown } }).response
+        ?.data;
 
-  const workflowSteps = ref<WorkflowStep[]>([
-    {
-      stepNumber: 1,
-      title: "Select Model & Reference Set",
-      description:
-        "Choose an active model checkpoint and baseline evaluation dataset.",
-      status: "completed",
-    },
-    {
-      stepNumber: 2,
-      title: "Configure Metrics",
-      description: "Toggle spatial, temporal, and classification benchmarks.",
-      status: "active",
-    },
-    {
-      stepNumber: 3,
-      title: "Run Inference & Vector Analysis",
-      description: "Compute joint angle vectors against reference kinematics.",
-      status: "pending",
-    },
-    {
-      stepNumber: 4,
-      title: "Review Score & Biomechanical Breakdown",
-      description:
-        "Analyze accuracy ratings, flag form deviations, and export report.",
-      status: "pending",
-    },
-  ]);
+      if (typeof response === "object" && response !== null) {
+        const data = response as Record<string, unknown>;
 
-  const selectTask = (modelId: string) => {
-    selectModel(modelId);
-  };
-
-  const selectModel = (modelId: string) => {
-    selectedModelId.value = selectedModelId.value === modelId ? null : modelId;
-  };
-
-  const toggleMetric = (metricId: string) => {
-    const metric = metrics.value.find((m) => m.id === metricId);
-    if (metric) {
-      metric.selected = !metric.selected;
+        for (const key of ["detail", "error_message", "message"]) {
+          if (typeof data[key] === "string" && data[key]) {
+            return data[key] as string;
+          }
+        }
+      }
     }
-  };
 
-  const setDataset = (dataset: Record<string, any> | null) => {
-    selectedDataset.value = dataset;
+    return err instanceof Error ? err.message : fallback;
   };
 
   const selectedModel = computed(
-    () => models.value.find((m) => m.id === selectedModelId.value) ?? null,
+    () =>
+      models.value.find((model) => model.id === selectedModelId.value) ?? null,
   );
 
-  const selectedMetrics = computed(() =>
-    metrics.value.filter((m) => m.selected),
+  const evaluation = computed(() => modelState.value?.evaluation ?? null);
+  const training = computed(() => modelState.value?.training ?? null);
+
+  const evaluationAvailable = computed(
+    () =>
+      training.value?.status === "COMPLETED" &&
+      evaluation.value?.accuracy != null,
   );
 
-  const configSummaryText = computed(() => {
-    if (!selectedModel.value && !selectedDataset.value) {
-      return "Select a model and dataset to begin evaluation configuration.";
-    }
+  const summaryCards = computed(() => {
+    const metrics = evaluation.value;
 
-    const modelPart = selectedModel.value
-      ? `Model: ${selectedModel.value.name}`
-      : "No model selected";
-    const datasetPart = selectedDataset.value
-      ? `Dataset: ${selectedDataset.value.name || selectedDataset.value.id}`
-      : "No dataset selected";
-    const metricPart = `${selectedMetrics.value.length} metric(s) enabled`;
-
-    return `${modelPart} | ${datasetPart} | ${metricPart}`;
-  });
-
-  const summaryCards = computed<SummaryCardData[]>(() => {
-    const totalEvals = evaluations.value.length;
-    const completedEvals = evaluations.value.filter(
-      (e) => e.status === "COMPLETED",
-    );
-
-    const avgScore = completedEvals.length
-      ? (
-          completedEvals.reduce((acc, curr) => acc + curr.score, 0) /
-          completedEvals.length
-        ).toFixed(1) + "%"
-      : "--";
-
-    const activeMetricsCount = selectedMetrics.value.length;
+    const formatPercent = (value: number | null | undefined) =>
+      value == null ? "—" : `${(value * 100).toFixed(1)}%`;
 
     return [
       {
-        label: "TOTAL EVALUATIONS",
-        value: totalEvals,
-        description:
-          totalEvals > 0
-            ? `${totalEvals} evaluation runs executed`
-            : "No evaluation runs recorded",
-        icon: "bar-chart",
-        variant: "samples",
+        label: "ACCURACY",
+        value: formatPercent(metrics?.accuracy),
+        description: "Correct predictions on the held-out test set",
       },
       {
-        label: "AVG VECTOR SCORE",
-        value: avgScore,
-        description: completedEvals.length
-          ? "Based on completed runs"
-          : "Pending evaluation runs",
-        icon: "check-circle",
-        variant: "correct",
+        label: "BALANCED ACCURACY",
+        value: formatPercent(metrics?.balanced_accuracy),
+        description: "Average recall across classes",
       },
       {
-        label: "SELECTED MODEL",
-        value: selectedModel.value ? selectedModel.value.name : "None",
-        description: selectedModel.value
-          ? `Active version v${selectedModel.value.version}`
-          : "No model selected",
-        icon: "cpu",
-        variant: "version",
+        label: "PRECISION",
+        value: formatPercent(metrics?.precision),
+        description: "Precision reported by the training evaluation",
       },
       {
-        label: "ACTIVE METRICS",
-        value: `${activeMetricsCount}/${metrics.value.length}`,
-        description: `${activeMetricsCount} benchmark metrics configured`,
-        icon: "layers",
-        variant: "samples",
+        label: "F1 SCORE",
+        value: formatPercent(metrics?.f1),
+        description: "F1 reported by the training evaluation",
       },
     ];
   });
 
+  const selectModel = async (id: number) => {
+    if (selectedModelId.value === id && modelState.value?.id === id) {
+      return;
+    }
+
+    selectedModelId.value = id;
+    modelState.value = null;
+    isStateLoading.value = true;
+    error.value = null;
+
+    try {
+      modelState.value = await modelService.getModelState(id);
+    } catch (err: unknown) {
+      error.value = messageFromError(
+        err,
+        "Failed to load evaluation results for this model.",
+      );
+    } finally {
+      isStateLoading.value = false;
+    }
+  };
+
+  const fetchModels = async () => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      models.value = await modelService.getModels();
+
+      if (!models.value.length) {
+        selectedModelId.value = null;
+        modelState.value = null;
+        return;
+      }
+
+      const initialModel =
+        models.value.find((model) => model.is_active) ?? models.value[0];
+
+      await selectModel(initialModel.id);
+    } catch (err: unknown) {
+      error.value = messageFromError(err, "Failed to load the Model Registry.");
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const formatPercent = (value: number | null | undefined) =>
+    value == null ? "—" : `${(value * 100).toFixed(1)}%`;
+
+  const formatDate = (value: string | null | undefined) => {
+    if (!value) return "—";
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : new Intl.DateTimeFormat(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(date);
+  };
+
+  const formatAngle = (value: string | null | undefined) => {
+    if (!value) return "Not specified";
+
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
+  const formatTarget = (value: string | null | undefined) => {
+    if (value === "binary_form") return "Good / Bad Form";
+    if (value === "error_type") return "Error Type";
+    return value || "Not specified";
+  };
+
+  onMounted(fetchModels);
+
   return {
-    selectedDataset,
-    selectedModelId,
-    selectedModel,
     models,
-    metrics,
-    evaluations,
-    workflowSteps,
-
-    selectedMetrics,
-    configSummaryText,
+    selectedModel,
+    selectedModelId,
+    modelState,
+    evaluation,
+    training,
     summaryCards,
-
-    selectTask,
+    evaluationAvailable,
+    isLoading,
+    isStateLoading,
+    error,
     selectModel,
-    toggleMetric,
-    setDataset,
+    fetchModels,
+    formatPercent,
+    formatDate,
+    formatAngle,
+    formatTarget,
   };
 }

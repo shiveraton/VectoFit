@@ -1,7 +1,9 @@
-from django.db import models
-from django.utils import timezone
-from pathlib import PurePosixPath
 import uuid
+from pathlib import PurePosixPath
+from typing import ClassVar
+
+from django.db import models
+
 
 class Participant(models.Model):
     participant_code = models.CharField(
@@ -9,15 +11,14 @@ class Participant(models.Model):
         unique=True,
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["participant_code"]
+        ordering: ClassVar[list] = ["participant_code"]
+
 
 class ViewAngle(models.Model):
-    ANGLE_CHOICES = [
+    ANGLE_CHOICES: ClassVar[list] = [
         ("diagonal", "Diagonal"),
         ("frontal", "Frontal"),
         ("sagittal", "Sagittal"),
@@ -32,60 +33,46 @@ class ViewAngle(models.Model):
     def __str__(self):
         return self.get_angle_variant_display()
 
+
 class Dataset(models.Model):
-    PURPOSE_CHOICES = [
+    class ReviewPolicy(models.TextChoices):
+        SOURCE = "source", "Use source labels"
+        ALL = "all", "Review all videos"
+        SUBSET = "subset", "Review selected videos"
+
+    class SelectionMethod(models.TextChoices):
+        STRATIFIED = "stratified", "Stratified"
+        MANUAL = "manual", "Manual"
+
+    PURPOSE_CHOICES: ClassVar[list] = [
         ("training", "Training"),
         ("evaluation", "Evaluation"),
     ]
 
-    EXERCISE_CHOICES = [
+    EXERCISE_CHOICES: ClassVar[list] = [
         ("bodyweight_squat", "Bodyweight Squat"),
         ("goblet_squat", "Goblet Squat"),
     ]
 
     name = models.CharField(max_length=50)
 
-    description = models.TextField(
-        blank=True
-    )
+    description = models.TextField(blank=True)
 
-    exercise_type = models.CharField(
-        max_length=50,
-        choices=EXERCISE_CHOICES
-    )
+    exercise_type = models.CharField(max_length=50, choices=EXERCISE_CHOICES)
 
-    purpose = models.CharField(
-        max_length=20,
-        choices=PURPOSE_CHOICES
-    )
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
 
-    primary_target = models.CharField(
-        max_length=50,
-        default="biomechanical_errors"
-    )
+    primary_target = models.CharField(max_length=50, default="biomechanical_errors")
 
-    secondary_target = models.CharField(
-        max_length=50,
-        default="biomechanical_errors"
-    )
+    secondary_target = models.CharField(max_length=50, default="biomechanical_errors")
 
-    status = models.CharField(
-        max_length=20,
-        default='PENDING'
-    )
+    status = models.CharField(max_length=20, default="PENDING")
 
-    error_message = models.TextField(
-        blank=True,
-        null=True
-    )
+    error_message = models.TextField(blank=True, null=True)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    updated_at = models.DateTimeField(
-        auto_now = True
-    )
+    updated_at = models.DateTimeField(auto_now=True)
 
     participant = models.ForeignKey(
         Participant,
@@ -105,16 +92,29 @@ class Dataset(models.Model):
         help_text="Camera view used to capture this dataset.",
     )
 
-    video_file = models.FileField(upload_to='datasets/videos/', null=True, blank=True)
+    video_file = models.FileField(upload_to="datasets/videos/", null=True, blank=True)
+
+    review_policy = models.CharField(
+        max_length=12,
+        choices=ReviewPolicy.choices,
+        default=ReviewPolicy.SOURCE,
+    )
+    selection_method = models.CharField(
+        max_length=12,
+        choices=SelectionMethod.choices,
+        default=SelectionMethod.STRATIFIED,
+    )
+    review_count = models.PositiveIntegerField(null=True, blank=True)
+    random_seed = models.IntegerField(null=True, blank=True)
+    selected_video_paths = models.JSONField(default=list, blank=True)
 
     def __str__(self):
         return self.name
 
+
 class DatasetSample(models.Model):
     dataset = models.ForeignKey(
-        Dataset,
-        on_delete=models.CASCADE,
-        related_name="samples"
+        Dataset, on_delete=models.CASCADE, related_name="samples"
     )
 
     dataset_video = models.ForeignKey(
@@ -122,13 +122,13 @@ class DatasetSample(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="samples"
+        related_name="samples",
     )
 
     rep_assessment = models.ForeignKey(
         "assessments.RepAssessment",
         on_delete=models.CASCADE,
-        related_name="dataset_sample"
+        related_name="dataset_sample",
     )
 
     is_correct = models.BooleanField(
@@ -154,16 +154,26 @@ class DatasetSample(models.Model):
         related_name="annotated_dataset_samples",
         help_text="Who assigned the label.",
     )
-    
+
     annotated_at = models.DateTimeField(null=True, blank=True)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         label = "unlabelled" if self.is_correct is None else str(self.is_correct)
         return f"DatasetSample(dataset={self.dataset_id}, label={label})"
+
+
+class KneeAnnotation(models.Model):
+    sample = models.OneToOneField(
+        DatasetSample, on_delete=models.CASCADE, related_name="knee_annotation_record"
+    )
+    annotation = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"KneeAnnotation(sample={self.sample_id})"
 
     def dataset_upload_to(instance, filename):
         safe_name = PurePosixPath(filename.replace("\\", "/")).name
@@ -171,6 +181,7 @@ class DatasetSample(models.Model):
             f"dataset_videos/dataset_{instance.dataset_id}"
             f"{uuid.uuid4().hex}_{safe_name}"
         )
+
 
 class DatasetVideo(models.Model):
     class Status(models.TextChoices):
@@ -180,26 +191,18 @@ class DatasetVideo(models.Model):
         FAILED = "FAILED", "Failed"
 
     dataset = models.ForeignKey(
-        Dataset,
-        on_delete=models.CASCADE,
-        related_name="videos"
+        Dataset, on_delete=models.CASCADE, related_name="videos"
     )
 
     participant = models.ForeignKey(
-        Participant,
-        on_delete=models.PROTECT,
-        related_name="dataset_videos"
+        Participant, on_delete=models.PROTECT, related_name="dataset_videos"
     )
 
     view_angle = models.ForeignKey(
-        ViewAngle,
-        on_delete=models.RESTRICT,
-        related_name="dataset_videos"
+        ViewAngle, on_delete=models.RESTRICT, related_name="dataset_videos"
     )
 
-    video_file = models.FileField(
-        upload_to="dataset_video_upload_to"
-    )
+    video_file = models.FileField(upload_to="dataset_video_upload_to")
 
     source_label = models.BooleanField(
         null=True,
@@ -213,13 +216,16 @@ class DatasetVideo(models.Model):
     source_path = models.CharField(
         max_length=500,
         blank=True,
-        help_text="Relative filename inside the imported ZIP archive."
+        help_text="Relative filename inside the imported ZIP archive.",
+    )
+
+    requires_manual_review = models.BooleanField(
+        default=False,
+        help_text="Whether repetitions from this video must be manually labelled.",
     )
 
     status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING
+        max_length=20, choices=Status.choices, default=Status.PENDING
     )
 
     error_message = models.TextField(blank=True)
@@ -227,18 +233,20 @@ class DatasetVideo(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["participant__participant_code", "view_angle"]
+        ordering: ClassVar[list] = ["participant__participant_code", "view_angle"]
 
-        indexes = [
-            models.Index(fields=["dataset", "status"]), 
-            models.Index(fields=["participant", "view_angle"])
+        indexes: ClassVar[list] = [
+            models.Index(fields=["dataset", "status"]),
+            models.Index(fields=["participant", "view_angle"]),
         ]
 
     def __str__(self):
         label = (
-        "GOOD" if self.source_label is True
-        else "BAD" if self.source_label is False
-        else "UNLABELLED"
+            "GOOD"
+            if self.source_label is True
+            else "BAD"
+            if self.source_label is False
+            else "UNLABELLED"
         )
         return (
             f"{self.dataset.name} / "

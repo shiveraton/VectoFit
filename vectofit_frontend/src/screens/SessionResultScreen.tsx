@@ -1,8 +1,7 @@
-// SessionResultScreen.tsx
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -10,101 +9,279 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-
 import type { InsightsStackParamList } from "../navigation/insightsTypes";
+import useAuthStore from "../stores/useAuthStore";
 import {
   getAssessmentErrorMessage,
+  getAssessmentRepSnapshotUrl,
   getAssessmentSession,
   type AssessmentRep,
   type AssessmentSessionDetail,
-} from "../features/assessment/services/assessmentSession";
+  type ModelPrediction,
+  type SessionReportFinding,
+} from "../features/assessment/services/sessionStructure";
 import { COLORS } from "../styles/designTokens";
 import styles from "../styles/SessionResultScreenStyles";
 
 type Props = NativeStackScreenProps<InsightsStackParamList, "SessionResult">;
-type JsonRecord = Record<string, unknown>;
-
-const METRIC_LABELS: Record<string, string> = {
-  hip_angle: "Hip angle",
-  knee_angle: "Knee angle",
-  trunk_angle: "Trunk angle observations",
-  rom: "Range of motion",
-  asymmetry: "Bilateral asymmetry",
-  velocity: "Movement velocity",
-};
 
 function formatDate(value?: string | null): string {
   if (!value) return "Date unavailable";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return Number.isNaN(date.getTime())
+    ? "Date unavailable"
+    : date.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+}
+function binaryPrediction(rep: AssessmentRep): ModelPrediction | undefined {
+  const prediction = rep.analysis_result?.model_prediction;
+  return prediction?.prediction_target === "binary_form"
+    ? prediction
+    : undefined;
+}
+function isConfirmedBad(rep: AssessmentRep): boolean {
+  const prediction = binaryPrediction(rep);
+  const value = prediction?.predicted_class?.trim().toLowerCase();
+  return (
+    prediction?.status === "assessed" &&
+    prediction.is_correct === false &&
+    (value === "bad" || value === "bad_form")
+  );
+}
+function predictionLabel(prediction?: ModelPrediction): string {
+  if (!prediction || prediction.status !== "assessed")
+    return "Model unavailable";
+  const value = prediction.predicted_class?.trim().toLowerCase();
+  if (value === "good" || value === "good_form") return "Good Form";
+  if (value === "bad" || value === "bad_form") return "Needs Improvement";
+  return "Unsupported result";
+}
+function unavailableText(prediction?: ModelPrediction): string {
+  if (prediction?.detail) return prediction.detail;
+  if (prediction?.reason === "no_active_model")
+    return "No active model was available for this camera angle.";
+  if (prediction?.reason === "feature_extraction_failed")
+    return "There was not enough usable movement data for inference.";
+  return "Model inference was unavailable for this repetition.";
+}
+function findingForRep(
+  findings: SessionReportFinding[],
+  repNumber: number,
+): SessionReportFinding | undefined {
+  return findings
+    .filter((finding) => finding.affected_reps.includes(repNumber))
+    .sort(
+      (a, b) =>
+        (a.severity === "major" ? -1 : 1) - (b.severity === "major" ? -1 : 1),
+    )[0];
 }
 
-function readableLabel(value: string): string {
-  return value
-    .replace(/_/g, " ")
-    .replace(/\bjaa\b/gi, "JAA")
-    .replace(/\brom\b/gi, "ROM")
-    .replace(/\bbad\b/gi, "BAD")
-    .replace(/\bkvt\b/gi, "KVT")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+function RepSnapshot({ rep }: { rep: AssessmentRep }) {
+  const token = useAuthStore((state) => state.token);
+  const [failed, setFailed] = useState(false);
+  return (
+    <View
+      style={[
+        styles.snapshotFrame,
+        rep.snapshot_frame_width && rep.snapshot_frame_height
+          ? {
+              aspectRatio: rep.snapshot_frame_width / rep.snapshot_frame_height,
+            }
+          : undefined,
+      ]}
+    >
+      {failed ? (
+        <Text style={styles.snapshotFallback}>Snapshot unavailable</Text>
+      ) : (
+        <Image
+          source={{
+            uri: getAssessmentRepSnapshotUrl(rep.id),
+            headers: token ? { Authorization: `Token ${token}` } : undefined,
+          }}
+          style={styles.snapshotImage}
+          resizeMode="contain"
+          onError={() => setFailed(true)}
+        />
+      )}
+      <Text style={styles.overlayLegend}>
+        Red: observed posture
+        {rep.snapshot_reference_available
+          ? " · Green: reference"
+          : " · No reference pose available"}
+      </Text>
+    </View>
+  );
 }
-
-function formatValue(value: unknown): string {
-  if (typeof value === "number")
-    return Number.isFinite(value) ? value.toFixed(2) : "Unavailable";
-  if (typeof value === "string") return value || "Unavailable";
-  if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (Array.isArray(value)) {
-    const numeric = value.filter(
-      (item): item is number =>
-        typeof item === "number" && Number.isFinite(item),
+function RepCoachingCard({
+  rep,
+  finding,
+}: {
+  rep: AssessmentRep;
+  finding?: SessionReportFinding;
+}) {
+  const prediction = binaryPrediction(rep);
+  const confidence =
+    prediction?.status === "assessed" &&
+    typeof prediction.probability === "number" &&
+    Number.isFinite(prediction.probability)
+      ? `Model estimate · ${Math.round(prediction.probability * 100)}%`
+      : null;
+  return (
+    <View style={styles.repCard}>
+      <View style={styles.repHeader}>
+        <Text style={styles.repTitle}>Rep {rep.rep_number}</Text>
+        <Text style={styles.statusPill}>{predictionLabel(prediction)}</Text>
+      </View>
+      <RepSnapshot rep={rep} />
+      <Text style={styles.issueLabel}>What we saw</Text>
+      <Text style={styles.cardText}>
+        {finding?.summary ??
+          "This repetition was flagged, but a specific correction could not be isolated."}
+      </Text>
+      <Text style={styles.issueLabel}>Try this next</Text>
+      <Text style={styles.cueText}>
+        {finding?.cue ??
+          "Repeat the movement with steady control and check your alignment before the next rep."}
+      </Text>
+      <View style={styles.cardFooter}>
+        {confidence ? <Text style={styles.mutedText}>{confidence}</Text> : null}
+      </View>
+    </View>
+  );
+}
+function ProcessingNotice({
+  session,
+  onRefresh,
+}: {
+  session: AssessmentSessionDetail;
+  onRefresh: () => void;
+}) {
+  if (session.status === "COMPLETED") return null;
+  const failed = session.status === "FAILED";
+  return (
+    <View
+      style={[
+        styles.notice,
+        { borderColor: failed ? COLORS.crimsonRed : COLORS.warningYellow },
+      ]}
+    >
+      <Text style={styles.noticeTitle}>
+        {failed ? "Assessment failed" : "Assessment is still processing"}
+      </Text>
+      <Text style={styles.noticeText}>
+        {failed
+          ? session.error_message || "The assessment could not be completed."
+          : "Refresh this result later to retrieve its saved coaching feedback."}
+      </Text>
+      {!failed ? (
+        <Pressable style={styles.actionButton} onPress={onRefresh}>
+          <Text style={styles.actionButtonText}>Refresh session</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
+  const report = session.report;
+  const reps = session.reps ?? [];
+  const findings = report?.findings ?? [];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const goodReps: AssessmentRep[] = [];
+  const [showGood, setShowGood] = useState(false);
+  const assessedBadCount = reps.filter(isConfirmedBad).length;
+  if (reps.length === 0)
+    return (
+      <View style={styles.notice}>
+        <Text style={styles.noticeTitle}>No repetition results</Text>
+        <Text style={styles.noticeText}>
+          No repetition results were returned for this session.
+        </Text>
+      </View>
     );
-    if (numeric.length === value.length && numeric.length > 0) {
-      const min = Math.min(...numeric);
-      const max = Math.max(...numeric);
-      const average =
-        numeric.reduce((sum, item) => sum + item, 0) / numeric.length;
-      return `avg ${average.toFixed(2)} · range ${min.toFixed(2)}–${max.toFixed(2)}`;
-    }
-    return `${value.length} values`;
-  }
-  if (value === null || value === undefined) return "Unavailable";
-  return "Recorded";
-}
+  return (
+    <>
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryHeadline}>
+          {assessedBadCount
+            ? "A few reps need attention."
+            : "Reps looked good."}
+        </Text>
+        <Text style={styles.summaryText}>
+          {assessedBadCount} of {reps.length} repetitions were flagged by the
+          binary form model. Unassessed predictions are not counted as bad form.
+        </Text>
+      </View>
+      <Text style={styles.sectionTitle}>Choose a repetition</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.repSelector}
+      >
+        {reps.map((rep, index) => {
+          const prediction = binaryPrediction(rep);
+          const statusStyle =
+            prediction?.status !== "assessed"
+              ? styles.repChipUnavailable
+              : isConfirmedBad(rep) || findingForRep(findings, rep.rep_number)
+                ? styles.repChipBad
+                : styles.repChipGood;
+          return (
+            <Pressable
+              key={rep.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Repetition ${rep.rep_number}, ${predictionLabel(prediction)}`}
+              style={[
+                styles.repChip,
+                statusStyle,
+                index === selectedIndex && styles.repChipSelected,
+              ]}
+              onPress={() => setSelectedIndex(index)}
+            >
+              <Text style={styles.repChipText}>{rep.rep_number}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
-function asRecord(value: unknown): JsonRecord | null {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : null;
-}
-
-function statusMessage(
-  session: AssessmentSessionDetail,
-): { title: string; body: string; color: string } | null {
-  if (session.status === "PENDING" || session.status === "PROCESSING") {
-    return {
-      title: "Assessment is still processing",
-      body: "Rep analysis is not marked complete yet. Refresh this result later to retrieve the latest saved status.",
-      color: COLORS.warningYellow,
-    };
-  }
-  if (session.status === "FAILED") {
-    return {
-      title: "Assessment failed",
-      body:
-        session.error_message ||
-        "The backend did not provide an error message for this session.",
-      color: COLORS.crimsonRed,
-    };
-  }
-  return null;
+      <RepCoachingCard
+        rep={reps[Math.min(selectedIndex, reps.length - 1)]}
+        finding={findingForRep(
+          findings,
+          reps[Math.min(selectedIndex, reps.length - 1)].rep_number,
+        )}
+      />
+      {/*
+      <Pressable
+        style={styles.goodToggle}
+        onPress={() => setShowGood((current) => !current)}
+      >
+        <Text style={styles.goodToggleText}>
+          {showGood ? "Hide" : "Reps that looked good"} · {goodReps.length}
+        </Text>
+        <Text style={styles.goodToggleIcon}>{showGood ? "⌃" : "⌄"}</Text>
+      </Pressable> */}
+      {showGood
+        ? goodReps.map((rep) => (
+            <View key={rep.id} style={styles.goodRepRow}>
+              <Text style={styles.repTitle}>Rep {rep.rep_number}</Text>
+              <Text style={styles.mutedText}>
+                {predictionLabel(binaryPrediction(rep))}
+              </Text>
+              {binaryPrediction(rep)?.status !== "assessed" ? (
+                <Text style={styles.mutedText}>
+                  {unavailableText(binaryPrediction(rep))}
+                </Text>
+              ) : null}
+            </View>
+          ))
+        : null}
+    </>
+  );
 }
 
 export default function SessionResultScreen({ route, navigation }: Props) {
@@ -112,41 +289,32 @@ export default function SessionResultScreen({ route, navigation }: Props) {
   const [session, setSession] = useState<AssessmentSessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const loadSession = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getAssessmentSession(sessionId);
-      setSession(result);
+      setSession(await getAssessmentSession(sessionId));
     } catch (loadError) {
       setError(getAssessmentErrorMessage(loadError));
     } finally {
       setLoading(false);
     }
   }, [sessionId]);
-
   useEffect(() => {
     void loadSession();
   }, [loadSession]);
-
-  if (loading) {
+  if (loading)
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={COLORS.primaryOrange} />
           <Text style={styles.stateTitle}>Loading session results</Text>
-          <Text style={styles.stateDescription}>
-            Retrieving session #{sessionId} and its saved rep analysis.
-          </Text>
         </View>
       </SafeAreaView>
     );
-  }
-
-  if (error || !session) {
+  if (error || !session)
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.centerState}>
           <Text style={styles.stateTitle}>Unable to open this session</Text>
           <Text style={styles.stateDescription}>
@@ -167,243 +335,41 @@ export default function SessionResultScreen({ route, navigation }: Props) {
         </View>
       </SafeAreaView>
     );
-  }
-
-  const notice = statusMessage(session);
-  const exerciseName = session.exercise_variant_name?.trim()
-    ? session.exercise_variant_name
-    : `Exercise variant #${session.exercise_variant}`;
-
+  const exerciseName =
+    session.exercise_variant_name?.trim() ||
+    `Exercise variant #${session.exercise_variant}`;
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Back to session history"
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
             <Text style={styles.backButtonText}>‹</Text>
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={styles.eyebrow}>SESSION REPOSITORY</Text>
-            <Text style={styles.title}>Session #{session.id}</Text>
+            <Text style={styles.eyebrow}>SESSION COACHING</Text>
+            <Text style={styles.title}>{exerciseName}</Text>
           </View>
         </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.exerciseName}>{exerciseName}</Text>
+        <View style={styles.metaLine}>
+          <Text style={styles.dateText}>{formatDate(session.created_at)}</Text>
           <Text style={styles.dateText}>
-            Recorded {formatDate(session.created_at)}
+            {session.reps?.length ?? session.rep_count ?? 0} reps
           </Text>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryStats}>
-            <View style={styles.summaryStat}>
-              <Text style={styles.summaryStatValue}>
-                {session.rep_count ?? session.reps?.length ?? 0}
-              </Text>
-              <Text style={styles.summaryStatLabel}>Reps detected</Text>
-            </View>
-            <View style={styles.summaryStat}>
-              <Text
-                style={[
-                  styles.summaryStatValue,
-                  { color: notice?.color ?? COLORS.successGreen },
-                ]}
-              >
-                {readableLabel(session.status)}
-              </Text>
-              <Text style={styles.summaryStatLabel}>Session status</Text>
-            </View>
-          </View>
         </View>
-
-        {notice ? (
-          <View
-            style={[
-              styles.notice,
-              {
-                backgroundColor: `${notice.color}12`,
-                borderColor: `${notice.color}66`,
-              },
-            ]}
-          >
-            <Text style={styles.noticeTitle}>{notice.title}</Text>
-            <Text style={styles.noticeText}>{notice.body}</Text>
-            {session.status !== "FAILED" ? (
-              <Pressable
-                style={styles.actionButton}
-                onPress={() => void loadSession()}
-              >
-                <Text style={styles.actionButtonText}>Refresh session</Text>
-              </Pressable>
-            ) : null}
-          </View>
+        <ProcessingNotice
+          session={session}
+          onRefresh={() => void loadSession()}
+        />
+        {session.status === "COMPLETED" ? (
+          <CoachingContent session={session} />
         ) : null}
-
-        <Text style={styles.sectionTitle}>Repetition analysis</Text>
-        <Text style={styles.sectionSubtitle}>
-          Each card is based on the saved analysis for that repetition. Missing
-          score fields are left unavailable rather than estimated.
-        </Text>
-
-        {session.reps?.length ? (
-          session.reps.map((rep) => <RepResultCard key={rep.id} rep={rep} />)
-        ) : (
-          <View style={styles.notice}>
-            <Text style={styles.noticeTitle}>No repetition results saved</Text>
-            <Text style={styles.noticeText}>
-              {session.status === "COMPLETED"
-                ? "The session is marked complete, but the API returned no repetition records."
-                : "Repetition results will appear here when the session has saved rep assessments."}
-            </Text>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function RepResultCard({ rep }: { rep: AssessmentRep }) {
-  const analysis = asRecord(rep.analysis_result);
-  const metrics = asRecord(analysis?.metrics) ?? {};
-  const classifications = asRecord(analysis?.classifications) ?? {};
-  const feedback = Array.isArray(analysis?.feedback)
-    ? analysis.feedback.filter(
-        (item): item is { metric?: string; message?: string } =>
-          asRecord(item) !== null &&
-          typeof (item as JsonRecord).message === "string",
-      )
-    : [];
-
-  const metricEntries = Object.entries(metrics).filter(
-    ([, value]) => value !== null && value !== undefined,
-  );
-  const classificationEntries = Object.entries(classifications)
-    .map(([key, value]) => ({ key, value: asRecord(value) }))
-    .filter((item) => item.value !== null);
-  const scoreEntries: Array<[string, number | null]> = [
-    ["JAA", rep.jaa_score],
-    ["ROM", rep.rom_score],
-    ["BAD", rep.bad_score],
-    ["KVT", rep.kvt_score],
-    ["Hybrid", rep.hybrid_score],
-  ];
-  const availableScores = scoreEntries.filter(
-    (entry): entry is [string, number] => typeof entry[1] === "number",
-  );
-  const storedClassification = rep.classification?.trim();
-  const repLabel =
-    storedClassification ||
-    (metricEntries.length > 0 ? "Analyzed" : "Unclassified");
-
-  return (
-    <View style={styles.repCard}>
-      <View style={styles.repHeader}>
-        <Text style={styles.repTitle}>Rep {rep.rep_number}</Text>
-        <View style={styles.classificationPill}>
-          <Text style={styles.classificationText} numberOfLines={1}>
-            {readableLabel(repLabel)}
-          </Text>
-        </View>
-      </View>
-
-      {availableScores.length > 0 ? (
-        <View style={styles.scoreRow}>
-          {availableScores.map(([label, value]) => (
-            <View key={label} style={styles.scoreChip}>
-              <Text style={styles.scoreChipText}>
-                {label}: {value.toFixed(1)}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
-
-      {metricEntries.length > 0 ? (
-        <>
-          <Text style={styles.blockTitle}>Measured metrics</Text>
-          {metricEntries.map(([key, value]) => (
-            <View key={key} style={styles.dataRow}>
-              <Text style={styles.dataLabel}>
-                {METRIC_LABELS[key] ?? readableLabel(key)}
-              </Text>
-              <Text style={styles.dataValue}>{formatValue(value)}</Text>
-            </View>
-          ))}
-        </>
-      ) : null}
-
-      {classificationEntries.length > 0 ? (
-        <>
-          <Text style={styles.blockTitle}>Rule-based findings</Text>
-          {classificationEntries.map(({ key, value }) => {
-            const classification = value?.classification;
-            const evaluation = asRecord(value?.evaluation);
-            const detail =
-              typeof classification === "string"
-                ? readableLabel(classification)
-                : "No classification";
-            const evaluationText = evaluation
-              ? Object.entries(evaluation)
-                  .filter(
-                    ([, item]) =>
-                      typeof item === "number" || typeof item === "string",
-                  )
-                  .map(
-                    ([name, item]) =>
-                      `${readableLabel(name)}: ${formatValue(item)}`,
-                  )
-                  .join(" · ")
-              : "";
-            return (
-              <View key={key} style={styles.dataRow}>
-                <Text style={styles.dataLabel}>{readableLabel(key)}</Text>
-                <View style={{ maxWidth: "60%", alignItems: "flex-end" }}>
-                  <Text style={styles.dataValue}>{detail}</Text>
-                  {evaluationText ? (
-                    <Text
-                      style={[
-                        styles.dataLabel,
-                        { textAlign: "right", marginTop: 3 },
-                      ]}
-                    >
-                      {evaluationText}
-                    </Text>
-                  ) : null}
-                </View>
-              </View>
-            );
-          })}
-        </>
-      ) : null}
-
-      {feedback.length > 0 ? (
-        <>
-          <Text style={styles.blockTitle}>Feedback</Text>
-          {feedback.map((item, index) => (
-            <View
-              key={`${item.metric ?? "feedback"}-${index}`}
-              style={styles.feedbackItem}
-            >
-              <Text style={styles.feedbackDot}>•</Text>
-              <Text style={styles.feedbackText}>{item.message}</Text>
-            </View>
-          ))}
-        </>
-      ) : null}
-
-      {metricEntries.length === 0 &&
-      classificationEntries.length === 0 &&
-      feedback.length === 0 ? (
-        <Text style={styles.noticeText}>
-          No structured analysis payload was saved for this repetition.
-        </Text>
-      ) : null}
-    </View>
   );
 }

@@ -218,7 +218,11 @@ def process_dataset_video_item_task(dataset_video_id, user_id):
                     dataset=video.dataset,
                     dataset_video=video,
                     rep_assessment=rep_assessment,
-                    is_correct=video.source_label,
+                    is_correct=(
+                        None
+                        if video.requires_manual_review
+                        else video.source_label
+                    ),
                 )
 
         video.status = DatasetVideo.Status.READY

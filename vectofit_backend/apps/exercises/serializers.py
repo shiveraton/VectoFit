@@ -1,11 +1,14 @@
+from typing import ClassVar
+
 from rest_framework import serializers
 
 from .models import ExerciseVariant
 
+
 class ExerciseVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExerciseVariant
-        fields = [
+        fields: ClassVar[list] = [
             "id",
             "name",
             "variant_type",

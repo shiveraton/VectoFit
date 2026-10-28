@@ -1,0 +1,57 @@
+id,dataset_video_id,dataset_video__participant__participant_code,dataset_video__source_label,dataset_video__requires_manual_review,dataset_video__video_file,rep_assessment__rep_number,rep_assessment__start_frame,rep_assessment__end_frame,rep_assessment__key_frame_index,is_correct,error_label,annotator_id,annotated_at
+336,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,1,31,101,,True,,,
+337,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,2,77,157,,True,,,
+338,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,3,177,205,,True,,,
+339,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,4,205,230,,True,,,
+340,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,5,230,287,,True,,,
+341,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,6,287,315,,True,,,
+342,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,7,317,343,,True,,,
+343,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,8,371,427,,True,,,
+344,33,P01,True,False,datasets/videos/dd5d91c0df4e4cc2bd3d599c1060bbe8.mp4,9,424,458,,True,,,
+345,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,1,61,86,,False,,,
+346,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,2,110,145,,False,,,
+347,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,3,145,179,,False,,,
+348,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,4,209,241,,False,,,
+349,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,5,241,276,,False,,,
+350,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,6,276,306,,False,,,
+351,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,7,333,368,,False,,,
+352,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,8,401,434,,False,,,
+353,34,P01,False,False,datasets/videos/46e2b248bb4546fb84db9a2b16df4d79.mp4,9,434,464,,False,,,
+384,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,1,37,67,,True,,,
+385,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,2,67,134,,True,,,
+386,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,3,134,195,,True,,,
+387,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,4,195,236,,True,,,
+388,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,5,225,268,,True,,,
+389,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,6,268,361,,True,,,
+390,39,P02,True,False,datasets/videos/9abbfe479e8c4c6c8445c1ba43400cb8.mp4,7,361,402,,True,,,
+391,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,1,64,93,,False,"knee_varus,excessive_trunk_lean,asymmetry,foot_instability",1,2026-10-22 08:33:06.548264+00:00
+392,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,2,93,155,,False,"excessive_trunk_lean,asymmetry,foot_instability",1,2026-10-22 08:33:42.807572+00:00
+393,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,3,155,203,,False,"excessive_trunk_lean,asymmetry,foot_instability",1,2026-10-22 08:34:25.632248+00:00
+394,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,4,203,250,,False,"knee_varus,excessive_trunk_lean,asymmetry,foot_instability",1,2026-10-22 08:34:58.775459+00:00
+395,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,5,250,319,,False,"knee_varus,excessive_trunk_lean,foot_instability,asymmetry",1,2026-10-22 08:35:42.945782+00:00
+396,40,P02,False,True,datasets/videos/d376c8b1a85e4013be6cd44aba3ff040.mp4,6,374,416,,False,"excessive_depth,knee_varus,excessive_trunk_lean,asymmetry,foot_instability",1,2026-10-22 08:35:46.196037+00:00
+423,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,1,47,114,,True,,1,2026-10-22 08:40:34.626277+00:00
+424,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,2,114,161,,True,,1,2026-10-22 08:40:38.123081+00:00
+425,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,3,161,232,,True,,1,2026-10-22 08:40:40.628424+00:00
+426,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,4,232,298,,True,,1,2026-10-22 08:40:42.547409+00:00
+427,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,5,298,367,,True,,1,2026-10-22 08:40:44.243298+00:00
+428,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,6,367,391,,True,,1,2026-10-22 08:40:46.032806+00:00
+429,45,P03,True,True,datasets/videos/454ac4ce376f4434a082d121fc4412e5.mp4,7,391,459,,True,,1,2026-10-22 08:40:47.607122+00:00
+430,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,1,43,110,,False,,,
+431,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,2,110,176,,False,,,
+432,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,3,218,279,,False,,,
+433,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,4,267,317,,False,,,
+434,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,5,302,359,,False,,,
+435,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,6,359,421,,False,,,
+436,46,P03,False,False,datasets/videos/4dc3dfad8baf47aab7d0a2384b04d801.mp4,7,412,445,,False,,,
+460,51,P04,True,False,datasets/videos/ae054e08912c4d44ae4c8bd9e558f7f2.mp4,1,69,124,,True,,,
+461,51,P04,True,False,datasets/videos/ae054e08912c4d44ae4c8bd9e558f7f2.mp4,2,124,177,,True,,,
+462,51,P04,True,False,datasets/videos/ae054e08912c4d44ae4c8bd9e558f7f2.mp4,3,221,288,,True,,,
+463,51,P04,True,False,datasets/videos/ae054e08912c4d44ae4c8bd9e558f7f2.mp4,4,379,450,,True,,,
+464,52,P04,False,False,datasets/videos/497b88fed57d4635ad5e2f2c08db0cb2.mp4,1,252,404,,False,,,
+501,57,P05,True,False,datasets/videos/b225b43497544f899b053ac64a91bac6.mp4,1,39,150,,True,,,
+502,57,P05,True,False,datasets/videos/b225b43497544f899b053ac64a91bac6.mp4,2,170,272,,True,,,
+503,57,P05,True,False,datasets/videos/b225b43497544f899b053ac64a91bac6.mp4,3,258,453,,True,,,
+504,58,P05,False,True,datasets/videos/f23ce43b49e8478eb3a014cd721a0e7c.mp4,1,108,221,,False,"insufficient_depth,knee_varus,excessive_trunk_lean",1,2026-10-22 08:48:18.346578+00:00
+505,58,P05,False,True,datasets/videos/f23ce43b49e8478eb3a014cd721a0e7c.mp4,2,221,300,,False,"insufficient_depth,excessive_trunk_lean",1,2026-10-22 08:48:31.361011+00:00
+506,58,P05,False,True,datasets/videos/f23ce43b49e8478eb3a014cd721a0e7c.mp4,3,300,367,,False,"insufficient_depth,excessive_trunk_lean",1,2026-10-22 08:48:47.659739+00:00

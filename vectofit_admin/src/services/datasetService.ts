@@ -26,6 +26,17 @@ export const VIEW_ANGLE_BY_ID: Record<number, ViewAngle> = {
   3: "sagittal",
 };
 
+export interface AngleTrainingStats {
+  sample_count: number;
+  labelled_sample_count: number;
+  good_count: number;
+  bad_count: number;
+  error_type_sample_count: number;
+  error_label_counts: Record<string, number>;
+  participant_count: number;
+  video_count: number;
+}
+
 export interface Dataset {
   id: number;
   name: string;
@@ -53,6 +64,16 @@ export interface Dataset {
   video_count?: number;
   ready_video_count?: number;
   failed_video_count?: number;
+
+  participant_count?: number;
+  view_angles?: ViewAngle[];
+  angle_training_stats?: Partial<Record<ViewAngle, AngleTrainingStats>>;
+
+  review_policy?: "source_labels" | "all_videos" | "subset";
+  review_selected_sample_count?: number;
+  human_reviewed_sample_count?: number;
+  pending_review_sample_count?: number;
+  inherited_labelled_sample_count?: number;
 }
 
 export interface DatasetImportFile {
@@ -66,6 +87,11 @@ export interface DatasetImportFile {
 
 export interface DatasetImportPreview {
   upload_token: string | null;
+  expires_at: number;
+  manifest: DatasetImportManifest;
+}
+
+export interface DatasetImportManifest {
   file_count: number;
   participant_count: number;
   by_angle: Record<ViewAngle, number>;
@@ -79,14 +105,103 @@ export interface DatasetImportPreview {
   ignored_file_count: number;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isViewAngle(value: unknown): value is ViewAngle {
+  return value === "diagonal" || value === "frontal" || value === "sagittal";
+}
+
+function isDatasetImportPreview(value: unknown): value is DatasetImportPreview {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  if (
+    !(typeof value.upload_token === "string" || value.upload_token === null) ||
+    !isNumber(value.expires_at) ||
+    !isRecord(value.manifest)
+  ) {
+    return false;
+  }
+
+  const manifest = value.manifest;
+
+  if (
+    !isNumber(manifest.file_count) ||
+    !isNumber(manifest.participant_count) ||
+    !isNumber(manifest.ignored_file_count) ||
+    !isRecord(manifest.by_label) ||
+    !isRecord(manifest.by_angle)
+  ) {
+    return false;
+  }
+
+  const byLabel = manifest.by_label;
+  const byAngle = manifest.by_angle;
+
+  if (
+    !isNumber(byLabel.good) ||
+    !isNumber(byLabel.bad) ||
+    !isNumber(byAngle.diagonal) ||
+    !isNumber(byAngle.frontal) ||
+    !isNumber(byAngle.sagittal)
+  ) {
+    return false;
+  }
+
+  if (
+    !Array.isArray(manifest.files) ||
+    !manifest.files.every(
+      (file: unknown) =>
+        isRecord(file) &&
+        typeof file.archive_path === "string" &&
+        typeof file.filename === "string" &&
+        typeof file.participant_code === "string" &&
+        isViewAngle(file.view_angle) &&
+        typeof file.source_label == "boolean" &&
+        isNumber(file.size_bytes),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    !Array.isArray(manifest.warnings) ||
+    !manifest.warnings.every(
+      (warning: unknown) => typeof warning === "string",
+    ) ||
+    !Array.isArray(manifest.errors) ||
+    !manifest.errors.every((error: unknown) => typeof error === "string")
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export type DatasetReviewPolicy = "source" | "all" | "subset";
+
+export type DatasetSelectionMethod = "stratified" | "manual";
+
 export interface DatasetBulkImportPayload {
-  upload_token: string;
+  upload_token: string | null;
   name: string;
   description?: string;
   exercise_type: string;
   purpose: string;
   primary_target: string;
   secondary_target?: string;
+  review_policy: DatasetReviewPolicy;
+  selection_method: DatasetSelectionMethod;
+  review_count?: number;
+  random_seed?: number;
+  selected_video_paths?: string[];
   files?: DatasetImportFile[];
 }
 
@@ -124,12 +239,7 @@ export const datasetService = {
   },
 
   async createDatasetWithVideo(payload: FormData): Promise<Dataset> {
-    const response = await client.post<Dataset>("/datasets/", payload, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
+    const response = await client.post<Dataset>("/datasets/", payload);
     return response.data;
   },
 
@@ -147,6 +257,12 @@ export const datasetService = {
       "/datasets/import/preview/",
       formData,
     );
+
+    if (!isDatasetImportPreview(response.data)) {
+      throw new Error(
+        "The server returned an invalid archive preview response.",
+      );
+    }
 
     return response.data;
   },

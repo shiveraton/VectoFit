@@ -2,6 +2,10 @@ export type ParameterSimulation =
   | "trees"
   | "depth"
   | "learning"
+  | "subsample"
+  | "features"
+  | "child-weight"
+  | "regularization"
   | "split"
   | "seed";
 

@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import ExerciseVariant
+
 
 @admin.register(ExerciseVariant)
 class ExerciseVariantAdmin(admin.ModelAdmin):

@@ -1,17 +1,6 @@
-"""XGBoost training and held-out evaluation.
-
-This module is deliberately free of Django request handling and of view logic
-so that it can be driven equally from the REST API (synchronous, for the first
-working experiment) and from a Celery task later without duplicating the
-training logic.
-
-It never invents a score: metrics come only from predictions made on a test
-set that the model was not fitted on, and if that split is impossible the
-function raises rather than reporting a number that would be meaningless.
-"""
-
 import os
 import tempfile
+
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
@@ -43,7 +32,9 @@ class InsufficientDataError(Exception):
     """Raised when the data cannot support a valid train/test experiment."""
 
 
-def resolve_hyperparameters(overrides=None):
+def resolve_hyperparameters(
+    overrides=None, prediction_target="binary_form", class_count=2
+):
     params = dict(BASELINE_HYPERPARAMETERS)
     if overrides:
         unknown = set(overrides) - set(BASELINE_HYPERPARAMETERS)
@@ -53,40 +44,45 @@ def resolve_hyperparameters(overrides=None):
                 f"Allowed: {sorted(BASELINE_HYPERPARAMETERS)}"
             )
         params.update(overrides)
+
+    if prediction_target == "error_type":
+        if class_count < 2:
+            raise InsufficientDataError(
+                "error_type training requires at least two target classes."
+            )
+        params["objective"] = "multi:softprob"
+        params["eval_metric"] = "mlogloss"
+        params["num_class"] = class_count
+    else:
+        params["objective"] = "binary:logistic"
+        params["eval_metric"] = str(params.get("eval_metric") or "logloss")
+        params.pop("num_class", None)
     return params
 
 
-def _check_split_viability(sample_set, train_idx, test_idx, labels):
+def _check_split_viability(train_idx, test_idx, labels):
     if not train_idx or not test_idx:
         raise InsufficientDataError(
-            "The group split produced an empty train or test set. This happens "
-            "when every repetition comes from a single video/session, so no "
-            "leakage-free held-out split exists. Record repetitions from at "
-            "least two separate sessions before training."
+            "The participant-grouped split produced an empty train or test set. "
+            "Record repetitions from at least two distinct participants."
         )
 
+    target_classes = set(labels)
     train_classes = {labels[i] for i in train_idx}
     test_classes = {labels[i] for i in test_idx}
-
-    if len(train_classes) < 2:
+    if train_classes != target_classes:
         raise InsufficientDataError(
-            "The training split contains only one class, so a classifier "
-            "cannot be fitted. Add labelled repetitions of both correct and "
-            "incorrect form."
+            "The training split does not contain every target class. Add labelled "
+            "repetitions for the missing class across more participants."
         )
-
-    if len(test_classes) < 2:
+    if test_classes != target_classes:
         raise InsufficientDataError(
-            "The held-out test split contains only one class, so accuracy and "
-            "F1 are not meaningful. Record more sessions so that the split "
-            "covers both classes, or accept that this run cannot be evaluated."
+            "The held-out test split does not contain every target class. Add data "
+            "from more participants so every class can be evaluated without leakage."
         )
-
-    overlap = set(train_idx) & set(test_idx)
-    if overlap:
+    if set(train_idx) & set(test_idx):
         raise InsufficientDataError(
-            f"Data leakage detected: {len(overlap)} sample(s) appear in both "
-            f"the training and test splits."
+            "Data leakage detected between training and test sample indices."
         )
 
 
@@ -94,64 +90,99 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
     if not isinstance(sample_set, SampleSet):
         raise TypeError("train_and_evaluate expects a SampleSet.")
 
-    labels = [int(label) for label in sample_set.labels]
-    X = np.asarray(sample_set.rows, dtype=float)
-    y = np.asarray(labels, dtype=int)
-
-    if X.ndim != 2 or X.shape[1] != len(sample_set.feature_names):
+    raw_labels = list(sample_set.labels)
+    if sample_set.prediction_target == "binary_form":
+        allowed = {0, 1}
+        if not set(raw_labels).issubset(allowed):
+            raise InsufficientDataError(
+                "binary_form targets must be encoded as 0 or 1."
+            )
+        if set(raw_labels) != {0, 1}:
+            raise InsufficientDataError(
+                "binary_form training requires both target classes: incorrect (0) "
+                "and correct (1). Add labelled repetitions from both classes."
+            )
+        target_names = ["BAD_FORM", "GOOD_FORM"]
+        label_to_index = {0: 0, 1: 1}
+        labels = [label_to_index[label] for label in raw_labels]
+    elif sample_set.prediction_target == "error_type":
+        target_names = sorted({str(label) for label in raw_labels})
+        if len(target_names) < 2:
+            raise InsufficientDataError(
+                "error_type requires at least two distinct target classes."
+            )
+        label_to_index = {name: index for index, name in enumerate(target_names)}
+        labels = [label_to_index[str(label)] for label in raw_labels]
+    else:
         raise InsufficientDataError(
-            f"Design matrix shape {X.shape} does not match "
-            f"{len(sample_set.feature_names)} selected features."
+            f"Unsupported prediction target {sample_set.prediction_target!r}."
         )
 
+    X = np.asarray(sample_set.rows, dtype=float)
+    y = np.asarray(labels, dtype=int)
+    if X.ndim != 2 or X.shape[1] != len(sample_set.feature_names):
+        raise InsufficientDataError(
+            f"Design matrix shape {X.shape} does not match {len(sample_set.feature_names)} selected features."
+        )
+    if len(X) != len(y) or len(y) != len(sample_set.groups):
+        raise InsufficientDataError(
+            "Feature rows, target labels, and participant groups are misaligned."
+        )
     if not np.all(np.isfinite(X)):
         raise InsufficientDataError(
             "The design matrix contains non-finite values; refusing to train."
         )
 
-    train_idx, test_idx = group_split(sample_set.groups, test_size, seed)
-    _check_split_viability(sample_set, train_idx, test_idx, labels)
+    train_idx, test_idx = group_split(sample_set.groups, test_size, seed, labels=labels)
+    _check_split_viability(train_idx, test_idx, labels)
 
-    params = resolve_hyperparameters(hyperparameters)
-
-    model = XGBClassifier(
-        **params,
-        random_state=seed,
+    params = resolve_hyperparameters(
+        hyperparameters,
+        prediction_target=sample_set.prediction_target,
+        class_count=len(target_names),
     )
-
+    model = XGBClassifier(**params, random_state=seed)
     model.fit(X[train_idx], y[train_idx])
-
-    y_pred = model.predict(X[test_idx])
-    y_proba = model.predict_proba(X[test_idx])[:, 1]
-
+    y_pred = model.predict(X[test_idx]).astype(int)
+    probabilities = model.predict_proba(X[test_idx])
+    class_indices = list(range(len(target_names)))
+    averaging = "binary" if sample_set.prediction_target == "binary_form" else "macro"
     metrics = {
         "accuracy": float(accuracy_score(y[test_idx], y_pred)),
-        "balanced_accuracy": float(
-            balanced_accuracy_score(y[test_idx], y_pred)
-        ),
-        "f1": float(f1_score(y[test_idx], y_pred, zero_division=0)),
+        "balanced_accuracy": float(balanced_accuracy_score(y[test_idx], y_pred)),
+        "f1": float(f1_score(y[test_idx], y_pred, average=averaging, zero_division=0)),
         "precision": float(
-            precision_score(y[test_idx], y_pred, zero_division=0)
+            precision_score(y[test_idx], y_pred, average=averaging, zero_division=0)
         ),
-        "recall": float(recall_score(y[test_idx], y_pred, zero_division=0)),
+        "recall": float(
+            recall_score(y[test_idx], y_pred, average=averaging, zero_division=0)
+        ),
         "confusion_matrix": confusion_matrix(
-            y[test_idx], y_pred, labels=[0, 1]
+            y[test_idx], y_pred, labels=class_indices
         ).tolist(),
         "classification_report": classification_report(
-            y[test_idx], y_pred, labels=[0, 1], zero_division=0
+            y[test_idx],
+            y_pred,
+            labels=class_indices,
+            target_names=target_names,
+            zero_division=0,
         ),
-        "train_class_distribution": _distribution(y[train_idx]),
-        "test_class_distribution": _distribution(y[test_idx]),
-        "overall_class_distribution": _distribution(y),
+        "target_names": target_names,
+        "class_mapping": {str(index): name for index, name in enumerate(target_names)},
+        "prediction_target": sample_set.prediction_target,
+        "train_class_distribution": _distribution(y[train_idx], target_names),
+        "test_class_distribution": _distribution(y[test_idx], target_names),
+        "overall_class_distribution": _distribution(y, target_names),
         "feature_names": list(sample_set.feature_names),
         "feature_importances": {
             name: float(value)
-            for name, value in zip(
-                sample_set.feature_names, model.feature_importances_
-            )
+            for name, value in zip(sample_set.feature_names, model.feature_importances_)
         },
+        "held_out_probabilities": [
+            {target_names[i]: float(prob) for i, prob in enumerate(row)}
+            for row in probabilities
+        ],
     }
-
     return {
         "model": model,
         "metrics": metrics,
@@ -160,31 +191,26 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
         "feature_names": list(sample_set.feature_names),
         "hyperparameters": params,
         "seed": seed,
+        "target_names": target_names,
+        "class_mapping": metrics["class_mapping"],
     }
 
 
-def _distribution(values):
+def _distribution(values, target_names):
     return {
-        str(int(label)): int(np.sum(values == label))
+        target_names[int(label)]: int(np.sum(values == label))
         for label in np.unique(values)
     }
 
 
 def serialize_model(model):
     temp_path = None
-
     try:
-        with tempfile.NamedTemporaryFile(
-            suffix=".json",
-            delete=False,
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as temp_file:
             temp_path = temp_file.name
-
         model.save_model(temp_path)
-
         with open(temp_path, "rb") as file:
             return file.read()
-
     finally:
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
@@ -192,20 +218,13 @@ def serialize_model(model):
 
 def load_model(artifact):
     temp_path = None
-
     try:
-        with tempfile.NamedTemporaryFile(
-            suffix=".json",
-            delete=False,
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as temp_file:
             temp_path = temp_file.name
             temp_file.write(artifact)
-
         estimator = XGBClassifier()
         estimator.load_model(temp_path)
-
         return estimator
-
     finally:
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)

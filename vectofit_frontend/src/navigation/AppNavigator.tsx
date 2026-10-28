@@ -1,4 +1,4 @@
-import { RootStackParamList } from "./types";
+import type { RootStackParamList } from "./types";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MainTabNavigator } from "../screens/MainTabNavigator";

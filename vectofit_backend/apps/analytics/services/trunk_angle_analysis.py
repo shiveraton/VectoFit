@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def calculate_midpoint(point_a, point_b):
     return (np.array(point_a) + np.array(point_b)) / 2
+
 
 def calculate_trunk_angle(left_shoulder, right_shoulder, left_hip, right_hip):
     mid_shoulder = calculate_midpoint(left_shoulder, right_shoulder)
@@ -17,6 +19,7 @@ def calculate_trunk_angle(left_shoulder, right_shoulder, left_hip, right_hip):
     cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
 
     return float(np.degrees(np.arccos(cosine_angle)))
+
 
 def calculate_trunk_angle_series(landmark_series):
     angles = []

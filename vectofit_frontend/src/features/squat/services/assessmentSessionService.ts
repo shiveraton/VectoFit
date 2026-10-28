@@ -1,5 +1,9 @@
 import apiClient from "../../../api/client";
-import type { SquatExerciseType } from "../../../navigation/types";
+import type {
+  AssessmentViewAngle,
+  SquatExerciseType,
+} from "../../../navigation/types";
+import type { RepAnalysisResult } from "../../assessment/services/sessionStructure";
 
 type ExerciseVariantType = "BW" | "GOB" | "BAR";
 type AssessmentStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
@@ -18,6 +22,8 @@ interface ExerciseVariantListResponse {
 export interface AssessmentSessionDetail {
   id: number;
   exercise_variant: number;
+  exercise_variant_name?: string;
+  view_angle: AssessmentViewAngle | "";
   status: AssessmentStatus;
   error_message: string;
   reps: Array<{
@@ -29,6 +35,7 @@ export interface AssessmentSessionDetail {
     kvt_score: number | null;
     hybrid_score: number | null;
     classification: string;
+    analysis_result: RepAnalysisResult | null;
     start_frame: number | null;
     end_frame: number | null;
   }>;
@@ -58,6 +65,7 @@ function getErrorMessage(error: unknown): string {
 export async function uploadSquatAssessmentVideo(
   videoPath: string,
   exercise: SquatExerciseType,
+  viewAngle: AssessmentViewAngle,
 ): Promise<AssessmentSessionDetail> {
   if (!videoPath.trim()) {
     throw new Error("No recorded video path was provided.");
@@ -88,6 +96,7 @@ export async function uploadSquatAssessmentVideo(
   const formData = new FormData();
 
   formData.append("exercise_variant", String(variant.id));
+  formData.append("view_angle", viewAngle);
   formData.append("video_file", {
     uri,
     name: filename.endsWith(".mp4") ? filename : `${filename}.mp4`,
@@ -110,6 +119,7 @@ export async function uploadSquatAssessmentVideo(
 
   const detailResponse = await apiClient.get<AssessmentSessionDetail>(
     `/assessments/sessions/${createResponse.data.id}/`,
+    { params: { include: "reps" } },
   );
   const session = detailResponse.data;
 
