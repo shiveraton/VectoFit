@@ -1,4 +1,7 @@
 import client from "../config/client";
+import type { ViewAngle } from "./datasetService";
+
+export type PredictionTarget = "binary_form" | "error_type";
 
 export type TrainingJobStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
 
@@ -7,9 +10,14 @@ export interface TrainingJob {
   dataset_ids: number[];
   dataset_names: string[];
   algorithm: string;
+  view_angle: ViewAngle | "";
+  prediction_target: PredictionTarget;
+  feature_schema_version: string;
+  training_manifest_summary?: Record<string, unknown>;
   feature_selection: string[];
   hyperparameters: Record<string, unknown>;
   random_seed: number;
+  test_size: number;
   split_strategy: string;
   status: TrainingJobStatus;
   error_message: string;
@@ -58,10 +66,6 @@ export interface WorkflowStep {
   subtitle: string;
   active?: boolean;
 }
-3;
-
-const API_BASE_URL = "/api/training";
-
 export const trainingService = {
   async getTrainingJobs(): Promise<TrainingJob[]> {
     const response = await client.get<TrainingJob[]>("/training/jobs/");
@@ -71,30 +75,19 @@ export const trainingService = {
   async startTraining(payload: {
     dataset_ids: number[];
     algorithm: string;
+    view_angle: ViewAngle;
+    prediction_target: PredictionTarget;
     feature_selection: string[];
     hyperparameters: Record<string, unknown>;
     test_size: number;
     random_seed: number;
   }): Promise<TrainingJob> {
-    const response = await fetch(`${API_BASE_URL}/jobs/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await client.post<TrainingJob>(
+      "/training/jobs/create/",
+      payload,
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-
-      throw new Error(
-        errorData?.detail ||
-          errorData?.non_field_errors?.[0] ||
-          "Failed to start training",
-      );
-    }
-
-    return response.json();
+    return response.data;
   },
 
   getAvailableFeatures(): FeatureOption[] {

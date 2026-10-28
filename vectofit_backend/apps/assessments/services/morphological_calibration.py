@@ -1,26 +1,18 @@
 #!/usr/bin/env python3
 
-# 1. Short and concise
-# 2. Specify a return type
-# 3. Make as simple and reusable as possible
-# 4. Document all your functions
-
-import os
-import sys
-import cv2
-import mediapipe as mp
-import math
-import numpy as np
 import json
+import os
+
+import mediapipe as mp
+import numpy as np
 from pose_estimator import PoseEstimator
-from typing import Any
 
 mp_pose = mp.solutions.pose
 pose_detector = mp_pose.Pose()
 mp_drawing = mp.solutions.drawing_utils
 
+
 def calculate_body_data(results) -> dict[str, float]:
-    # calculate arms, trunk, hips, legs, knees, ankles
 
     if not (results and results.pose_world_landmarks):
         return {}
@@ -43,12 +35,8 @@ def calculate_body_data(results) -> dict[str, float]:
 
     return body_data
 
-def heel_detection(results) -> dict[str, dict[str, float]]:
-    # detect left and right heels
-    # to be used for heel stability calculation (if moving along with squat movement)
 
-    # returning a dictionary
-    # check to see if results exists and if so, if results.pose_landmarks exists
+def heel_detection(results) -> dict[str, dict[str, float]]:
     if not (results and results.pose_landmarks):
         return {}
 
@@ -57,29 +45,40 @@ def heel_detection(results) -> dict[str, dict[str, float]]:
     right_heel = landmarks[mp_pose.PoseLandmark.RIGHT_HEEL.value]
 
     return {
-        "left_heel": {"x": left_heel.x, "y": left_heel.y, "z": left_heel.z, "vis": left_heel.visibility},
-        "right_heel": {"x": right_heel.x, "y": right_heel.y, "z": right_heel.z, "vis": right_heel.visibility},
+        "left_heel": {
+            "x": left_heel.x,
+            "y": left_heel.y,
+            "z": left_heel.z,
+            "vis": left_heel.visibility,
+        },
+        "right_heel": {
+            "x": right_heel.x,
+            "y": right_heel.y,
+            "z": right_heel.z,
+            "vis": right_heel.visibility,
+        },
     }
 
-def calibrate_frame(frame: np.ndarray, pose_estimator: PoseEstimator) -> tuple[np.ndarray, dict[str, any]]:
-    # runs estimation, performs calculations, and renders landmarks
+
+def calibrate_frame(
+    frame: np.ndarray, pose_estimator: PoseEstimator
+) -> tuple[np.ndarray, dict[str, any]]:
 
     results = pose_estimator.estimate_pose(frame)
 
     body_data = calculate_body_data(results)
     heel_data = heel_detection(results)
 
-    combined_metrics = {
-        "body_data": body_data,
-        "heel_data": heel_data
-    }
+    combined_metrics = {"body_data": body_data, "heel_data": heel_data}
 
     annotated_frame = pose_estimator.render_landmarks(frame, results)
 
     return annotated_frame, combined_metrics
 
-def save_custom_body_type(body_data: dict[str, float], user_id: str, output_dir: str = "profiles") -> bool:
-    # record calculated body type to use for live feedback later on
+
+def save_custom_body_type(
+    body_data: dict[str, float], user_id: str, output_dir: str = "profiles"
+) -> bool:
 
     if not body_data:
         return False

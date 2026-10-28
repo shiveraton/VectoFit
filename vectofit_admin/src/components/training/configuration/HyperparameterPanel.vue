@@ -2,6 +2,7 @@
 import { computed } from "vue";
 
 import HyperparameterCard from "./HyperparameterCard.vue";
+import type { PredictionTarget } from "../../../services/trainingService";
 import {
   FIXED_TRAINING_SETTINGS,
   TRAINING_PARAMETER_DEFINITIONS,
@@ -11,6 +12,7 @@ const props = defineProps<{
   hyperparameters: Record<string, unknown>;
   testSize: number;
   randomSeed: number;
+  predictionTarget: PredictionTarget;
 }>();
 
 const emit = defineEmits<{
@@ -41,6 +43,19 @@ const baselineDescription = computed(
   () =>
     "Use the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.",
 );
+
+const effectiveFixedSettings = computed(() => {
+  if (props.predictionTarget === "error_type") {
+    return [
+      { label: "Objective", value: "multi:softprob" },
+      { label: "Evaluation Metric", value: "mlogloss" },
+      { label: "Split Strategy", value: "group_by_participant" },
+      { label: "Class Count", value: "Inferred from labels" },
+    ];
+  }
+
+  return FIXED_TRAINING_SETTINGS;
+});
 
 const emitUpdate = (definitionKey: string, value: number) => {
   const definition = TRAINING_PARAMETER_DEFINITIONS.find(
@@ -91,7 +106,7 @@ const emitUpdate = (definitionKey: string, value: number) => {
     </div>
 
     <div class="fixed-parameters">
-      <span v-for="setting in FIXED_TRAINING_SETTINGS" :key="setting.label">
+      <span v-for="setting in effectiveFixedSettings" :key="setting.label">
         <strong>{{ setting.label }}</strong>
         <code>{{ setting.value }}</code>
       </span>

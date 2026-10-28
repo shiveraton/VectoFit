@@ -1,11 +1,16 @@
 import client from "../config/client";
 
+export type DeploymentStatus = "active" | "building" | "failed" | "inactive";
+
 export interface ModelRegistryRecord {
   id: number;
   name: string;
   version: string;
   training_job: number;
   algorithm: string;
+  view_angle: "diagonal" | "frontal" | "sagittal" | "";
+  prediction_target: "binary_form" | "error_type";
+  feature_schema_version: string;
   metrics: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
@@ -16,6 +21,9 @@ export interface ModelState {
   name: string;
   version: string;
   algorithm: string;
+  view_angle: "diagonal" | "frontal" | "sagittal" | "";
+  prediction_target: "binary_form" | "error_type";
+  feature_schema_version: string;
   is_active: boolean;
   created_at: string;
   artifact_available: boolean;
@@ -23,6 +31,10 @@ export interface ModelState {
   training: {
     job_id: number;
     status: string;
+    view_angle: "diagonal" | "frontal" | "sagittal" | "";
+    prediction_target: "binary_form" | "error_type";
+    feature_schema_version: string;
+    test_size: number;
     dataset_names: string[];
     sample_count: number;
     train_count: number;
@@ -52,6 +64,7 @@ export interface ModelState {
   };
 
   feature_warnings: string[];
+  training_manifest: Record<string, unknown>;
 }
 
 export const modelService = {
@@ -59,6 +72,13 @@ export const modelService = {
     const response =
       await client.get<ModelRegistryRecord[]>("/training/models/");
 
+    return response.data;
+  },
+
+  async activateModel(id: number): Promise<ModelRegistryRecord> {
+    const response = await client.post<ModelRegistryRecord>(
+      `/training/models/${id}/activate/`,
+    );
     return response.data;
   },
 

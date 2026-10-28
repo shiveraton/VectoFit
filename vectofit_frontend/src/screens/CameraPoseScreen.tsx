@@ -13,7 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Camera } from "react-native-vision-camera";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import type { RootStackParamList } from "../navigation/types";
+import type {
+  AssessmentViewAngle,
+  RootStackParamList,
+} from "../navigation/types";
 import { useCameraPoseScreen } from "../features/squat/hooks/useCameraPoseScreen";
 import PoseLandmarkOverlay from "../features/squat/components/PoseLandmarkOverlay";
 import styles, { CAMERA_COLORS } from "../styles/CameraPoseScreenStyles";
@@ -26,6 +29,15 @@ const EXERCISE_LABELS = {
   barbell_squat: "Barbell Squat",
 } as const;
 
+const VIEW_ANGLE_OPTIONS: Array<{
+  value: AssessmentViewAngle;
+  label: string;
+}> = [
+  { value: "diagonal", label: "Diagonal" },
+  { value: "frontal", label: "Frontal" },
+  { value: "sagittal", label: "Side" },
+];
+
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const remaining = seconds % 60;
@@ -33,7 +45,10 @@ function formatTime(seconds: number) {
 }
 
 export default function CameraPoseScreen({ route }: Props) {
-  const camera = useCameraPoseScreen(route.params.exercise);
+  const [viewAngle, setViewAngle] = useState<AssessmentViewAngle>(
+    route.params.viewAngle ?? "diagonal",
+  );
+  const camera = useCameraPoseScreen(route.params.exercise, viewAngle);
   const { height: windowHeight } = useWindowDimensions();
   const isCompactScreen = windowHeight < 740;
 
@@ -164,7 +179,6 @@ export default function CameraPoseScreen({ route }: Props) {
                 camera.isSessionActive && styles.controlDisabled,
               ]}
               onPress={camera.toggleCameraFacing}
-              // disabled={camera.isSessionActive}
               accessibilityRole="button"
               accessibilityLabel="Flip camera"
               accessibilityHint="Switch between the front and rear cameras"
@@ -228,6 +242,32 @@ export default function CameraPoseScreen({ route }: Props) {
                 VOICE {voiceCuesEnabled ? "ON" : "OFF"}
               </Text>
             </Pressable>
+          </View>
+
+          <View style={styles.statusRow}>
+            <Text style={styles.voiceCueLabel}>ASSESSMENT VIEW</Text>
+            {VIEW_ANGLE_OPTIONS.map((option) => (
+              <Pressable
+                key={option.value}
+                onPress={() => setViewAngle(option.value)}
+                disabled={camera.isSessionActive || camera.isUploadingAssessment}
+                accessibilityRole="button"
+                accessibilityState={{ selected: viewAngle === option.value }}
+                style={[
+                  styles.voiceCueToggle,
+                  viewAngle === option.value && styles.voiceCueToggleActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.voiceCueLabel,
+                    viewAngle === option.value && styles.voiceCueLabelActive,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
           {Boolean(pose.feedback?.trim()) ? (
@@ -311,7 +351,6 @@ export default function CameraPoseScreen({ route }: Props) {
                     ? camera.stopSession
                     : camera.startSession
               }
-              // disabled={isSessionButtonDisabled}
               accessibilityRole="button"
               accessibilityLabel={
                 camera.isUploadingAssessment

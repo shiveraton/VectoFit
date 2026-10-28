@@ -1,6 +1,9 @@
+from typing import ClassVar
+
 from django.contrib import admin
 
-from .models import AssessmentSession, RepAssessment, BodyProfile
+from .models import AssessmentSession, BodyProfile, RepAssessment
+
 
 class RepAssessmentInline(admin.TabularInline):
     model = RepAssessment
@@ -17,11 +20,13 @@ class RepAssessmentInline(admin.TabularInline):
     readonly_fields = fields
     can_delete = False
 
+
 @admin.register(BodyProfile)
 class BodyProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "height_cm", "scale_factor", "calibrated_at")
     list_filter = ("calibrated_at",)
     search_fields = ("user__username",)
+
 
 @admin.register(AssessmentSession)
 class AssessmentSessionAdmin(admin.ModelAdmin):
@@ -31,11 +36,12 @@ class AssessmentSessionAdmin(admin.ModelAdmin):
         "exercise_variant",
         "status",
         "created_at",
-        "processed_at"
+        "processed_at",
     )
     list_filter = ("exercise_variant", "status")
     search_fields = ("user__username",)
-    inlines = [RepAssessmentInline]
+    inlines: ClassVar[list] = [RepAssessmentInline]
+
 
 @admin.register(RepAssessment)
 class RepAssessment(admin.ModelAdmin):

@@ -1,36 +1,36 @@
-from rest_framework import viewsets, status, permissions
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+from typing import ClassVar
+
+from rest_framework import permissions, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Profile
-from .serializers import ProfileSerializer, UserSerializer, RegisterSerializer, LoginSerializer 
+from .serializers import (
+    LoginSerializer,
+    ProfileSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
+
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Profile.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         if Profile.objects.filter(user=self.request.user).exists():
-            raise ValidationError({
-                "detail": "A profile already exists for this user."
-            })
+            raise ValidationError({"detail": "A profile already exists for this user."})
 
         serializer.save(user=self.request.user)
 
-    @action(
-        detail=False,
-        methods=["get", "patch"],
-        url_path="current"
-    )
+    @action(detail=False, methods=["get", "patch"], url_path="current")
     def current(self, request):
         profile, _ = Profile.objects.get_or_create(
             user=request.user,
@@ -38,11 +38,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         )
 
         if request.method == "PATCH":
-            serializer = self.get_serializer(
-                profile,
-                data=request.data,
-                partial=True
-            )
+            serializer = self.get_serializer(profile, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
         else:
@@ -50,8 +46,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+
 class CurrentUserViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def list(self, request):
         serializer = UserSerializer(request.user)
@@ -63,8 +60,9 @@ class CurrentUserViewSet(viewsets.ViewSet):
         serializer.save()
         return Response(serializer.data)
 
+
 class RegisterAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes: ClassVar[list] = [AllowAny]
     authentication_classes = []
 
     def post(self, request):
@@ -74,21 +72,17 @@ class RegisterAPIView(APIView):
             serializer.save()
 
             return Response(
-            {
-                'message': 'User registered successfully.'
-            },
-            status=status.HTTP_201_CREATED
-        )
+                {"message": "User registered successfully."},
+                status=status.HTTP_201_CREATED,
+            )
 
         print(f"DEBUG: {serializer.errors}")
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes: ClassVar[list] = [AllowAny]
     authentication_classes = []
 
     def post(self, request):
@@ -96,18 +90,10 @@ class LoginAPIView(APIView):
         serializer = LoginSerializer(data=request.data)
 
         if serializer.is_valid():
-            user = serializer.validated_data['user']
+            user = serializer.validated_data["user"]
             token, created = Token.objects.get_or_create(user=user)
-            return Response(
-                {
-                    'token': token.key
-                },
-                status=status.HTTP_200_OK
-            )
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
 
         print(f"DEBUG: Serializer errors: {serializer.errors}")
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)

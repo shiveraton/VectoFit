@@ -19,7 +19,7 @@ import {
   getAssessmentSessions,
   type AssessmentSessionSummary,
   type AssessmentStatus,
-} from "../features/assessment/services/assessmentSession";
+} from "../features/assessment/services/sessionStructure";
 import styles from "../styles/SessionHistoryScreenStyles";
 import { COLORS } from "../styles/designTokens";
 

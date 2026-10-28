@@ -2,7 +2,10 @@ from django.db import transaction
 
 from apps.assessments.models import AssessmentSession, RepAssessment
 from apps.assessments.services.video_processor import VideoProcessor
-from apps.analytics.services.segmentation import segment_reps
+from apps.analytics.services.segmentation import (
+    segment_reps,
+    split_contiguous_pose_runs,
+)
 from apps.exercises.models import ExerciseVariant
 
 from ..models import DatasetSample
@@ -54,20 +57,28 @@ def process_video_repetitions(
             result.get("message", "Video processing failed.")
         )
 
-    entries = [
-        entry
-        for entry in result.get("landmark_data", [])
-        if entry.get("landmarks")
-    ]
-
-    if len(entries) < 3:
-        raise RuntimeError("Not enough valid pose frames were produced.")
-
-    repetitions = segment_reps(
-        [entry["landmarks"] for entry in entries]
+    landmark_data = result.get("landmark_data", [])
+    native_fps = float(result.get("native_fps") or 30.0)
+    expected_frame_step = max(1, round(native_fps / 30.0))
+    pose_runs = split_contiguous_pose_runs(
+        landmark_data,
+        expected_frame_step=expected_frame_step,
     )
 
-    if not repetitions:
+    if sum(len(run) for run in pose_runs) < 3:
+        raise RuntimeError("Not enough valid pose frames were produced.")
+
+    segmented_repetitions = []
+    for run in pose_runs:
+        if len(run) < 3:
+            continue
+
+        repetitions = segment_reps([entry["landmarks"] for entry in run])
+        segmented_repetitions.extend(
+            (run, repetition) for repetition in repetitions
+        )
+
+    if not segmented_repetitions:
         raise RuntimeError("No complete squat repetitions were detected.")
 
     with transaction.atomic():
@@ -81,15 +92,15 @@ def process_video_repetitions(
             video_file=video_file.name,
         )
 
-        for number, rep in enumerate(repetitions, start=1):
+        for number, (run, rep) in enumerate(segmented_repetitions, start=1):
             start, end = rep["start"], rep["end"]
 
-            if start < 0 or end < start or end >= len(entries):
+            if start < 0 or end < start or end >= len(run):
                 raise RuntimeError(
                     f"Invalid frame range for repetition {number}."
                 )
 
-            rep_entries = entries[start:end + 1]
+            rep_entries = run[start:end + 1]
 
             assessment = RepAssessment.objects.create(
                 session=session,
@@ -117,4 +128,4 @@ def process_video_repetitions(
         session.status = AssessmentSession.Status.COMPLETED
         session.save(update_fields=["status"])
 
-    return len(repetitions)
+    return len(segmented_repetitions)

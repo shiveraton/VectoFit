@@ -1,7 +1,7 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require("expo/metro-config");
 
-/** @type {import('expo/metro-config').MetroConfig} */
+/** @type {import("expo/metro-config").MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
 module.exports = config;

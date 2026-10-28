@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_joint_angle(hip, knee, ankle) -> float:
     vector_a = np.array(hip) - np.array(knee)
     vector_b = np.array(ankle) - np.array(knee)
@@ -11,6 +12,7 @@ def calculate_joint_angle(hip, knee, ankle) -> float:
     angle = np.degrees(np.arccos(cosine_angle))
 
     return angle
+
 
 def calculate_angle_series(landmark_series, hip, knee, ankle) -> list:
     angles = []
@@ -25,6 +27,7 @@ def calculate_angle_series(landmark_series, hip, knee, ankle) -> list:
         angles.append(angle)
 
     return angles
+
 
 if __name__ == "__main__":
     print(calculate_joint_angle([0, 1], [0, 0], [1, 0]))

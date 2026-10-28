@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useDashboard } from "../../hooks/useDashboard";
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
 
@@ -16,11 +16,41 @@ withDefaults(defineProps<Props>(), {
     "Real-time overview of biomechanical datasets, registered models, live active endpoints, and running training jobs.",
 });
 
-const { dashboardCards, activeModel, fetchAllDashboardData } = useDashboard();
+const { dashboardCards, currentModel, fetchAllDashboardData } = useDashboard();
 
-const handleRefresh = () => {
-  fetchAllDashboardData();
+const handleRefresh = async () => {
+  await fetchAllDashboardData();
 };
+
+const formatMetric = (
+  value: unknown,
+  options?: { multiplier?: number; suffix?: string; decimals?: number },
+): string => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  const { multiplier = 1, suffix = "", decimals = 1 } = options ?? {};
+
+  return `${(value * multiplier).toFixed(decimals)}${suffix}`;
+};
+
+const modelAlgorithm = computed(() => currentModel.value?.algorithm ?? "N/A");
+
+const modelLatency = computed(() =>
+  formatMetric(currentModel.value?.metrics?.latencyMs, {
+    suffix: " ms",
+    decimals: 1,
+  }),
+);
+
+const modelAccuracy = computed(() =>
+  formatMetric(currentModel.value?.metrics?.accuracy, {
+    multiplier: 100,
+    suffix: "%",
+    decimals: 1,
+  }),
+);
 
 onMounted(() => {
   fetchAllDashboardData();
@@ -57,49 +87,55 @@ onMounted(() => {
         <div class="section-title-row">
           <div class="section-marker"></div>
           <div>
-            <h2>Active Production Endpoint</h2>
-            <p>Live model handling movement vector inference traffic.</p>
+            <h2>Registered Model Overview</h2>
+            <p>Model metadata and available performance metrics.</p>
           </div>
         </div>
-        <span class="status-badge" :class="{ 'is-active': activeModel }">
-          {{ activeModel ? "ONLINE" : "INACTIVE" }}
+
+        <span class="status-badge" :class="{ 'is-active': currentModel }">
+          {{ currentModel ? "REGISTERED" : "NO MODEL" }}
         </span>
       </div>
 
       <div class="card-body">
-        <template v-if="activeModel">
+        <template v-if="currentModel">
           <div class="active-endpoint-details">
             <div class="detail-group">
-              <span class="detail-label">Model Architecture</span>
-              <span class="detail-value">{{ activeModel.modelName }}</span>
+              <span class="detail-label">Model Name</span>
+              <span class="detail-value">{{ currentModel.name }}</span>
             </div>
+
             <div class="detail-group">
-              <span class="detail-label">Active Version</span>
-              <span class="detail-value font-mono">{{
-                activeModel.version
-              }}</span>
+              <span class="detail-label">Version</span>
+              <span class="detail-value font-mono">
+                {{ currentModel.version }}
+              </span>
             </div>
+
             <div class="detail-group">
-              <span class="detail-label">Framework</span>
-              <span class="detail-value">{{ activeModel.framework }}</span>
+              <span class="detail-label">Algorithm</span>
+              <span class="detail-value">{{ modelAlgorithm }}</span>
             </div>
+
             <div class="detail-group">
               <span class="detail-label">p99 Latency</span>
-              <span class="detail-value font-mono"
-                >{{ activeModel.latencyMs }} ms</span
-              >
-            </div>
-            <div class="detail-group">
-              <span class="detail-label">Posture Precision</span>
               <span class="detail-value font-mono">
-                {{ (activeModel.accuracy * 100).toFixed(1) }}%
+                {{ modelLatency }}
+              </span>
+            </div>
+
+            <div class="detail-group">
+              <span class="detail-label">Accuracy</span>
+              <span class="detail-value font-mono">
+                {{ modelAccuracy }}
               </span>
             </div>
           </div>
         </template>
+
         <template v-else>
           <div class="empty-endpoint">
-            <p>No model version currently deployed to production.</p>
+            <p>No registered model is available.</p>
           </div>
         </template>
       </div>

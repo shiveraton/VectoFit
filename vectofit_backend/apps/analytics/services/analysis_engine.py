@@ -1,15 +1,16 @@
 """analysis engine module to orchestrate the analysis of the four
 deliverable features and construct the final assessment result"""
 
-from .joint_angle_analysis import calculate_angle_series
-from .range_of_motion import calculate_rom
-from .bilateral_asymmetry import calculate_asymmetry_series
-from .kinematic_velocity import calculate_velocity_series
-from .trunk_angle_analysis import calculate_trunk_angle_series
-from .classifier import classify_metrics
-from .result_builder import build_result
-
 import numpy as np
+
+from .bilateral_asymmetry import calculate_asymmetry_series
+from .classifier import classify_metrics
+from .joint_angle_analysis import calculate_angle_series
+from .kinematic_velocity import calculate_velocity_series
+from .range_of_motion import calculate_rom
+from .result_builder import build_result
+from .trunk_angle_analysis import calculate_trunk_angle_series
+
 
 def analyze(landmark_series, thresholds):
     metrics = {}
@@ -48,9 +49,6 @@ def analyze(landmark_series, thresholds):
 
     trunk_angles = calculate_trunk_angle_series(landmark_series)
 
-    # KVT: velocity of the hip midpoint (trunk centre of mass) over the rep.
-    # A frame interval is required; callers that know the source fps should
-    # pass it. 30 fps matches the VideoProcessor's downsampling target.
     frame_interval = 1.0 / 30.0
     hip_midpoints = []
     for frame in landmark_series:
@@ -80,16 +78,47 @@ def analyze(landmark_series, thresholds):
     metrics["trunk_angle"] = trunk_angles
     metrics["knee_angle"] = min(min(left_knee_angles), min(right_knee_angles))
     metrics["rom"] = calculate_rom(left_knee_angles)
-    metrics["asymmetry"] = max(calculate_asymmetry_series(left_knee_angles, right_knee_angles))
 
-    classifications = classify_metrics(
-        metrics,
-        thresholds
+    asymmetry_series = calculate_asymmetry_series(left_knee_angles, right_knee_angles)
+
+    valid_asymmetry = [
+        value for value in asymmetry_series if value is not None and np.isfinite(value)
+    ]
+    metrics["asymmetry"] = (
+        float(np.median(valid_asymmetry)) if valid_asymmetry else None
     )
 
-    result = build_result(
-        metrics,
-        classifications
-    )
+    valid_asymmetry_indices = [
+        index
+        for index, value in enumerate(asymmetry_series)
+        if value is not None and np.isfinite(value)
+    ]
+
+    valid_knee_indices = [
+        index
+        for index, (left, right) in enumerate(zip(left_knee_angles, right_knee_angles))
+        if np.isfinite(left) and np.isfinite(right)
+    ]
+
+    if valid_asymmetry_indices and valid_knee_indices:
+        bottom_index = min(
+            valid_knee_indices,
+            key=lambda index: (
+                left_knee_angles[index] + right_knee_angles[index],
+                index,
+            ),
+        )
+
+        asymmetry_index = min(
+            valid_asymmetry_indices,
+            key=lambda index: (
+                left_knee_angles[index] + right_knee_angles[index],
+                index,
+            ),
+        )
+
+    classifications = classify_metrics(metrics, thresholds)
+
+    result = build_result(metrics, classifications)
 
     return result

@@ -17,9 +17,7 @@ class ModelStateApiTests(TestCase):
 
         self.client = APIClient()
 
-        self.client.force_authenticate(
-            user=self.admin
-        )
+        self.client.force_authenticate(user=self.admin)
 
         self.job = TrainingJob.objects.create(
             feature_selection=[
@@ -72,29 +70,22 @@ class ModelStateApiTests(TestCase):
         )
 
     def test_model_state_is_read_only_and_complete(self):
-        response = self.client.get(
-            f"/api/training/models/"
-            f"{self.model.pk}/state/"
-        )
+        response = self.client.get(f"/api/training/models/{self.model.pk}/state/")
 
         self.assertEqual(
             response.status_code,
             200,
         )
 
-        self.assertEqual(
-            response.data["id"],
-            self.model.pk,
-        )
+        self.assertEqual(response.data["id"], self.model.pk)
+
+        self.assertEqual(response.data["training"]["job_id"], self.job.pk)
+        self.assertEqual(response.data["view_angle"], "")
+        self.assertEqual(response.data["prediction_target"], "binary_form")
+        self.assertEqual(response.data["training_manifest"], {})
 
         self.assertEqual(
-            response.data["training"]["job_id"],
-            self.job.pk,
-        )
-
-        self.assertEqual(
-            response.data["features"]["selected"],
-            self.job.feature_selection,
+            response.data["features"]["selected"], self.job.feature_selection
         )
 
         self.assertEqual(
@@ -103,9 +94,7 @@ class ModelStateApiTests(TestCase):
         )
 
         self.assertEqual(
-            response.data["evaluation"][
-                "confusion_matrix"
-            ],
+            response.data["evaluation"]["confusion_matrix"],
             [
                 [1, 0],
                 [1, 1],

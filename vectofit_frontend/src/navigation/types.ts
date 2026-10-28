@@ -12,6 +12,8 @@ export type SquatExerciseType =
   | "goblet_squat"
   | "barbell_squat";
 
+export type AssessmentViewAngle = "diagonal" | "frontal" | "sagittal";
+
 export type RootStackParamList = {
   MainTabs: undefined;
   WorkoutSession: undefined;
@@ -20,6 +22,7 @@ export type RootStackParamList = {
   Register: undefined;
   CameraPose: {
     exercise: SquatExerciseType;
+    viewAngle?: AssessmentViewAngle;
   };
   MorphologicalCalibration: {
     bodyProfileData?: BodyProfileData;

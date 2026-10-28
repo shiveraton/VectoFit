@@ -109,12 +109,13 @@ export default function PhysicalInfoSection() {
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>Physical Information</Text>
 
+          {/*
           <View style={[styles.statusChip, styles.statusChipUncalibrated]}>
             <View style={[styles.statusDot, styles.statusDotUncalibrated]} />
             <Text style={[styles.statusText, styles.statusTextUncalibrated]}>
               Not Calibrated
             </Text>
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.inputsGrid}>

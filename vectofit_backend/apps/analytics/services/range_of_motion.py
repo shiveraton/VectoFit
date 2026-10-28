@@ -6,5 +6,6 @@ def calculate_rom(angle_series) -> float:
 
     return rom
 
+
 if __name__ == "__main__":
     print(calculate_rom([178, 165, 140, 110, 85, 110, 145, 170]))

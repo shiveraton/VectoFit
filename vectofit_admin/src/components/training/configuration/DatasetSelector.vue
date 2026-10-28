@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Dataset, ViewAngle } from "../../../services/datasetService";
+import type { PredictionTarget } from "../../../services/trainingService";
 
 type DatasetId = number;
 
@@ -10,6 +11,7 @@ const props = defineProps<{
   selectedDatasetIds: DatasetId[];
   selectedDatasets: Dataset[];
   selectedViewAngle: ViewAngle | null;
+  predictionTarget: PredictionTarget;
 }>();
 
 const emit = defineEmits<{
@@ -18,18 +20,32 @@ const emit = defineEmits<{
 
 const selectedCount = computed(() => props.selectedDatasets.length);
 
+const statsFor = (dataset: Dataset) =>
+  props.selectedViewAngle
+    ? dataset.angle_training_stats?.[props.selectedViewAngle]
+    : undefined;
+
+const errorLabelEntries = (dataset: Dataset) =>
+  Object.entries(statsFor(dataset)?.error_label_counts ?? {}).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
+
 const selectedSamples = computed(() =>
   props.selectedDatasets.reduce(
-    (total, dataset) => total + Number(dataset.sample_count || 0),
+    (total, dataset) => total + Number(statsFor(dataset)?.sample_count || 0),
     0,
   ),
 );
 
 const selectedLabelledSamples = computed(() =>
-  props.selectedDatasets.reduce(
-    (total, dataset) => total + Number(dataset.labelled_sample_count || 0),
-    0,
-  ),
+  props.selectedDatasets.reduce((total, dataset) => {
+    const stats = statsFor(dataset);
+    const count =
+      props.predictionTarget === "binary_form"
+        ? stats?.labelled_sample_count
+        : stats?.error_type_sample_count;
+    return total + Number(count || 0);
+  }, 0),
 );
 
 const formatNumber = (value: number) => value.toLocaleString("en-US");
@@ -71,8 +87,36 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
             <span v-if="dataset.exercise_type">{{
               dataset.exercise_type
             }}</span>
-            <span>{{ dataset.labelled_sample_count ?? 0 }} labelled</span>
-            <span>{{ dataset.sample_count ?? 0 }} samples</span>
+            <span v-if="predictionTarget === 'binary_form'"
+              >{{ statsFor(dataset)?.good_count ?? 0 }} GOOD ·
+              {{ statsFor(dataset)?.bad_count ?? 0 }} BAD</span
+            >
+            <span v-else
+              >{{ statsFor(dataset)?.good_count ?? 0 }} correct_form</span
+            >
+            <span
+              v-for="entry in predictionTarget === 'error_type'
+                ? errorLabelEntries(dataset)
+                : []"
+              :key="entry[0]"
+            >
+              {{ entry[0] }}: {{ entry[1] }}
+            </span>
+            <span>
+              {{
+                props.predictionTarget === "binary_form"
+                  ? (statsFor(dataset)?.labelled_sample_count ?? 0)
+                  : (statsFor(dataset)?.error_type_sample_count ?? 0)
+              }}
+              labelled
+            </span>
+            <span
+              >{{
+                statsFor(dataset)?.participant_count ?? 0
+              }}
+              participants</span
+            >
+            <span>{{ statsFor(dataset)?.video_count ?? 0 }} videos</span>
           </span>
         </span>
       </button>
@@ -81,7 +125,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
         <strong>
           {{
             selectedViewAngle
-              ? "No usable datasets are available for this view."
+              ? "No training-ready datasets have labelled samples for this angle and target."
               : "Select a camera view to display compatible datasets."
           }}
         </strong>
@@ -94,11 +138,16 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
         dataset{{ selectedCount === 1 ? "" : "s" }} selected
       </span>
       <span v-if="selectedCount">
-        {{ formatNumber(selectedLabelledSamples) }} labelled ·
-        {{ formatNumber(selectedSamples) }} samples
+        {{ formatNumber(selectedLabelledSamples) }} labelled target samples ·
+        {{ formatNumber(selectedSamples) }} available samples at selected angle
       </span>
       <span v-else>Choose at least one dataset to train.</span>
     </div>
+    <p class="selection-note">
+      Counts reflect stored labels. Repetitions with invalid or incomplete
+      landmarks are excluded during feature extraction, so the final training
+      sample count may be lower.
+    </p>
   </section>
 </template>
 
@@ -280,6 +329,13 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
 
 .selection-summary strong {
   color: var(--vf-text);
+}
+
+.selection-note {
+  margin: 8px 0 0;
+  color: var(--vf-light-muted);
+  font-size: 9px;
+  line-height: 1.5;
 }
 
 @media (max-width: 800px) {
