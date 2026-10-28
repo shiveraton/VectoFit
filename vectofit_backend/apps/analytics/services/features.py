@@ -150,13 +150,12 @@ def extract_rep_features(landmark_series, fps=30.0, scale_factor=None):
 
     warnings = []
     if scale_factor:
-        for key in ("rom", "velocity_mean", "velocity_peak"):
+        for key in ("velocity_mean", "velocity_peak"):
             features[key] = features[key] / float(scale_factor)
     else:
         warnings.append(
-            "No scale_factor supplied: ROM and velocity remain in pixel units. "
-            "Comparisons are only valid across subjects captured at a "
-            "comparable pixel scale."
+            "No scale_factor supplied: velocity remains in pixel units. "
+            "Velocity comparisons across subjects are not normalized."
         )
 
     if not warnings:

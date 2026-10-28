@@ -1,10 +1,13 @@
 {
   "buildFiles": [
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\@react-native-async-storage\\async-storage\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\@react-native-vector-icons\\ionicons\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-nitro-modules\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-permissions\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-safe-area-context\\android\\src\\main\\jni\\CMakeLists.txt",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-svg\\android\\src\\main\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-vector-icons\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-worklets\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native\\ReactAndroid\\cmake-utils\\default-app-setup\\CMakeLists.txt"
   ],
   "cleanCommandsComponents": [
@@ -32,9 +35,9 @@
       "abi": "arm64-v8a",
       "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\212l1z73\\obj\\arm64-v8a\\libreact_codegen_safeareacontext.so",
       "runtimeFiles": [
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\d4c696bcd5014eac3cc714eabdf0a1f8\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.arm64-v8a\\libfbjni.so",
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\8cbd9de9b0e37345cefa1e98d7917898\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\jsi\\libs\\android.arm64-v8a\\libjsi.so",
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\8cbd9de9b0e37345cefa1e98d7917898\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\reactnative\\libs\\android.arm64-v8a\\libreactnative.so"
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\a68ac8579331058b3e365cf858e7ce6e\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.arm64-v8a\\libfbjni.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\jsi\\libs\\android.arm64-v8a\\libjsi.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\reactnative\\libs\\android.arm64-v8a\\libreactnative.so"
       ]
     },
     "react_codegen_RNPermissionsSpec::@7ad697819b753921c957": {
@@ -48,9 +51,10 @@
       "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\212l1z73\\obj\\arm64-v8a\\libappmodules.so",
       "runtimeFiles": [
         "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\212l1z73\\obj\\arm64-v8a\\libreact_codegen_safeareacontext.so",
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\d4c696bcd5014eac3cc714eabdf0a1f8\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.arm64-v8a\\libfbjni.so",
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\8cbd9de9b0e37345cefa1e98d7917898\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\jsi\\libs\\android.arm64-v8a\\libjsi.so",
-        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\8cbd9de9b0e37345cefa1e98d7917898\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\reactnative\\libs\\android.arm64-v8a\\libreactnative.so"
+        "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\212l1z73\\obj\\arm64-v8a\\libreact_codegen_rnsvg.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\a68ac8579331058b3e365cf858e7ce6e\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.arm64-v8a\\libfbjni.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\jsi\\libs\\android.arm64-v8a\\libjsi.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\reactnative\\libs\\android.arm64-v8a\\libreactnative.so"
       ]
     },
     "react_codegen_NitroModulesSpec::@472a82f9c57d3d3b8644": {
@@ -60,6 +64,26 @@
     },
     "react_codegen_VectorIconsIonicons::@d19b6b0a3fec254dc7d5": {
       "artifactName": "react_codegen_VectorIconsIonicons",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "react_codegen_rnsvg::@4f40eb209d0c0b4a3b65": {
+      "artifactName": "react_codegen_rnsvg",
+      "abi": "arm64-v8a",
+      "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\212l1z73\\obj\\arm64-v8a\\libreact_codegen_rnsvg.so",
+      "runtimeFiles": [
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\reactnative\\libs\\android.arm64-v8a\\libreactnative.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\c428131498cfcde0a70c0f58f2e9ea40\\transformed\\react-android-0.86.3-debug\\prefab\\modules\\jsi\\libs\\android.arm64-v8a\\libjsi.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\8.13\\transforms\\a68ac8579331058b3e365cf858e7ce6e\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.arm64-v8a\\libfbjni.so"
+      ]
+    },
+    "react_codegen_AsyncStorageSpec::@15af80695a6281ecf900": {
+      "artifactName": "react_codegen_AsyncStorageSpec",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "react_codegen_rnworklets::@68f58d84d4754f193387": {
+      "artifactName": "react_codegen_rnworklets",
       "abi": "arm64-v8a",
       "runtimeFiles": []
     }

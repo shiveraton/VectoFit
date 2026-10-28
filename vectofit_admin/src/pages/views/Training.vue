@@ -1,68 +1,60 @@
 <script setup lang="ts">
-import { useTraining } from "../../hooks/useTraining";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
-import TrainingModal from "../../components/training/TrainingModal.vue";
-import TrainingConfigGrid from "../../components/training/TrainingConfigGrid.vue";
-import TrainingEmptyState from "../../components/training/TrainingEmptyState.vue";
+import TrainingConfiguration from "../../components/training/configuration/TrainingConfiguration.vue";
+import TrainingResult from "../../components/training/results/TrainingResult.vue";
 import TrainingWorkflow from "../../components/training/TrainingWorkflow.vue";
+import { useTraining } from "../../hooks/useTraining";
 
-interface Props {
-  eyebrowText?: string;
-  pageTitle?: string;
-  pageDescription?: string;
-  actionButtonText?: string;
-}
-
-withDefaults(defineProps<Props>(), {
-  eyebrowText: "VECTOFIT MODEL TRAINING",
-  pageTitle: "Training",
-  pageDescription:
-    "Configure and monitor machine learning experiments for squat movement classification.",
-  actionButtonText: "New Training Run",
-});
-
-const emit = defineEmits<{
-  (e: "new-run"): void;
-  (e: "start-training"): void;
-  (e: "job-started", jobId: string): void;
-}>();
+const configurationSection = ref<HTMLElement | null>(null);
 
 const {
-  selectedDataset,
-  selectedTaskId,
-  tasks,
+  trainingJobs,
   features,
-  algorithm,
+  algorithms,
   workflowSteps,
+  selectedDatasets,
+  selectedDatasetIds,
+  selectedViewAngle,
+  selectedAlgorithm,
+  hyperparameters,
+  testSize,
+  randomSeed,
   summaryCards,
   configSummaryText,
+  canStartTraining,
+  isLoading,
+  isTraining,
+  error,
+  toggleDataset,
+  selectViewAngle,
   toggleFeature,
-  selectTask,
+  selectAlgorithm,
+  setHyperparameter,
+  setTestSize,
+  setRandomSeed,
+  startTraining,
+  availableDatasets,
+  filteredDatasets,
 } = useTraining();
 
-const isModalOpen = ref(false);
+const latestJob = computed(() => trainingJobs.value[0] ?? null);
 
-const activeDatasetIds = computed(() => {
-  if (!selectedDataset.value) return [];
-
-  const dataset = selectedDataset.value as unknown as Record<string, any>;
-  const id = typeof dataset === "object" ? dataset.id : dataset;
-  return id ? [id] : [];
+const configurationStatus = computed(() => {
+  if (isTraining.value) return "TRAINING";
+  return canStartTraining.value ? "READY" : "INCOMPLETE";
 });
 
-const handleStartTraining = () => {
-  isModalOpen.value = true;
-  emit("start-training");
+const scrollToConfiguration = () => {
+  configurationSection.value?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 };
 
-const handleNewRun = () => {
-  isModalOpen.value = true;
-  emit("new-run");
-};
-
-const handleJobStarted = (jobData: { job_id: string }) => {
-  emit("job-started", jobData.job_id);
+const handleStartTraining = async () => {
+  await startTraining();
 };
 </script>
 
@@ -71,19 +63,26 @@ const handleJobStarted = (jobData: { job_id: string }) => {
     <header class="page-header">
       <div class="page-heading">
         <div class="eyebrow">
-          <span class="eyebrow-dot"></span>
-          {{ eyebrowText }}
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          VECTOFIT MODEL TRAINING
         </div>
-        <h1>{{ pageTitle }}</h1>
-        <p>{{ pageDescription }}</p>
+        <h1>Training</h1>
+        <p>
+          Configure, train, and inspect VectoFit machine learning experiments.
+        </p>
       </div>
 
-      <button class="primary-button" @click="handleNewRun">
-        <span class="button-icon">+</span> {{ actionButtonText }}
+      <button
+        class="primary-button"
+        type="button"
+        @click="scrollToConfiguration"
+      >
+        <span class="button-icon" aria-hidden="true">+</span>
+        New Training Run
       </button>
     </header>
 
-    <section class="summary-grid">
+    <section class="summary-grid" aria-label="Training summary">
       <SummaryCard
         v-for="card in summaryCards"
         :key="card.label"
@@ -91,77 +90,113 @@ const handleJobStarted = (jobData: { job_id: string }) => {
       />
     </section>
 
-    <section class="content-card">
+    <section ref="configurationSection" class="content-card">
       <div class="section-header">
-        <div>
-          <div class="section-title-row">
-            <div class="section-marker"></div>
-            <div>
-              <h2>Training Configuration</h2>
-              <p>
-                Define the dataset, target and algorithm for a training
-                experiment.
-              </p>
-            </div>
+        <div class="section-title-row">
+          <div class="section-marker" aria-hidden="true"></div>
+          <div>
+            <h2>Training Configuration</h2>
+            <p>
+              Define the datasets, camera view, features, algorithm, and
+              experiment parameters.
+            </p>
           </div>
         </div>
-        <span class="status-badge">
-          {{ selectedDataset ? "CONFIGURED" : "NOT CONFIGURED" }}
+
+        <span
+          :class="[
+            'status-badge',
+            {
+              ready: configurationStatus === 'READY',
+              running: configurationStatus === 'TRAINING',
+            },
+          ]"
+        >
+          {{ configurationStatus }}
         </span>
       </div>
 
-      <TrainingConfigGrid
-        :selected-dataset="selectedDataset"
-        :selected-task-id="selectedTaskId"
-        :tasks="tasks"
+      <div v-if="error" class="error-banner" role="alert">
+        {{ error }}
+      </div>
+
+      <div v-if="isLoading" class="loading-state" aria-live="polite">
+        <span class="loading-dot" aria-hidden="true"></span>
+        Loading training configuration...
+      </div>
+
+      <TrainingConfiguration
+        v-else
+        :available-datasets="availableDatasets"
+        :filtered-datasets="filteredDatasets"
+        :selected-dataset-ids="selectedDatasetIds"
+        :selected-datasets="selectedDatasets"
+        :selected-view-angle="selectedViewAngle"
         :features="features"
-        :algorithm="algorithm"
+        :algorithms="algorithms"
+        :selected-algorithm="selectedAlgorithm"
+        :hyperparameters="hyperparameters"
+        :test-size="testSize"
+        :random-seed="randomSeed"
         :summary-text="configSummaryText"
-        @select-task="selectTask"
+        :can-start-training="canStartTraining"
+        :is-training="isTraining"
+        @toggle-dataset="toggleDataset"
+        @select-view-angle="selectViewAngle"
         @toggle-feature="toggleFeature"
+        @select-algorithm="selectAlgorithm"
+        @set-hyperparameter="setHyperparameter"
+        @set-test-size="setTestSize"
+        @set-random-seed="setRandomSeed"
         @start-training="handleStartTraining"
       />
     </section>
 
     <section class="content-card">
       <div class="section-header">
-        <div>
-          <div class="section-title-row">
-            <div class="section-marker"></div>
-            <div>
-              <h2>Training Runs</h2>
-              <p>Previous model experiments and their evaluation status.</p>
-            </div>
+        <div class="section-title-row">
+          <div class="section-marker" aria-hidden="true"></div>
+          <div>
+            <h2>Training Result</h2>
+            <p>
+              Evaluation results produced by the latest configured experiment.
+            </p>
           </div>
         </div>
-        <span class="status-badge">NO RUNS</span>
+
+        <span
+          v-if="latestJob"
+          :class="[
+            'status-badge',
+            {
+              ready: latestJob.status === 'COMPLETED',
+              running:
+                latestJob.status === 'RUNNING' ||
+                latestJob.status === 'PENDING',
+              failed: latestJob.status === 'FAILED',
+            },
+          ]"
+        >
+          {{ latestJob.status }}
+        </span>
       </div>
 
-      <TrainingEmptyState @configure="handleNewRun" />
+      <TrainingResult :job="latestJob" />
     </section>
 
     <section class="content-card">
       <div class="section-header">
-        <div>
-          <div class="section-title-row">
-            <div class="section-marker"></div>
-            <div>
-              <h2>Training Workflow</h2>
-              <p>The intended lifecycle of a VectoFit model experiment.</p>
-            </div>
+        <div class="section-title-row">
+          <div class="section-marker" aria-hidden="true"></div>
+          <div>
+            <h2>Training Workflow</h2>
+            <p>The intended lifecycle of a VectoFit model experiment.</p>
           </div>
         </div>
       </div>
 
       <TrainingWorkflow :steps="workflowSteps" />
     </section>
-
-    <TrainingModal
-      :is-open="isModalOpen"
-      :dataset-ids="activeDatasetIds"
-      @close="isModalOpen = false"
-      @job-started="handleJobStarted"
-    />
   </div>
 </template>
 
@@ -177,12 +212,12 @@ const handleJobStarted = (jobData: { job_id: string }) => {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 24px;
   margin-bottom: 28px;
 }
 
 .page-heading {
-  display: flex;
-  flex-direction: column;
+  min-width: 0;
 }
 
 .eyebrow {
@@ -199,6 +234,7 @@ const handleJobStarted = (jobData: { job_id: string }) => {
 .eyebrow-dot {
   width: 6px;
   height: 6px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--vf-orange);
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
@@ -220,7 +256,7 @@ const handleJobStarted = (jobData: { job_id: string }) => {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -229,6 +265,7 @@ const handleJobStarted = (jobData: { job_id: string }) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   padding: 18px 22px;
   border-bottom: 1px solid var(--vf-border-light);
 }
@@ -256,14 +293,97 @@ const handleJobStarted = (jobData: { job_id: string }) => {
 }
 
 .section-header p {
-  margin: 5px 0 0 12px;
+  margin: 5px 0 0;
   color: var(--vf-light-muted);
   font-size: 11px;
+  line-height: 1.5;
 }
 
-@media (max-width: 1000px) {
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 78px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--vf-muted);
+  background: #f4f4f5;
+  border: 1px solid var(--vf-border);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.status-badge.ready {
+  color: #15803d;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.status-badge.running {
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border-color: #fed7aa;
+}
+
+.status-badge.failed {
+  color: #b91c1c;
+  background: var(--vf-red-soft);
+  border-color: #fecaca;
+}
+
+.error-banner {
+  margin: 18px 22px 0;
+  padding: 11px 13px;
+  color: #991b1b;
+  background: var(--vf-red-soft);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 26px 22px;
+  color: var(--vf-muted);
+  font-size: 12px;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vf-orange);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.primary-button {
+  white-space: nowrap;
+}
+
+.button-icon {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1100px) {
   .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -271,13 +391,18 @@ const handleJobStarted = (jobData: { job_id: string }) => {
   .training-page {
     padding: 20px;
   }
+
   .page-header {
-    flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
+    flex-direction: column;
   }
+
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    align-items: flex-start;
   }
 }
 </style>

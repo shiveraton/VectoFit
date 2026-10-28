@@ -4,9 +4,9 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootStackParamList } from "../navigation/types";
 import HomeScreen from "./HomeScreen";
-import InsightsScreen from "./InsightsScreen";
+import InsightsNavigator from "../navigation/InsightsNavigator";
 import ProfileScreen from "./ProfileScreen";
-import { COLORS } from "../styles/InsightsScreenStyles";
+import { COLORS } from "../styles/designTokens";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -61,7 +61,7 @@ export const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Insights"
-        component={InsightsScreen}
+        component={InsightsNavigator}
         options={{ title: "Insights" }}
       />
       <Tab.Screen

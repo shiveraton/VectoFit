@@ -5,10 +5,9 @@ import AdminLayout from "../layouts/AdminLayout.vue";
 import Login from "../pages/auth/Login.vue";
 import Register from "../pages/auth/Register.vue";
 import Dashboard from "../pages/dashboard/Dashboard.vue";
-import Features from "../pages/views/Features.vue";
 import Training from "../pages/views/Training.vue";
 import Dataset from "../pages/views/Datasets.vue";
-import Evaluation from "../pages/views/Evaluation.vue";
+import DatasetAnnotation from "../pages/views/DatasetAnnotation.vue";
 import Models from "../pages/views/Models.vue";
 
 const routes = [
@@ -27,9 +26,9 @@ const routes = [
         component: Dataset,
       },
       {
-        path: "features",
-        name: "Features",
-        component: Features,
+        path: "dataset/:id/annotate",
+        name: "DatasetAnnotation",
+        component: DatasetAnnotation,
       },
       {
         path: "training",
@@ -38,8 +37,9 @@ const routes = [
       },
       {
         path: "evaluation",
-        name: "Evaluation",
-        component: Evaluation,
+        redirect: {
+          name: "Models",
+        },
       },
       {
         path: "models",

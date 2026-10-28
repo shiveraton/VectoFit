@@ -1,126 +1,348 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  LayoutChangeEvent,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import styles from "../styles/CameraPoseScreenStyles";
-import { RootStackParamList } from "../navigation/types";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AppText } from "../components/AppText";
+import { Camera } from "react-native-vision-camera";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-// Camera Preview | DONE
-// Start / Stop Recording | DONE
-// Exercise Status & Feedback | DONE
-// Rep Counter | DONE
-// 45° Angle Alignment Guide (Rule-Based) | NEED TO DO
-// MediaPipe Landmark Overlay | NEED TO DO
-// Session Timer | NEED TO DO
+import type { RootStackParamList } from "../navigation/types";
+import { useCameraPoseScreen } from "../features/squat/hooks/useCameraPoseScreen";
+import PoseLandmarkOverlay from "../features/squat/components/PoseLandmarkOverlay";
+import styles, { CAMERA_COLORS } from "../styles/CameraPoseScreenStyles";
 
-type CameraPoseScreenProps = NativeStackScreenProps<
-  RootStackParamList,
-  "CameraPose"
->;
+type Props = NativeStackScreenProps<RootStackParamList, "CameraPose">;
 
-interface SquatSession {
-  is_recording: boolean;
-  squat_type: string;
-  rep_count: number;
-  instant_feedback: string;
-  quality_assessment: string;
+const EXERCISE_LABELS = {
+  bodyweight_squat: "Bodyweight Squat",
+  goblet_squat: "Goblet Squat",
+  barbell_squat: "Barbell Squat",
+} as const;
+
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remaining = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
 }
 
-interface CameraStatus {
-  landmark: string;
-  angle: string;
-}
+export default function CameraPoseScreen({ route }: Props) {
+  const camera = useCameraPoseScreen(route.params.exercise);
+  const { height: windowHeight } = useWindowDimensions();
+  const isCompactScreen = windowHeight < 740;
 
-interface Landmark {
-  x_coordinate: number;
-  y_coordinate: number;
-  z_coordinate: number;
-  visibility: number; //mediapipe confidence
-}
-
-interface PoseFrame {
-  landmarks: Landmark[];
-  timestamp: number;
-}
-
-interface SquatMetrics {
-  hip_angle: number;
-  knee_angle: number;
-  ankle_angle: number;
-  depth: number;
-  symmetry: number;
-  velocity: number;
-}
-
-export default function CameraPoseScreen({ route }: CameraPoseScreenProps) {
-  const [squat_session] = useState<SquatSession>({
-    is_recording: false,
-    squat_type: "",
-    rep_count: 0,
-    instant_feedback: "",
-    quality_assessment: "",
-  });
-
-  const [camera_status] = useState<CameraStatus>({
-    landmark: "",
-    angle: "",
-  });
-
-  const [landmark] = useState({
-    x_coordinate: 0,
-    y_coordinate: 0,
-    z_coordinate: 0,
-    visibility: 0,
-  });
-
-  const [pose_frame] = useState({
-    landmarks: 0,
-    timestamp: 0,
-  });
-
-  const [squat_metrics] = useState({
-    hip_angle: 0,
-    knee_angle: 0,
-    ankle_angle: 0,
-    depth: 0,
-    symmetry: 0,
-    velocity: 0,
-  });
-
-  const { exercise } = route.params;
-
-  return (
-    <View style={styles.parentContainer}>
-      <AppText variant="regular" style={styles.parentContainer}>
-        User in Frame
-      </AppText>
-      <CameraPreview
-        squat_session={squat_session}
-        camera_status={camera_status}
-        exercise={exercise}
-      />
-    </View>
+  const cameraOutputs = useMemo(
+    () => [camera.frameOutput, camera.videoOutput],
+    [camera.frameOutput, camera.videoOutput],
   );
-}
 
-interface CameraPreviewProps {
-  squat_session: SquatSession;
-  camera_status: CameraStatus;
-  exercise: RootStackParamList["CameraPose"]["exercise"];
-}
+  const [voiceCuesEnabled, setVoiceCuesEnabled] = useState(false);
 
-function CameraPreview({
-  squat_session,
-  camera_status,
-  exercise,
-}: CameraPreviewProps) {
+  const handleToggleVoiceCues = useCallback(() => {
+    setVoiceCuesEnabled((enabled) => !enabled);
+  }, []);
+
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+
+  const handleViewportLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setViewportSize((current) =>
+      current.width === width && current.height === height
+        ? current
+        : { width, height },
+    );
+  }, []);
+
+  if (!camera.hasPermission) {
+    return (
+      <SafeAreaView style={styles.center} edges={["top", "bottom"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={CAMERA_COLORS.background}
+        />
+        <Text style={styles.permissionTitle}>
+          Camera permission is required
+        </Text>
+        <Text style={styles.permissionText}>
+          VectoFit uses the camera to track your squat movement.
+        </Text>
+        <Pressable
+          style={styles.primaryButton}
+          onPress={() => void camera.requestPermission()}
+          accessibilityRole="button"
+        >
+          <Text style={styles.primaryButtonText}>Grant permission</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
+  if (!camera.device) {
+    return (
+      <SafeAreaView style={styles.center} edges={["top", "bottom"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={CAMERA_COLORS.background}
+        />
+        <ActivityIndicator size="large" color={CAMERA_COLORS.primary} />
+        <Text style={styles.permissionText}>Initializing camera…</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const { pose } = camera;
+  const canStartSession = pose.bodyVisible && camera.isCameraConfigured;
+  const isSessionButtonDisabled =
+    camera.isUploadingAssessment ||
+    (!camera.isSessionActive && !canStartSession);
+
+  const trackingLabel = pose.bodyVisible
+    ? "Full body tracked"
+    : pose.isPersonDetected
+      ? "Adjust your framing"
+      : "Looking for your pose";
+
   return (
-    <View style={styles.childContainer}>
-      <AppText style={styles.childContainer}>User in Frame</AppText>
-      <Text>{camera_status.landmark}</Text>
-      <Text>{camera_status.angle}</Text>
-      <Text>{exercise.bodyweight_squat}</Text>
-    </View>
+    <SafeAreaView
+      style={styles.safeArea}
+      edges={["top", "bottom", "left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={CAMERA_COLORS.background}
+      />
+
+      <View style={styles.cameraViewport} onLayout={handleViewportLayout}>
+        <Camera
+          style={StyleSheet.absoluteFill}
+          device={camera.device}
+          isActive={camera.isCameraActive}
+          outputs={cameraOutputs}
+          onConfigured={camera.handleCameraConfigured}
+        />
+
+        <PoseLandmarkOverlay
+          landmarks={pose.landmarks}
+          viewportWidth={viewportSize.width}
+          viewportHeight={viewportSize.height}
+          sourceFrameWidth={pose.frameWidth}
+          sourceFrameHeight={pose.frameHeight}
+          mirrored={camera.cameraFacing === "front"}
+        />
+
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.topOverlay,
+            isCompactScreen && styles.topOverlayCompact,
+          ]}
+        >
+          <View style={styles.headerRow}>
+            <View style={styles.titleGroup}>
+              <Text style={styles.eyebrow}>VECTOFIT · LIVE ASSESSMENT</Text>
+              <Text
+                style={[
+                  styles.exerciseTitle,
+                  isCompactScreen && styles.exerciseTitleCompact,
+                ]}
+                numberOfLines={1}
+              >
+                {EXERCISE_LABELS[camera.exercise]}
+              </Text>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.cameraFlipButton,
+                pressed && styles.controlPressed,
+                camera.isSessionActive && styles.controlDisabled,
+              ]}
+              onPress={camera.toggleCameraFacing}
+              // disabled={camera.isSessionActive}
+              accessibilityRole="button"
+              accessibilityLabel="Flip camera"
+              accessibilityHint="Switch between the front and rear cameras"
+            >
+              <Text style={styles.cameraFlipText}>Flip</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.statusRow}>
+            <View
+              style={[
+                styles.trackingPill,
+                pose.bodyVisible && styles.trackingPillReady,
+                !pose.bodyVisible &&
+                  pose.isPersonDetected &&
+                  styles.trackingPillWarning,
+              ]}
+              accessibilityLiveRegion="polite"
+            >
+              <View
+                style={[
+                  styles.trackingDot,
+                  pose.bodyVisible && styles.trackingDotReady,
+                  !pose.bodyVisible &&
+                    pose.isPersonDetected &&
+                    styles.trackingDotWarning,
+                ]}
+              />
+              <Text style={styles.trackingText}>
+                {pose.bodyVisible
+                  ? "Full body tracked"
+                  : pose.isPersonDetected
+                    ? "Adjust your framing"
+                    : "Looking for pose"}
+              </Text>
+            </View>
+
+            <Pressable
+              style={[
+                styles.voiceCueToggle,
+                voiceCuesEnabled && styles.voiceCueToggleActive,
+              ]}
+              onPress={handleToggleVoiceCues}
+              accessibilityRole="switch"
+              accessibilityLabel="Voice feedback"
+              accessibilityState={{ checked: voiceCuesEnabled }}
+              accessibilityHint="Enable or disable spoken exercise feedback"
+            >
+              <View
+                style={[
+                  styles.voiceCueDot,
+                  voiceCuesEnabled && styles.voiceCueDotActive,
+                ]}
+              />
+              <Text
+                style={[
+                  styles.voiceCueLabel,
+                  voiceCuesEnabled && styles.voiceCueLabelActive,
+                ]}
+              >
+                VOICE {voiceCuesEnabled ? "ON" : "OFF"}
+              </Text>
+            </Pressable>
+          </View>
+
+          {Boolean(pose.feedback?.trim()) ? (
+            <View
+              style={[
+                styles.feedbackPill,
+                isCompactScreen && styles.feedbackPillCompact,
+              ]}
+              accessibilityLiveRegion="polite"
+            >
+              <View style={[styles.feedbackGlow]} />
+              <Text style={styles.feedbackText} numberOfLines={2}>
+                {pose.feedback}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.bottomOverlay,
+            isCompactScreen && styles.bottomOverlayCompact,
+          ]}
+        >
+          {camera.processingError || camera.recordingError ? (
+            <View style={styles.errorPill} accessibilityRole="alert">
+              <Text style={styles.errorMessage}>
+                {camera.processingError || camera.recordingError}
+              </Text>
+            </View>
+          ) : null}
+
+          {camera.isUploadingAssessment || camera.savedAssessmentMessage ? (
+            <View style={styles.statusPill}>
+              {camera.isUploadingAssessment ? (
+                <ActivityIndicator size="small" color={CAMERA_COLORS.primary} />
+              ) : null}
+              <Text style={styles.statusText} numberOfLines={2}>
+                {camera.isUploadingAssessment
+                  ? "Saving assessment…"
+                  : camera.savedAssessmentMessage}
+              </Text>
+            </View>
+          ) : null}
+
+          <View style={styles.bottomHud}>
+            <View style={styles.metricsRow}>
+              <View style={styles.repMetric}>
+                <Text style={styles.metricLabel}>REPS</Text>
+                <Text
+                  style={[
+                    styles.repValue,
+                    isCompactScreen && styles.repValueCompact,
+                  ]}
+                >
+                  {camera.repCount}
+                </Text>
+              </View>
+
+              <View style={styles.metricDivider} />
+
+              <View style={styles.timerMetric}>
+                <Text style={styles.metricLabel}>SESSION</Text>
+                <Text style={styles.timerValue}>
+                  {formatTime(camera.elapsedSeconds)}
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.primaryButton,
+                camera.isSessionActive && styles.endSessionButton,
+                pressed && styles.primaryButtonPressed,
+              ]}
+              onPress={
+                camera.isUploadingAssessment
+                  ? undefined
+                  : camera.isSessionActive
+                    ? camera.stopSession
+                    : camera.startSession
+              }
+              // disabled={isSessionButtonDisabled}
+              accessibilityRole="button"
+              accessibilityLabel={
+                camera.isUploadingAssessment
+                  ? "Saving assessment"
+                  : camera.isSessionActive
+                    ? "End squat session"
+                    : "Start squat session"
+              }
+            >
+              {camera.isUploadingAssessment ? (
+                <ActivityIndicator size="small" color={CAMERA_COLORS.text} />
+              ) : null}
+              <Text style={styles.primaryButtonText}>
+                {camera.isUploadingAssessment
+                  ? "Saving…"
+                  : camera.isSessionActive
+                    ? "End session"
+                    : "Start session"}
+              </Text>
+            </Pressable>
+          </View>
+
+          {!camera.isSessionActive &&
+          !camera.isUploadingAssessment &&
+          !pose.bodyVisible ? (
+            <Text style={styles.framingHint} numberOfLines={2}>
+              Keep your head and feet in frame. Step back if needed.
+            </Text>
+          ) : null}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }

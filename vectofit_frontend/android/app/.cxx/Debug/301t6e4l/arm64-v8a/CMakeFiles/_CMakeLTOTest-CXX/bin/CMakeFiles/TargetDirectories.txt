@@ -1,0 +1,4 @@
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/301t6e4l/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/301t6e4l/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/301t6e4l/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/301t6e4l/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

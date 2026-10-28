@@ -424,6 +424,85 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 15,
   },
+  // Physical Information Editing
+  editHint: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    textAlign: "center",
+    marginTop: -SPACING.xs,
+  },
+
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    justifyContent: "center",
+    paddingHorizontal: SPACING.lg,
+  },
+  modalKeyboardContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  modalCard: {
+    backgroundColor: COLORS.cardBg,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+    padding: SPACING.xl,
+  },
+  modalTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: SPACING.xs,
+  },
+  modalSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: SPACING.xl,
+  },
+  modalInput: {
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.lg,
+  },
+  modalError: {
+    color: COLORS.crimsonRed,
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: SPACING.md,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.md,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 46,
+  },
+  modalPrimaryButton: {
+    backgroundColor: COLORS.primaryOrange,
+  },
+  modalSecondaryButton: {
+    backgroundColor: COLORS.inputBg,
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+  },
+  modalButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  modalSecondaryButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });
 
 export default styles;

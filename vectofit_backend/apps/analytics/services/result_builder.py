@@ -14,82 +14,116 @@ def build_result(metrics, classifications):
 def build_feedback(classifications):
     feedback = []
 
-    rom_result = classifications["rom"]
-    asymmetry_result = classifications["asymmetry"]
-    knee_result = classifications["knee_angle"]
-    hip_result = classifications["hip_angle"]
-    velocity_result = classifications["velocity"]
+    rom_result = classifications.get("rom", {})
+    asymmetry_result = classifications.get("asymmetry", {})
+    trunk_result = classifications.get("trunk_angle", {})
+    knee_result = classifications.get("knee_angle", {})
+    hip_result = classifications.get("hip_angle", {})
+    velocity_result = classifications.get("velocity", {})
 
-    if rom_result["classification"] == "insufficient":
-        deficit = rom_result["evaluation"]["deficit"]
+    if rom_result.get("classification") == "insufficient":
+        evaluation = rom_result.get("evaluation", {})
+        deficit = evaluation.get("deficit")
 
-        feedback.append({
-            "metric": "rom",
-            "message": f"Your squat depth is insufficient. "
-                       f"Your range of motion is {deficit:.1f} degrees below the required range."
-        })
+        if deficit is not None:
+            feedback.append({
+                "metric": "rom",
+                "message": (
+                    "Your squat depth is insufficient. "
+                    f"Your range of motion is {deficit:.1f} degrees below the required range."
+                ),
+            })
 
     if asymmetry_result["classification"] == "excessive":
-        difference = asymmetry_result["evaluation"]["difference"]
+        evaluation = asymmetry_result.get("evaluation", {})
+        difference = evaluation.get("difference")
 
-        feedback.append({
-            "metric": "asymmetry",
-            "message": f"Excessive bilateral asymmetry was detected! "
-                       f"Your asymmetry is {difference:.1f}% above the acceptable limit."
-        })
+        if difference is not None:
+            feedback.append({
+                "metric": "asymmetry",
+                "message": ("Excessive bilateral asymmetry was detected! "
+                        f"Your asymmetry is {difference:.1f}% above the acceptable limit."
+                )
+            })
 
-    if knee_result["classification"] == "too_low":
-        difference = knee_result["evaluation"]["difference"]
+    if trunk_result.get("classification") == "excessive_trunk_lean":
+        evaluation = trunk_result.get("evaluation", {})
+        difference = evaluation.get("difference")
 
-        feedback.append({
-            "metric": "knee_angle",
-            "message": f"Your knee angle is below the target range. "
-                       f"It is {difference:.1f} degrees below the minimum target."
-        })
+        if difference is not None:
+            feedback.append({
+                "metric": "trunk_angle",
+                "message": (
+                    "Excessive trunk lean was detected! "
+                    f"Your trunk lean is {difference:.1f}% above the configured arch limit."
+                )
+            })
 
-    if knee_result["classification"] == "too_high":
-        difference = knee_result["evaluation"]["difference"]
+    knee_classification = knee_result.get("classification")
+    knee_evaluation = knee_result.get("evaluation", {})
 
-        feedback.append({
-            "metric": "knee_angle",
-            "message": f"Your knee angle is above the target range. "
-                       f"It is {difference:.1f} degrees above the maximum target."
-        })
+    if knee_classification == "insufficient_depth":
+        difference = knee_evaluation.get("difference")
 
-    if hip_result["classification"] == "too_low":
-        difference = hip_result["evaluation"]["difference"]
+        if difference is not None:
+            feedback.append({
+                "metric": "knee_angle",
+                "message": (
+                    "Your squat may not have reached the configured "
+                    "depth target. Your minimum measured knee angke "
+                    f"was {difference:.1f} degrees above the target."
+                )
+            })
 
-        feedback.append({
-            "metric": "hip_angle",
-            "message": f"Your hip angle is below the target range. "
-                       f"It is {difference:.1f} degrees below the minimum target."
-        })
+    elif knee_classification == "too_low":
+        difference = knee_evaluation.get("difference")
 
-    if hip_result["classification"] == "too_high":
-        difference = hip_result["evaluation"]["difference"]
+        if difference is not None:
+            feedback.append({
+                "metric": "knee_angle",
+                "message": (
+                    "Your knee angle was below the target range. "
+                    f"It is {difference:.1f} degrees below the minimum target."
+                )
+            })
 
-        feedback.append({
-            "metric": "hip_angle",
-            "message": f"Your hip angle is above the target range. "
-                       f"It is {difference:.1f} degrees above the maximum target."
-        })
+    hip_classification = hip_result.get("classification")
+    hip_evaluation = hip_result.get("evaluation", {})
 
-    if velocity_result["classification"] == "too_slow":
-        difference = velocity_result["evaluation"]["difference"]
+    if hip_classification in ("too_low", "too high"):
+        difference = hip_evaluation.get("difference")
 
-        feedback.append({
-            "metric": "velocity",
-            "message": f"Your movement velocity is below the target range. "
-                       f"Your velocity is {difference:.1f} m/s below the minimum target."
-        })
+        if difference is not None:
+            direction = (
+                "below" if hip_classification == "too_low"
+                else "above"
+            )
+            feedback.append({
+                "metric": "hip_angle",
+                "message": (
+                    f"Your hip angle was {direction} the target range "
+                    f"by {difference:.1f} degrees."
+                )
+            })
 
-    if velocity_result["classification"] == "too_fast":
-        difference = velocity_result["evaluation"]["difference"]
+    velocity_classification = velocity_result.get("classification")
+    velocity_evaluation = velocity_result.get("evaluation", {})
 
-        feedback.append({
-            "metric": "velocity",
-            "message": f"Your movement velocity was too fast. "
-                       f"Your velocity is {difference:.1f} m/s above the maximum target."
-        })
+    if velocity_classification in ("too_slow", "too_fast"):
+        difference = velocity_evaluation.get("difference")
+
+        if difference is not None:
+            description = (
+                "too slow" if velocity_classification == "too_slow"
+                else "too_fast"
+            )
+            feedback.append({
+                "metric": "velocity",
+                "message": (
+                    f"Your movement velocity was {description} "
+                    f"relative to the configured target by "
+                    f"{difference:1f}."
+                )
+            })
 
     return feedback

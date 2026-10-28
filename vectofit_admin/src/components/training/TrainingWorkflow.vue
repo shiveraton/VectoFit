@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import type { WorkflowStep } from '../../services/trainingService'
+import type { WorkflowStep } from "../../services/trainingService";
 
 defineProps<{
-  steps: WorkflowStep[]
-}>()
+  steps: WorkflowStep[];
+}>();
 </script>
 
 <template>
   <div class="workflow">
     <template v-for="(step, index) in steps" :key="step.number">
       <div :class="['workflow-step', { active: step.active }]">
-        <div class="workflow-number">{{ step.number }}</div>
+        <div class="workflow-number">
+          {{ step.number }}
+        </div>
+
         <strong>{{ step.title }}</strong>
+
         <span>{{ step.subtitle }}</span>
       </div>
 
-      <div v-if="index < steps.length - 1" class="workflow-connector"></div>
+      <div v-if="index < steps.length - 1" class="workflow-line"></div>
     </template>
   </div>
 </template>
@@ -24,7 +28,7 @@ defineProps<{
 .workflow {
   display: flex;
   align-items: center;
-  padding: 25px 28px;
+  padding: 26px 28px;
 }
 
 .workflow-step {
@@ -66,10 +70,10 @@ defineProps<{
   font-size: 9px;
 }
 
-.workflow-connector {
+.workflow-line {
   width: 45px;
   height: 1px;
-  margin: 0 12px 25px;
+  margin: 0 12px 26px;
   background: #fed7aa;
 }
 
@@ -79,8 +83,12 @@ defineProps<{
     align-items: flex-start;
     gap: 10px;
   }
-  .workflow-step { width: 100%; }
-  .workflow-connector {
+
+  .workflow-step {
+    width: 100%;
+  }
+
+  .workflow-line {
     width: 1px;
     height: 20px;
     margin: 0 0 0 14px;

@@ -1,31 +1,56 @@
-export interface TrainingTask {
-  id: string;
-  code: string;
-  title: string;
-  description: string;
-}
+import client from "../config/client";
+
+export type TrainingJobStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
 
 export interface TrainingJob {
-  id: string;
-  name: string;
-  status: "queued" | "running" | "completed" | "failed";
-  progressPercentage: number;
-  started_at: string;
-  tasks?: TrainingTask[];
+  id: number;
+  dataset_ids: number[];
+  dataset_names: string[];
+  algorithm: string;
+  feature_selection: string[];
+  hyperparameters: Record<string, unknown>;
+  random_seed: number;
+  split_strategy: string;
+  status: TrainingJobStatus;
+  error_message: string;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  sample_count: number;
+  train_count: number;
+  test_count: number;
+  metrics: Record<string, unknown>;
+  feature_warnings: string[];
+  has_artifact: boolean;
+  artifact_url: string | null;
 }
 
 export interface FeatureOption {
-  id: string;
+  id:
+    | "hip_angle"
+    | "knee_angle"
+    | "rom"
+    | "asymmetry"
+    | "trunk_angle"
+    | "velocity";
   name: string;
   selected: boolean;
 }
 
 export interface AlgorithmOption {
-  id: string;
+  id: "xgboost";
   code: string;
   name: string;
   description: string;
 }
+
+export interface SplitStrategyOption {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export type Hyperparameters = Record<string, unknown>;
 
 export interface WorkflowStep {
   number: string;
@@ -33,25 +58,42 @@ export interface WorkflowStep {
   subtitle: string;
   active?: boolean;
 }
+3;
 
-const API_BASE_URL = "/api/v1/training";
+const API_BASE_URL = "/api/training";
 
 export const trainingService = {
-  async getTrainingTasks(): Promise<TrainingTask[]> {
-    const response = await fetch(`${API_BASE_URL}/tasks`);
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch training tasks: ${response.status}${response.statusText}`,
-      );
-    }
-    return response.json();
+  async getTrainingJobs(): Promise<TrainingJob[]> {
+    const response = await client.get<TrainingJob[]>("/training/jobs/");
+    return response.data;
   },
 
-  async getTrainingJobs(): Promise<TrainingJob[]> {
-    const response = await fetch(`${API_BASE_URL}/tasks`);
+  async startTraining(payload: {
+    dataset_ids: number[];
+    algorithm: string;
+    feature_selection: string[];
+    hyperparameters: Record<string, unknown>;
+    test_size: number;
+    random_seed: number;
+  }): Promise<TrainingJob> {
+    const response = await fetch(`${API_BASE_URL}/jobs/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
     if (!response.ok) {
-      throw new Error("Failed to fetch training jobs");
+      const errorData = await response.json().catch(() => null);
+
+      throw new Error(
+        errorData?.detail ||
+          errorData?.non_field_errors?.[0] ||
+          "Failed to start training",
+      );
     }
+
     return response.json();
   },
 
@@ -68,17 +110,17 @@ export const trainingService = {
         selected: true,
       },
       {
-        id: "trunk",
+        id: "trunk_angle",
         name: "Trunk Angle",
         selected: true,
       },
       {
-        id: "knee",
+        id: "knee_angle",
         name: "Knee Angle",
         selected: true,
       },
       {
-        id: "hip",
+        id: "hip_angle",
         name: "Hip Angle",
         selected: true,
       },
@@ -90,12 +132,27 @@ export const trainingService = {
     ];
   },
 
-  async getAlgorithm(): Promise<AlgorithmOption> {
-    const response = await fetch(`${API_BASE_URL}/algorithm`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch default algorithm option");
-    }
-    return response.json();
+  getAvailableAlgorithms(): AlgorithmOption[] {
+    return [
+      {
+        id: "xgboost",
+        code: "xgb",
+        name: "XGBoost",
+        description:
+          "Gradient-boosted decision trees for squat movement classification.",
+      },
+    ];
+  },
+
+  getSplitStrategy(): SplitStrategyOption[] {
+    return [
+      {
+        id: "group_by_participant",
+        name: "Group by Participant",
+        description:
+          "Keeps repetitions from the same participant in a single split to prevent subject-level leakage.",
+      },
+    ];
   },
 
   getWorkflowStep(): WorkflowStep[] {

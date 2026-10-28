@@ -43,6 +43,13 @@ class AssessmentSession(models.Model):
         on_delete=models.CASCADE,
         related_name="assessment_sessions"
     )
+    dataset = models.ForeignKey(
+        "datasets.Dataset",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="assessment_sessions"
+    )
     exercise_variant = models.ForeignKey(
         ExerciseVariant,
         on_delete=models.PROTECT,
@@ -83,6 +90,15 @@ class RepAssessment(models.Model):
 
     hybrid_score = models.FloatField(null=True, blank=True)
     classification = models.CharField(max_length=50, blank=True)
+
+    analysis_result = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            "Per repetition metrics, classification, "
+            "and feedback produced by the analytics pipeline."
+        )
+    )
 
     landmark_series = models.JSONField(
         help_text="Numeric landmark coordinate time-series for this rep's frame window. No raw frames are stored."
