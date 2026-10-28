@@ -10,6 +10,8 @@ import DatasetSelector from "./DatasetSelector.vue";
 import FeatureSelector from "./FeatureSelector.vue";
 import HyperparameterPanel from "./HyperparameterPanel.vue";
 import ViewAngleSelector from "./ViewAngleSelector.vue";
+import PredictionTargetSelector from "./PredictionTargetSelector.vue";
+import type { PredictionTarget } from "../../../services/trainingService";
 
 type ViewAngle = "diagonal" | "frontal" | "sagittal";
 type DatasetId = number;
@@ -20,6 +22,7 @@ interface Props {
   selectedDatasetIds: DatasetId[];
   selectedDatasets: Dataset[];
   selectedViewAngle: ViewAngle | null;
+  predictionTarget: PredictionTarget;
   features: FeatureOption[];
   algorithms: AlgorithmOption[];
   selectedAlgorithm: AlgorithmOption | null;
@@ -36,6 +39,7 @@ defineProps<Props>();
 const emit = defineEmits<{
   (event: "toggle-dataset", id: DatasetId): void;
   (event: "select-view-angle", angle: ViewAngle): void;
+  (event: "set-prediction-target", target: PredictionTarget): void;
   (event: "toggle-feature", id: string): void;
   (event: "select-algorithm", id: string): void;
   (event: "set-hyperparameter", key: string, value: number): void;
@@ -47,18 +51,24 @@ const emit = defineEmits<{
 
 <template>
   <div class="configuration-grid">
+    <ViewAngleSelector
+      :selected-view-angle="selectedViewAngle"
+      @select-view-angle="emit('select-view-angle', $event)"
+    />
+
+    <PredictionTargetSelector
+      :model-value="predictionTarget"
+      @update:model-value="emit('set-prediction-target', $event)"
+    />
+
     <DatasetSelector
       :available-datasets="availableDatasets"
       :filtered-datasets="filteredDatasets"
       :selected-dataset-ids="selectedDatasetIds"
       :selected-datasets="selectedDatasets"
       :selected-view-angle="selectedViewAngle"
+      :prediction-target="predictionTarget"
       @toggle-dataset="emit('toggle-dataset', $event)"
-    />
-
-    <ViewAngleSelector
-      :selected-view-angle="selectedViewAngle"
-      @select-view-angle="emit('select-view-angle', $event)"
     />
 
     <FeatureSelector
@@ -76,6 +86,7 @@ const emit = defineEmits<{
       :hyperparameters="hyperparameters"
       :test-size="testSize"
       :random-seed="randomSeed"
+      :prediction-target="predictionTarget"
       @set-hyperparameter="emit('set-hyperparameter', $event.key, $event.value)"
       @set-test-size="emit('set-test-size', $event)"
       @set-random-seed="emit('set-random-seed', $event)"

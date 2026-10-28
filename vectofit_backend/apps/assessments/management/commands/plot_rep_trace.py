@@ -16,49 +16,11 @@ from apps.analytics.services.segmentation import (
     _smooth,
     _turning_points,
     segment_reps,
+    split_contiguous_pose_runs,
 )
 
 
 TARGET_FPS = 30.0
-
-
-def split_contiguous_pose_runs(landmark_data, expected_frame_step):
-    """
-    Split valid pose entries into runs without missing poses or
-    unexpected gaps in the original video frame indices.
-    """
-    runs = []
-    current_run = []
-    previous_frame_index = None
-
-    for entry in landmark_data:
-        landmarks = entry.get("landmarks")
-        frame_index = entry.get("frame_index")
-
-        if not landmarks or frame_index is None:
-            if current_run:
-                runs.append(current_run)
-
-            current_run = []
-            previous_frame_index = None
-            continue
-
-        frame_index = int(frame_index)
-
-        if (
-            current_run
-            and frame_index - previous_frame_index != expected_frame_step
-        ):
-            runs.append(current_run)
-            current_run = []
-
-        current_run.append(entry)
-        previous_frame_index = frame_index
-
-    if current_run:
-        runs.append(current_run)
-
-    return runs
 
 
 class Command(BaseCommand):

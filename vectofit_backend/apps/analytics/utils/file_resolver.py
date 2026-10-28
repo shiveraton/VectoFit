@@ -34,7 +34,7 @@ def _try_native_path(dataset):
     """
     try:
         video_file = dataset.video_file
-    except Exception:
+    except (AttributeError, ValueError, OSError):
         return None
 
     if not video_file:
@@ -42,9 +42,7 @@ def _try_native_path(dataset):
 
     try:
         path = video_file.path
-    except (NotImplementedError, AttributeError, ValueError):
-        return None
-    except Exception:
+    except (NotImplementedError, AttributeError, ValueError, OSError):
         return None
 
     if not path or not isinstance(path, str):
@@ -57,7 +55,7 @@ def _materialize_to_temp(dataset, suffix):
     """Stream the file through the storage API into a temporary local file."""
     try:
         name = dataset.video_file.name
-    except Exception as exc:  # pragma: no cover - defensive
+    except Exception as exc:
         raise VideoResolutionError(
             f"Dataset {dataset.pk} has no readable video file reference."
         ) from exc
@@ -66,7 +64,6 @@ def _materialize_to_temp(dataset, suffix):
         raise VideoResolutionError(f"Dataset {dataset.pk} has no video file attached.")
 
     tmp_dir = tempfile.mkdtemp(prefix="vectofit_video_")
-    # Preserve the extension so OpenCV/ffmpeg can sniff the container format.
     ext = os.path.splitext(name)[1] or suffix or ".mp4"
     tmp_path = os.path.join(tmp_dir, f"dataset_{dataset.pk}{ext}")
 
@@ -119,5 +116,5 @@ def has_usable_video(dataset):
     """Cheap pre-check: does this dataset have a video attached at all?"""
     try:
         return bool(dataset.video_file)
-    except Exception:
+    except (AttributeError, ValueError, OSError):
         return False

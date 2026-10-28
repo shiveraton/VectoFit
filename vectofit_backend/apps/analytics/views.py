@@ -1,7 +1,8 @@
 from datetime import timedelta
+from typing import ClassVar
 
 from django.db.models import Avg, Count
-from django.db.models.functions import TruncMonth, TruncWeek, TruncDate
+from django.db.models.functions import TruncDate, TruncMonth, TruncWeek
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions, viewsets
@@ -11,14 +12,16 @@ from apps.assessments.models import RepAssessment
 from apps.exercises.models import ExerciseVariant
 
 from .serializers import (
-    TrendPointSerializer,
     DailyActivityPointSerializer,
-    WeeklyTrendSerializer,
+    TrendPointSerializer,
     VariantTrendSerializer,
+    WeeklyTrendSerializer,
 )
+
 
 def _reps_for_user(user):
     return RepAssessment.objects.filter(session__user=user)
+
 
 def _daily_activity_for_user(user, week_start):
     week_end = week_start + timedelta(days=6)
@@ -40,48 +43,34 @@ def _daily_activity_for_user(user, week_start):
         .order_by("date")
     )
 
-    activity_by_date = {
-        row["date"]: row
-        for row in daily_rows
-    }
+    activity_by_date = {row["date"]: row for row in daily_rows}
 
     return [
         {
             "date": day,
-            "rep_count": activity_by_date.get(day, {}).get(
-                "rep_count", 0
-            ),
-            "session_count": activity_by_date.get(day, {}).get(
-                "session_count", 0
-            ),
+            "rep_count": activity_by_date.get(day, {}).get("rep_count", 0),
+            "session_count": activity_by_date.get(day, {}).get("session_count", 0),
         }
-        for day in (
-            week_start + timedelta(days=offset)
-            for offset in range(7)
-        )
+        for day in (week_start + timedelta(days=offset) for offset in range(7))
     ]
 
+
 class DailyActivityPointViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def list(self, request):
         today = timezone.localdate()
         week_start = today - timedelta(days=today.weekday())
 
-        daily_activity = _daily_activity_for_user(
-            request.user,
-            week_start
-        )
+        daily_activity = _daily_activity_for_user(request.user, week_start)
 
-        serializer = DailyActivityPointSerializer(
-            daily_activity,
-            many=True
-        )
+        serializer = DailyActivityPointSerializer(daily_activity, many=True)
 
         return Response(serializer.data)
 
+
 class WeeklyTrendViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def list(self, request):
         today = timezone.localdate()
@@ -109,10 +98,7 @@ class WeeklyTrendViewSet(viewsets.ViewSet):
             rep_count=Count("id"),
             avg_hybrid_score=Avg("hybrid_score"),
         )
-        daily_activity = _daily_activity_for_user(
-            request.user,
-            week_start
-        )
+        daily_activity = _daily_activity_for_user(request.user, week_start)
 
         data = {
             "week_start": week_start,
@@ -122,13 +108,14 @@ class WeeklyTrendViewSet(viewsets.ViewSet):
             "previous_week_session_count": previous_week["session_count"],
             "previous_week_rep_count": previous_week["rep_count"],
             "previous_week_avg_hybrid_score": previous_week["avg_hybrid_score"],
-            "daily_activity": daily_activity
+            "daily_activity": daily_activity,
         }
         serializer = WeeklyTrendSerializer(data)
         return Response(serializer.data)
 
+
 class TrendSeriesViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def list(self, request):
         period = request.query_params.get("period", "week")
@@ -149,8 +136,9 @@ class TrendSeriesViewSet(viewsets.ViewSet):
         serializer = TrendPointSerializer(buckets, many=True)
         return Response(serializer.data)
 
+
 class VariantTrendViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list] = [permissions.IsAuthenticated]
 
     def retrieve(self, request, pk=None):
         variant = get_object_or_404(ExerciseVariant, pk=pk)

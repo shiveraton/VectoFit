@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
+import type { TrainingJob } from "../../services/trainingService";
 
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
 import TrainingConfiguration from "../../components/training/configuration/TrainingConfiguration.vue";
@@ -10,13 +11,13 @@ import { useTraining } from "../../hooks/useTraining";
 const configurationSection = ref<HTMLElement | null>(null);
 
 const {
-  trainingJobs,
   features,
   algorithms,
   workflowSteps,
   selectedDatasets,
   selectedDatasetIds,
   selectedViewAngle,
+  predictionTarget,
   selectedAlgorithm,
   hyperparameters,
   testSize,
@@ -29,6 +30,7 @@ const {
   error,
   toggleDataset,
   selectViewAngle,
+  setPredictionTarget,
   toggleFeature,
   selectAlgorithm,
   setHyperparameter,
@@ -39,7 +41,7 @@ const {
   filteredDatasets,
 } = useTraining();
 
-const latestJob = computed(() => trainingJobs.value[0] ?? null);
+const latestJob = ref<TrainingJob | null>(null);
 
 const configurationStatus = computed(() => {
   if (isTraining.value) return "TRAINING";
@@ -54,7 +56,7 @@ const scrollToConfiguration = () => {
 };
 
 const handleStartTraining = async () => {
-  await startTraining();
+  latestJob.value = await startTraining();
 };
 </script>
 
@@ -132,6 +134,7 @@ const handleStartTraining = async () => {
         :selected-dataset-ids="selectedDatasetIds"
         :selected-datasets="selectedDatasets"
         :selected-view-angle="selectedViewAngle"
+        :prediction-target="predictionTarget"
         :features="features"
         :algorithms="algorithms"
         :selected-algorithm="selectedAlgorithm"
@@ -143,6 +146,7 @@ const handleStartTraining = async () => {
         :is-training="isTraining"
         @toggle-dataset="toggleDataset"
         @select-view-angle="selectViewAngle"
+        @set-prediction-target="setPredictionTarget"
         @toggle-feature="toggleFeature"
         @select-algorithm="selectAlgorithm"
         @set-hyperparameter="setHyperparameter"

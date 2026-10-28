@@ -13,7 +13,10 @@ import {
   getAssessmentUploadErrorMessage,
   uploadSquatAssessmentVideo,
 } from "../services/assessmentSessionService";
-import type { SquatExerciseType } from "../../../navigation/types";
+import type {
+  AssessmentViewAngle,
+  SquatExerciseType,
+} from "../../../navigation/types";
 import { poseLandmarkerPlugin } from "../../calibration/services/poseLandmarker";
 
 export interface PoseLandmark {
@@ -121,7 +124,10 @@ function flattenLandmarks(values: number[]): PoseLandmark[] {
   });
 }
 
-export function useCameraPoseScreen(exercise: SquatExerciseType) {
+export function useCameraPoseScreen(
+  exercise: SquatExerciseType,
+  viewAngle: AssessmentViewAngle,
+) {
   const [cameraFacing, setCameraFacing] = useState<"front" | "back">("front");
   const device = useCameraDevice(cameraFacing);
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -393,7 +399,11 @@ export function useCameraPoseScreen(exercise: SquatExerciseType) {
       }
 
       try {
-        const session = await uploadSquatAssessmentVideo(filePath, exercise);
+        const session = await uploadSquatAssessmentVideo(
+          filePath,
+          exercise,
+          viewAngle,
+        );
 
         const persistedRepCount = session.reps?.length ?? 0;
 
@@ -442,7 +452,7 @@ export function useCameraPoseScreen(exercise: SquatExerciseType) {
         setIsUploadingAssessment(false);
       }
     }
-  }, [exercise]);
+  }, [exercise, viewAngle]);
 
   const startSession = useCallback(async (): Promise<void> => {
     if (recorderRef.current || sessionActiveRef.current) return;

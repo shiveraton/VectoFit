@@ -1,4 +1,7 @@
+from typing import ClassVar
+
 from django.contrib import admin
+
 from .models import Dataset, DatasetSample, Participant, ViewAngle
 
 
@@ -9,9 +12,8 @@ class ParticipantAdmin(admin.ModelAdmin):
         "participant_code",
         "created_at",
     )
-    search_fields = (
-        "participant_code",
-    )
+    search_fields = ("participant_code",)
+
 
 @admin.register(ViewAngle)
 class ViewAngleAdmin(admin.ModelAdmin):
@@ -19,16 +21,21 @@ class ViewAngleAdmin(admin.ModelAdmin):
         "id",
         "angle_variant",
     )
-    list_filter = (
-        "angle_variant",
-    )
-    search_fields = (
-        "angle_variant",
-    )
+    list_filter = ("angle_variant",)
+    search_fields = ("angle_variant",)
+
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "exercise_type", "purpose", "primary_target", "status", "created_at")
+    list_display = (
+        "id",
+        "name",
+        "exercise_type",
+        "purpose",
+        "primary_target",
+        "status",
+        "created_at",
+    )
     list_filter = ("exercise_type", "purpose", "status", "created_at")
     search_fields = ("name", "description")
     ordering = ("-created_at",)
@@ -36,7 +43,7 @@ class DatasetAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return True
 
-    actions = ['delete_selected']
+    actions: ClassVar[list] = ["delete_selected"]
 
 
 @admin.register(DatasetSample)

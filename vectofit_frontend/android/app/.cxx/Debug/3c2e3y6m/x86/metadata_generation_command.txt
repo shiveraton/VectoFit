@@ -1,0 +1,25 @@
+                        -HD:\Thesis\VectoFit\vectofit_frontend\android
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=24
+-DANDROID_PLATFORM=android-24
+-DANDROID_ABI=x86
+-DCMAKE_ANDROID_ARCH_ABI=x86
+-DANDROID_NDK=C:\Users\Jhedver\AppData\Local\Android\Sdk\ndk\27.1.12297006
+-DCMAKE_ANDROID_NDK=C:\Users\Jhedver\AppData\Local\Android\Sdk\ndk\27.1.12297006
+-DCMAKE_TOOLCHAIN_FILE=C:\Users\Jhedver\AppData\Local\Android\Sdk\ndk\27.1.12297006\build\cmake\android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=C:\Users\Jhedver\AppData\Local\Android\Sdk\cmake\3.31.6\bin\ninja.exe
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=D:\Thesis\VectoFit\vectofit_frontend\android\app\build\intermediates\cxx\Debug\3c2e3y6m\obj\x86
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=D:\Thesis\VectoFit\vectofit_frontend\android\app\build\intermediates\cxx\Debug\3c2e3y6m\obj\x86
+-DCMAKE_BUILD_TYPE=Debug
+-DCMAKE_FIND_ROOT_PATH=D:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\3c2e3y6m\prefab\x86\prefab
+-BD:\Thesis\VectoFit\vectofit_frontend\android\app\.cxx\Debug\3c2e3y6m\x86
+-GNinja
+-DCMAKE_OBJECT_PATH_MAX=1024
+-DPROJECT_BUILD_DIR=D:\Thesis\VectoFit\vectofit_frontend\android\app\build
+-DPROJECT_ROOT_DIR=D:\Thesis\VectoFit\vectofit_frontend\android
+-DREACT_ANDROID_DIR=D:\Thesis\VectoFit\vectofit_frontend\node_modules\react-native\ReactAndroid
+-DANDROID_STL=c++_shared
+-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+                        Build command args: []
+                        Version: 2

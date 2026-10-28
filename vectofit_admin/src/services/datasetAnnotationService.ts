@@ -1,22 +1,31 @@
 import client from "../config/client";
 
-export type CriterionKey =
-  | "depth"
-  | "knee"
-  | "trunk"
-  | "symmetry"
-  | "foot"
-  | "completion";
+export type KneeAlignmentGrade =
+  | "aligned"
+  | "borderline"
+  | "deviated"
+  | "unassessable";
 
-export type CriterionValue = boolean | null;
+export type KneeDeviationDirection = "valgus" | "varus" | "none" | "uncertain";
 
-export interface AnnotationCriteria {
-  depth: CriterionValue;
-  knee: CriterionValue;
-  trunk: CriterionValue;
-  symmetry: CriterionValue;
-  foot: CriterionValue;
-  completion: CriterionValue;
+export type SymmetryObservation =
+  | "symmetric"
+  | "asymmetric"
+  | "uncertain"
+  | "not_recorded";
+
+export type TargetLabel = "good" | "bad" | "borderline" | "unassessable";
+
+export interface KneeSideAnnotation {
+  grade: KneeAlignmentGrade | null;
+  direction: KneeDeviationDirection | null;
+}
+
+export interface KneeAnnotation {
+  left: KneeSideAnnotation;
+  right: KneeSideAnnotation;
+  symmetry_observation: SymmetryObservation;
+  notes: string;
 }
 
 export interface RepAssessment {
@@ -27,15 +36,32 @@ export interface RepAssessment {
   classification: string;
 }
 
+export interface DatasetVideoPlayback {
+  id: number;
+  video_url: string | null;
+  participant_code: string;
+  view_angle_name: string;
+  source_label?: boolean | null;
+  source_path?: string;
+  requires_manual_review?: boolean;
+}
+
 export interface DatasetSample {
   id: number;
   dataset: number;
+  dataset_video: DatasetVideoPlayback | number | null;
+  video_fps?: number | null;
+  is_manually_annotated?: boolean;
   rep_assessment: RepAssessment;
+
   is_correct: boolean | null;
   error_label: string;
   annotator: number | null;
   annotated_at: string | null;
   created_at: string;
+
+  knee_annotation?: KneeAnnotation | null;
+  target_label?: TargetLabel | null;
 }
 
 export interface AnnotationSession {
@@ -54,17 +80,27 @@ export interface AnnotationSession {
   samples: DatasetSample[];
 }
 
-export interface SaveAnnotationPayload {
-  is_correct: boolean | null;
-  error_label: string;
+export interface DatasetSamplePlaybackFields {
+  dataset_video: DatasetVideoPlayback | null;
+  video_fps: number | null;
 }
+
+export interface SaveAnnotationPayload {
+  knee_annotation: KneeAnnotation;
+}
+
+export const emptyKneeAnnotation = (): KneeAnnotation => ({
+  left: { grade: null, direction: null },
+  right: { grade: null, direction: null },
+  symmetry_observation: "not_recorded",
+  notes: "",
+});
 
 export const datasetAnnotationService = {
   async getSession(datasetId: number): Promise<AnnotationSession> {
     const response = await client.get<AnnotationSession>(
       `/datasets/${datasetId}/annotation/`,
     );
-
     return response.data;
   },
 
@@ -76,19 +112,14 @@ export const datasetAnnotationService = {
       `/datasets/dataset-samples/${sampleId}/`,
       payload,
     );
-
     return response.data;
   },
 
   async clear(sampleId: number): Promise<DatasetSample> {
     const response = await client.patch<DatasetSample>(
       `/datasets/dataset-samples/${sampleId}/`,
-      {
-        is_correct: null,
-        error_label: "",
-      },
+      { knee_annotation: null },
     );
-
     return response.data;
   },
 };

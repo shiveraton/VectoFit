@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 
 import { useDatasets } from "../../hooks/useDatasets";
 import { useParticipants } from "../../hooks/useParticipants.ts";
-import { type Dataset } from "../../services/datasetService";
+import { VIEW_ANGLE_BY_ID, type Dataset } from "../../services/datasetService";
 
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
 import DatasetEmptyState from "../../components/datasets/DatasetEmptyState.vue";
@@ -35,18 +35,103 @@ const {
 const { participants, fetchParticipants, createParticipant } =
   useParticipants();
 
+type DatasetReviewMetrics = {
+  human_reviewed_sample_count?: number | null;
+  review_selected_sample_count?: number | null;
+  pending_review_sample_count?: number | null;
+};
+
+const reviewMetrics = (dataset: Dataset) =>
+  dataset as Dataset & DatasetReviewMetrics;
+
 const hasSamples = (dataset: Dataset) => dataset.sample_count > 0;
 
 const hasUnlabelledSamples = (dataset: Dataset) =>
   dataset.sample_count > dataset.labelled_sample_count;
 
-const isAnnotationReady = (dataset: Dataset) =>
-  dataset.status === "READY" &&
-  hasSamples(dataset) &&
-  hasUnlabelledSamples(dataset);
+const pendingReviewCount = (dataset: Dataset) => {
+  const count = reviewMetrics(dataset).pending_review_sample_count;
 
-const isFullyLabelled = (dataset: Dataset) =>
-  hasSamples(dataset) && !hasUnlabelledSamples(dataset);
+  if (typeof count === "number" && Number.isFinite(count)) {
+    return Math.max(0, count);
+  }
+
+  if (!isZipCollection(dataset)) {
+    return 0;
+  }
+
+  return Math.max(0, dataset.sample_count - dataset.labelled_sample_count);
+};
+
+const humanReviewedSummary = (dataset: Dataset) => {
+  const metrics = reviewMetrics(dataset);
+  const reviewed = metrics.human_reviewed_sample_count;
+  const selected = metrics.review_selected_sample_count;
+
+  if (typeof reviewed !== "number" || !Number.isFinite(reviewed)) {
+    return "Not tracked";
+  }
+
+  return typeof selected === "number" && Number.isFinite(selected)
+    ? `${reviewed}/${selected}`
+    : String(reviewed);
+};
+
+const zipReviewStatus = (dataset: Dataset): string => {
+  const metrics = reviewMetrics(dataset);
+
+  const selected = metrics.review_selected_sample_count;
+  const reviewed = metrics.human_reviewed_sample_count;
+  const pending = metrics.pending_review_sample_count;
+
+  if (typeof selected !== "number" || !Number.isFinite(selected)) {
+    return "Review tracking unavailable";
+  }
+
+  if (selected === 0) {
+    return "No samples selected";
+  }
+
+  if (typeof pending === "number" && pending > 0) {
+    return `${pending} pending review`;
+  }
+
+  if (
+    typeof reviewed === "number" &&
+    Number.isFinite(reviewed) &&
+    reviewed >= selected
+  ) {
+    return "Review complete";
+  }
+
+  if (typeof reviewed === "number" && reviewed >= 0) {
+    return "Review in progress";
+  }
+
+  return "Review status unavailable";
+};
+
+const isAnnotationReady = (dataset: Dataset) =>
+  dataset.status === "READY" && hasSamples(dataset);
+
+const isReviewComplete = (dataset: Dataset) => {
+  if (!hasSamples(dataset)) return false;
+
+  if (isZipCollection(dataset)) {
+    const metrics = reviewMetrics(dataset);
+    const selected = metrics.review_selected_sample_count;
+    const reviewed = metrics.human_reviewed_sample_count;
+
+    return (
+      typeof selected === "number" &&
+      selected > 0 &&
+      typeof reviewed === "number" &&
+      reviewed >= selected
+    );
+  }
+
+  return !hasUnlabelledSamples(dataset);
+};
 
 const openAnnotation = (datasetId: number) => {
   router.push(`/dataset/${datasetId}/annotate`);
@@ -83,6 +168,48 @@ const handleBulkImported = async (datasetName: string, videoCount: number) => {
 
   await fetchDatasets(true);
 };
+
+function isZipCollection(dataset: Dataset): boolean {
+  return !dataset.video_file && (dataset.video_count ?? 0) > 0;
+}
+
+function participantSummary(dataset: Dataset): string {
+  if (isZipCollection(dataset)) {
+    const count = dataset.participant_count;
+
+    return count === null
+      ? "Assigned per video"
+      : `${count} participant${count === 1 ? "" : "s"}`;
+  }
+
+  return dataset.participant ? `p-${dataset.participant}` : "Unassigned";
+}
+
+function viewSummary(dataset: Dataset): string {
+  if (isZipCollection(dataset)) {
+    return dataset.view_angles?.length
+      ? dataset.view_angles
+          .map((angle) => angle.charAt(0).toUpperCase() + angle.slice(1))
+          .join(",")
+      : "Defined per video";
+  }
+
+  return dataset.view_angle == null
+    ? ""
+    : (VIEW_ANGLE_BY_ID[dataset.view_angle] ?? "Unknown");
+}
+
+function videoSummary(dataset: Dataset): string {
+  if (!isZipCollection(dataset)) {
+    return dataset.video_file ? "1 video" : "";
+  }
+
+  const total = dataset.video_count ?? 0;
+  const ready = dataset.ready_video_count ?? 0;
+  const failed = dataset.failed_video_count ?? 0;
+
+  return `${ready}/${total} ready - ${failed} failed`;
+}
 
 onMounted(async () => {
   await Promise.all([fetchParticipants(), fetchDatasets()]);
@@ -184,11 +311,21 @@ onMounted(async () => {
           <thead>
             <tr>
               <th>Dataset</th>
-              <th>Participant</th>
+              <th>Type</th>
+              <th>Participants</th>
+              <th>View Angles</th>
               <th>Exercise</th>
               <th>Purpose</th>
+              <th>Videos</th>
               <th>Samples</th>
-              <th>Labelled</th>
+              <th>
+                <span
+                  title="A sample may have inherited its label from a ZIP folder; this does not prove human review."
+                >
+                  Labelled
+                </span>
+              </th>
+              <th>Human reviewed</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -204,21 +341,49 @@ onMounted(async () => {
               </td>
 
               <td>
-                <span v-if="dataset.participant" class="participant-value">
-                  P-{{ dataset.participant }}
+                <span
+                  class="exercise-value"
+                  :title="
+                    isZipCollection(dataset)
+                      ? 'A collection of individual video records'
+                      : 'A dataset containing one video'
+                  "
+                >
+                  {{ isZipCollection(dataset) ? "ZIP" : "Single video" }}
                 </span>
-
-                <span v-else class="muted-value"> Unassigned </span>
               </td>
 
               <td>
-                <span class="exercise-value">
-                  {{ dataset.exercise_type }}
+                <span
+                  v-if="!isZipCollection(dataset) && dataset.participant"
+                  class="participant-value"
+                >
+                  P-{{ dataset.participant }}
                 </span>
+
+                <span v-else class="muted-value">
+                  {{ participantSummary(dataset) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="muted-value">
+                  {{ viewSummary(dataset) }}
+                </span>
+              </td>
+
+              <td>
+                {{ dataset.exercise_type }}
               </td>
 
               <td>
                 {{ dataset.purpose }}
+              </td>
+
+              <td>
+                <span class="sample-count">
+                  {{ videoSummary(dataset) }}
+                </span>
               </td>
 
               <td>
@@ -228,10 +393,19 @@ onMounted(async () => {
               </td>
 
               <td>
-                <span class="labelled-count">
+                <span
+                  class="labelled-count"
+                  :title="`${dataset.labelled_sample_count} of ${dataset.sample_count} repetitions have a binary label; labels may be inherited from ZIP folders.`"
+                >
                   <strong>{{ dataset.labelled_sample_count }}</strong>
                   /
                   {{ dataset.sample_count }}
+                </span>
+              </td>
+
+              <td>
+                <span class="labelled-count">
+                  {{ humanReviewedSummary(dataset) }}
                 </span>
               </td>
 
@@ -240,10 +414,7 @@ onMounted(async () => {
                   class="status-badge"
                   :class="`status-${dataset.status.toLowerCase()}`"
                 >
-                  <span
-                    v-if="dataset.status === 'PROCESSING'"
-                    class="processing-indicator"
-                  ></span>
+                  <span v-if="dataset.status === 'PROCESSING'"></span>
 
                   {{ dataset.status }}
                 </span>
@@ -261,10 +432,24 @@ onMounted(async () => {
                   </button>
 
                   <span
-                    v-else-if="isFullyLabelled(dataset)"
+                    v-else-if="
+                      dataset.status === 'READY' && isReviewComplete(dataset)
+                    "
                     class="action-complete"
                   >
-                    Complete
+                    {{
+                      isZipCollection(dataset) ? "Review complete" : "Complete"
+                    }}
+                  </span>
+
+                  <span
+                    v-else-if="
+                      dataset.status === 'READY' && isZipCollection(dataset)
+                    "
+                    class="muted-value"
+                    title="ZIP folder labels are source labels. Manual-review completion is tracked separately."
+                  >
+                    {{ zipReviewStatus(dataset) }}
                   </span>
 
                   <span
@@ -272,11 +457,23 @@ onMounted(async () => {
                     class="processing-state"
                   >
                     <span class="processing-spinner"></span>
-                    Processing...
+                  </span>
+
+                  <span
+                    v-else-if="
+                      isZipCollection(dataset) &&
+                      ['PARTIAL', 'FAILED'].includes(dataset.status)
+                    "
+                    class="muted-value"
+                    :title="`${dataset.failed_video_count ?? 0} video(s) failed processing`"
+                  >
+                    Check videos
                   </span>
 
                   <button
-                    v-else-if="dataset.status === 'FAILED'"
+                    v-else-if="
+                      dataset.status === 'FAILED' && !isZipCollection(dataset)
+                    "
                     type="button"
                     class="action-button retry-button"
                     @click="handleRetryDataset(dataset.id)"
@@ -291,7 +488,7 @@ onMounted(async () => {
                     Queued
                   </span>
 
-                  <span v-else class="muted-value">—</span>
+                  <span v-else class="muted-value"></span>
                 </div>
               </td>
             </tr>
@@ -671,14 +868,6 @@ onMounted(async () => {
   color: var(--vf-muted, #71717a);
   font-size: 10px;
   font-weight: 600;
-}
-
-.processing-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: processing-pulse 1.2s ease-in-out infinite;
 }
 
 .processing-spinner {

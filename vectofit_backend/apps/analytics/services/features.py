@@ -6,6 +6,9 @@ from .kinematic_velocity import calculate_velocity_series
 from .range_of_motion import calculate_rom
 from .trunk_angle_analysis import calculate_trunk_angle_series
 
+FEATURE_SCHEMA_VERSION = "python_rep_features_v1"
+
+
 AVAILABLE_FEATURES = [
     "hip_angle",
     "knee_angle",
@@ -120,7 +123,9 @@ def extract_rep_features(landmark_series, fps=30.0, scale_factor=None):
     asymmetry_values = [a for a in asymmetry_values if a is not None]
     max_asymmetry = max(asymmetry_values) if asymmetry_values else 0.0
 
-    trunk_angles = np.asarray(calculate_trunk_angle_series(landmark_series), dtype=float)
+    trunk_angles = np.asarray(
+        calculate_trunk_angle_series(landmark_series), dtype=float
+    )
 
     hip_midpoints = []
     for frame in landmark_series:
@@ -129,7 +134,9 @@ def extract_rep_features(landmark_series, fps=30.0, scale_factor=None):
         hip_midpoints.append({"hip_midpoint": (left + right) / 2.0})
 
     frame_interval = 1.0 / float(fps)
-    velocity_series = calculate_velocity_series(hip_midpoints, "hip_midpoint", frame_interval)
+    velocity_series = calculate_velocity_series(
+        hip_midpoints, "hip_midpoint", frame_interval
+    )
 
     if not velocity_series:
         raise FeatureExtractionError(
