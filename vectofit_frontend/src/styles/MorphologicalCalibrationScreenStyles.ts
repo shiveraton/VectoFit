@@ -1,172 +1,373 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StrictMode } from "react";
+import { StyleSheet } from "react-native";
 
-const { width, height } = Dimensions.get('window');
+export const CALIBRATION_COLORS = {
+  background: "#020617",
+  surface: "#0F172A",
+  surfaceElevated: "#1E293B",
+  border: "#334155",
+  text: "#F8FAFC",
+  textSecondary: "#CBD5E1",
+  textMuted: "#94A3B8",
+  primary: "#F97316",
+  primaryLight: "#FDBA74",
+  success: "#22C55E",
+  warning: "#FB923C",
+  danger: "#EF4444",
+  error: "#FECACA",
+} as const;
 
 const styles = StyleSheet.create({
-  // Root Container Layout
-  parentContainer: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#0F172A', // Slate dark backdrop
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: CALIBRATION_COLORS.background,
   },
-
-  // Header & Title Section
-  headerContainer: {
-    color: '#F8FAFC',
-    fontSize: 24,
-    fontWeight: '800',
-    marginBottom: 4,
-    letterSpacing: 0.2,
+  screen: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: CALIBRATION_COLORS.background,
   },
-  subHeaderText: {
-    color: '#94A3B8',
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    gap: 12,
+    backgroundColor: CALIBRATION_COLORS.background,
+  },
+  permissionTitle: {
+    color: CALIBRATION_COLORS.text,
+    fontSize: 21,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  emptyStateText: {
+    color: CALIBRATION_COLORS.textSecondary,
     fontSize: 14,
-    fontWeight: '500',
-    lineHeight: 20,
-  },
-  instructionText: {
-    color: '#CBD5E1',
-    fontSize: 13,
-    fontWeight: '400',
-    marginBottom: 16,
+    lineHeight: 21,
+    textAlign: "center",
   },
 
-  // Card Shell Component
-  childContainer: {
-    backgroundColor: '#1E293B', // Dark slate module
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#334155',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-
-  // Camera Viewport & Detection Box
-  cameraPreviewContainer: {
-    width: '100%',
-    height: height * 0.35,
-    backgroundColor: '#020617',
-    borderRadius: 16,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#334155',
-    position: 'relative',
-    marginBottom: 16,
-  },
-  cameraOverlayFrame: {
-    width: '75%',
-    height: '85%',
-    borderWidth: 2,
-    borderColor: 'rgba(249, 115, 22, 0.5)', // Tactical orange frame guide
-    borderRadius: 16,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Status & Confidence Badges
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51, 65, 85, 0.4)',
-  },
-  statusLabel: {
-    color: '#94A3B8',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  statusBadgeActive: {
-    color: '#22C55E', // Green for active detection
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  statusBadgeInactive: {
-    color: '#EF4444', // Red for inactive state
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  confidenceValue: {
-    color: '#F97316', // Tactical orange for landmark metrics
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-
-  // Landmark Data Mesh Display
-  sectionTitle: {
-    color: '#F8FAFC',
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  landmarkGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  landmarkRow: {
-    width: '48%',
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  landmarkJointTitle: {
-    color: '#A855F7', // Purple accent for joint labels
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-  },
-  landmarkCoordText: {
-    color: '#CBD5E1',
-    fontSize: 11,
-    fontWeight: '500',
-    fontVariant: ['tabular-nums'],
-    lineHeight: 16,
-  },
-
-  // Calibration Position Selector
-  positionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  positionButton: {
+  cameraStage: {
     flex: 1,
-    backgroundColor: '#1E293B',
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 4,
+    width: "100%",
+    minHeight: 0,
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#000000",
+  },
+  cameraFill: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  topOverlay: {
+    position: "absolute",
+    top: 8,
+    left: 12,
+    right: 12,
+    gap: 9,
+  },
+  topOverlayCompact: {
+    top: 5,
+    left: 10,
+    right: 10,
+    gap: 7,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  titleGroup: {
+    flex: 1,
+    gap: 3,
+    paddingRight: 8,
+  },
+  eyebrow: {
+    color: CALIBRATION_COLORS.primaryLight,
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 1.35,
+    textShadowColor: "rgba(0, 0, 0, 0.72)",
+    textShadowRadius: 5,
+    textShadowOffset: { width: 0, height: 1 },
+  },
+  screenTitle: {
+    color: CALIBRATION_COLORS.text,
+    fontSize: 19,
+    fontWeight: "800",
+    letterSpacing: 0.1,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowRadius: 8,
+    textShadowOffset: { width: 0, height: 1 },
+  },
+  flipCameraButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    borderRadius: 22,
+    backgroundColor: "rgba(15, 23, 42, 0.58)",
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: "rgba(248, 250, 252, 0.17)",
   },
-  positionButtonActive: {
-    backgroundColor: 'rgba(168, 85, 247, 0.15)',
-    borderColor: '#A855F7', // Purple border active state
+  flipCameraText: {
+    color: CALIBRATION_COLORS.text,
+    fontSize: 23,
+    lineHeight: 26,
+    fontWeight: "700",
   },
-  positionText: {
-    color: '#94A3B8',
+  controlDisabled: {
+    opacity: 0.42,
+  },
+  positionSelectorContainer: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    padding: 4,
+    borderRadius: 14,
+    backgroundColor: "rgba(2, 6, 23, 0.56)",
+    borderWidth: 1,
+    borderColor: "rgba(248, 250, 252, 0.13)",
+  },
+  positionPill: {
+    minWidth: 66,
+    minHeight: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  positionPillActive: {
+    backgroundColor: "rgba(249, 115, 22, 0.90)",
+    borderWidth: 1,
+    borderColor: "rgba(253, 186, 116, 0.45)",
+    shadowColor: CALIBRATION_COLORS.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.16,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  positionPillText: {
+    color: "rgba(226, 232, 240, 0.82)",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.65,
+  },
+  positionPillTextActive: {
+    color: "#FFFFFF",
+  },
+
+  bottomOverlay: {
+    position: "absolute",
+    left: 10,
+    right: 10,
+    bottom: 8,
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    paddingBottom: 9,
+    borderRadius: 18,
+    backgroundColor: "rgba(2, 6, 23, 0.64)",
+    borderWidth: 1,
+    borderColor: "rgba(248, 250, 252, 0.10)",
+  },
+  bottomOverlayCompact: {
+    left: 8,
+    right: 8,
+    bottom: 5,
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 7,
+    borderRadius: 15,
+  },
+  statusPillsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  trackingPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+    gap: 7,
+    minHeight: 29,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+  },
+  trackingPillReady: {
+    backgroundColor: "rgba(20, 83, 45, 0.32)",
+    borderColor: "rgba(74, 222, 128, 0.28)",
+  },
+  trackingPillWarning: {
+    borderColor: "rgba(251, 146, 60, 0.30)",
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: CALIBRATION_COLORS.textMuted,
+  },
+  statusDotGood: {
+    backgroundColor: "#4ADE80",
+  },
+  statusDotWarning: {
+    backgroundColor: CALIBRATION_COLORS.warning,
+  },
+  statusPillText: {
+    flexShrink: 1,
+    color: "rgba(248, 250, 252, 0.95)",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  confidencePill: {
+    minHeight: 29,
+    justifyContent: "center",
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 15,
+    backgroundColor: "rgba(15, 23, 42, 0.58)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.10)",
+  },
+  confidenceText: {
+    color: "rgba(226, 232, 240, 0.83)",
+    fontSize: 10,
+    fontWeight: "700",
+    fontVariant: ["tabular-nums"],
+  },
+
+  progressWrapper: {
+    gap: 7,
+    paddingHorizontal: 11,
+    paddingVertical: 9,
+    borderRadius: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.68)",
+    borderWidth: 1,
+    borderColor: "rgba(248, 250, 252, 0.10)",
+  },
+  progressTextRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  progressLabel: {
+    color: CALIBRATION_COLORS.text,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  progressPercent: {
+    color: CALIBRATION_COLORS.primaryLight,
+    fontSize: 12,
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
+  },
+
+  actionRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 8,
+  },
+  actionButton: {
+    flex: 1.35,
+    minHeight: 46,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 14,
+    backgroundColor: CALIBRATION_COLORS.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.17)",
+    shadowColor: CALIBRATION_COLORS.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  secondaryActionButton: {
+    backgroundColor: "rgba(30, 41, 59, 0.82)",
+    borderColor: "rgba(248, 250, 252, 0.19)",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  actionButtonDisabled: {
+    opacity: 0.56,
+  },
+  actionButtonText: {
+    color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "800",
+    letterSpacing: 0.15,
   },
-  positionTextActive: {
-    color: '#A855F7',
-    fontWeight: '700',
+  framingHint: {
+    color: "rgba(226, 232, 240, 0.76)",
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: "center",
+    paddingHorizontal: 6,
+  },
+  errorMessage: {
+    color: CALIBRATION_COLORS.error,
+    fontSize: 12,
+    lineHeight: 17,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "rgba(127, 29, 29, 0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(252, 165, 165, 0.22)",
+  },
+  angleSwitcherButton: {
+    flex: 0.82,
+    minWidth: 92,
+    minHeight: 46,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: "rgba(15, 23, 42, 0.72)",
+    borderWidth: 1,
+    borderColor: "rgba(248, 250, 252, 0.16)",
+  },
+
+  angleSwitcherEyebrow: {
+    color: "rgba(226, 232, 240, 0.62)",
+    fontSize: 8,
+    fontWeight: "800",
+    letterSpacing: 1.1,
+  },
+
+  angleSwitcherText: {
+    color: CALIBRATION_COLORS.primaryLight,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.25,
+  },
+  guidanceText: {
+    alignSelf: "center",
+    maxWidth: "96%",
+    color: "rgba(248, 250, 252, 0.84)",
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.46)",
   },
 });
 

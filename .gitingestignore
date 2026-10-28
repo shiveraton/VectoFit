@@ -1,0 +1,25 @@
+# JavaScript dependencies
+node_modules/
+**/node_modules/
+
+# Android / Gradle build artifacts
+**/build/
+**/.gradle/
+**/.cxx/
+**/.transforms/
+
+# Python environments and generated files
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Frontend build output
+dist/
+**/dist/
+coverage/
+**/coverage/
+
+# Git metadata
+.git/

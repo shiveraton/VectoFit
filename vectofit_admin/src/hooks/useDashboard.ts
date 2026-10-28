@@ -1,31 +1,25 @@
 import { computed } from "vue";
+
 import { useModels } from "./useModels";
 import { useDatasets } from "./useDatasets";
 import { useTraining } from "./useTraining";
 
 export function useDashboard() {
   const { models, fetchModels } = useModels();
-  const { datasets, fetchDatasets } = useDatasets();
-  const { trainingJobs, fetchTrainingJobs } = useTraining();
 
-  const activeModel = computed(() => {
-    for (const model of models.value) {
-      const activeVersion = model.versions.find((v) => v.status === "active");
-      if (activeVersion) {
-        return {
-          modelName: model.name,
-          framework: model.framework,
-          ...activeVersion,
-        };
-      }
-    }
-    return null;
-  });
+  const { datasets, fetchDatasets } = useDatasets();
+
+  const { trainingJobs, fetchTrainingData } = useTraining();
+
+  const currentModel = computed(
+    () =>
+      models.value.find((model) => model.is_active) ?? models.value[0] ?? null,
+  );
 
   const activeJobsCount = computed(
     () =>
       trainingJobs.value.filter(
-        (j) => j.status === "running" || j.status === "queued",
+        (job) => job.status === "RUNNING" || job.status === "PENDING",
       ).length,
   );
 
@@ -37,22 +31,23 @@ export function useDashboard() {
       icon: "D",
       variant: "samples" as const,
     },
+
     {
       label: "Registered Models",
       value: models.value.length,
-      description: "Total model architectures",
+      description: "Total trained model versions",
       icon: "M",
       variant: "version" as const,
     },
+
     {
-      label: "Active Production Endpoint",
-      value: activeModel.value ? activeModel.value.version : "None",
-      description: activeModel.value
-        ? activeModel.value.modelName
-        : "No model deployed",
-      icon: "E",
+      label: "Current Model",
+      value: currentModel.value ? `v${currentModel.value.version}` : "None",
+      description: currentModel.value?.name ?? "No registered model",
+      icon: "M",
       variant: "correct" as const,
     },
+
     {
       label: "Active Training Runs",
       value: activeJobsCount.value,
@@ -63,12 +58,12 @@ export function useDashboard() {
   ]);
 
   const fetchAllDashboardData = async () => {
-    await Promise.all([fetchModels(), fetchDatasets(), fetchTrainingJobs()]);
+    await Promise.all([fetchModels(), fetchDatasets(), fetchTrainingData()]);
   };
 
   return {
     dashboardCards,
-    activeModel,
+    currentModel,
     fetchAllDashboardData,
   };
 }

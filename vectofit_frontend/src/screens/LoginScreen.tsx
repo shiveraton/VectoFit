@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
-import authStore from "../stores/authStore";
+import useAuthStore from "../stores/useAuthStore";
 import { authStyles as styles } from "../styles/LoginScreenStyles";
 
 interface LoginForm {
@@ -26,7 +26,7 @@ export default function Login({ navigation }: LoginProps) {
   });
   const [loading, setLoading] = useState(false);
 
-  const login = authStore((state) => state.login);
+  const login = useAuthStore((state) => state.login);
 
   const handleLogin = async () => {
     if (!formData.username || !formData.password) {

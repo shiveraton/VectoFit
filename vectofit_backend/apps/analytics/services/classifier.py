@@ -3,45 +3,93 @@
 import os
 import numpy as np
 
+def _not_evaluated(reason):
+    return {
+        "classification": "not_evaluated",
+        "evaluation": {
+            "reason": reason
+        },
+    }
+
 def classify_metrics(metrics, thresholds):
-    # metrics - what did we measure?
-    # thresholds - what counts as acceptable?
+    required_thresholds = {
+        "knee_depth",
+        "trunk_lean",
+        "asymmetry"
+    }
 
-    results = {}
+    missing = required_thresholds - set(thresholds.keys())
+    if missing:
+        raise ValueError(
+            f"Missing exercise thresholds: {sorted(missing)}"
+        )
 
-    results["rom"] = evaluate_rom(
-        metrics["rom"],
-        thresholds["minimum_rom"]
+    trunk_angles = metrics.get("trunk_angle")
+
+    if not trunk_angles:
+        raise ValueError(
+            "Cannot evaluate trunk lean without trunk-angle measurements."
+        )
+
+    knee_angle = float(metrics["knee_angle"])
+    maximum_trunk_lean = max(
+        abs(float(angle)) for angle in trunk_angles
+    )
+    asymmetry = float(metrics["asymmetry"])
+
+    knee_depth_threshold = float(thresholds["knee_depth"])
+    trunk_lean_threshold = float(thresholds["trunk_lean"])
+    asymmetry_threshold = float(thresholds["asymmetry"])
+
+    knee_classification = (
+        "insufficient_depth"
+        if knee_angle > knee_depth_threshold
+        else "acceptable"
     )
 
-    results["asymmetry"] = evaluate_asymmetry(
-        metrics["asymmetry"],
-        thresholds["maximum_asymmetry"],
+    trunk_classification = (
+        "excessive_trunk_lean"
+        if maximum_trunk_lean > trunk_lean_threshold
+        else "acceptable"
     )
 
-    results["trunk_angle"] = evaluate_trunk_angle(
-        metrics["trunk_angle"],
-        thresholds["proper_trunk_form"],
-    )
-
-    results["knee_angle"] = evaluate_knee(
-        metrics["knee_angle"],
-        thresholds["knee"],
-    )
-
-    results["hip_angle"] = evaluate_hip_angle(
-        metrics["hip_angle"],
-        thresholds["minimum_hip_angle"],
-        thresholds["maximum_hip_angle"],
-    )
-
-    results["velocity"] = evaluate_velocity(
-        metrics["velocity"],
-        thresholds["minimum_velocity"],
-        thresholds["maximum_velocity"],
-    )
-
-    return results
+    return {
+        "rom": _not_evaluated(
+            "No minimum ROM threshold is configured for this exercise."
+        ),
+        "asymmetry": evaluate_asymmetry(
+            asymmetry,
+            asymmetry_threshold
+        ),
+        "trunk_angle": {
+            "classification": trunk_classification,
+            "evaluation": {
+                "maximum_measured_lean_deg": maximum_trunk_lean,
+                "maximum_allowed_lean_deg": trunk_lean_threshold,
+                "difference": max(
+                    0.0,
+                    maximum_trunk_lean - trunk_lean_threshold
+                ),
+            },
+        },
+        "knee_angle": {
+            "classification": knee_classification,
+            "evaluation": {
+                "measured_minimum_knee_angle_deg": knee_angle,
+                "depth_threshold": knee_depth_threshold,
+                "difference": max(
+                    0.0,
+                    knee_angle - knee_depth_threshold
+                ),
+            },
+        },
+        "hip_angle": _not_evaluated(
+            "No hip-angle evaluation thresholds are configured."
+        ),
+        "velocity": _not_evaluated(
+            "No velocity evaluation thresholds are configured."
+        ),
+    }
 
 def evaluate_hip_angle(hip_angle, minimum_hip_angle, maximum_hip_angle):
     if hip_angle < minimum_hip_angle:

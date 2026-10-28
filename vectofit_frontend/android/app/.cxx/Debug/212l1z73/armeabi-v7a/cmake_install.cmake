@@ -44,11 +44,14 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/AsyncStorageSpec_autolinked_build/cmake_install.cmake")
   include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/VectorIconsIonicons_autolinked_build/cmake_install.cmake")
   include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/NitroModulesSpec_autolinked_build/cmake_install.cmake")
   include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/RNPermissionsSpec_autolinked_build/cmake_install.cmake")
   include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/safeareacontext_autolinked_build/cmake_install.cmake")
+  include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/rnsvg_autolinked_build/cmake_install.cmake")
   include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/RNVectorIconsSpec_autolinked_build/cmake_install.cmake")
+  include("D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/212l1z73/armeabi-v7a/rnworklets_autolinked_build/cmake_install.cmake")
 
 endif()
 
