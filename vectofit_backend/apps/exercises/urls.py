@@ -5,7 +5,7 @@ from . import views
 
 router = DefaultRouter()
 
-router.register(r"variants", views.ExerciseVariantViewSet, basename="exercise-variant")
+router.register(r"variants", views.ExerciseVariantViewSet, basename="exercisevariant")
 
 urlpatterns = [
     path("", include(router.urls)),

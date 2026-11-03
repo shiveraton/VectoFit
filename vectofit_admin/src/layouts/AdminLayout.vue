@@ -9,10 +9,19 @@
         <div class="nav-section">
           <span class="nav-title">Overview</span>
 
-          <RouterLink to="/dashboard" class="nav-link"> Dashboard </RouterLink>
+          <RouterLink v-if="!isAnnotator" to="/dashboard" class="nav-link">
+            Dashboard
+          </RouterLink>
+          <RouterLink
+            v-if="isAnnotator"
+            to="/annotation-queue"
+            class="nav-link"
+          >
+            Annotation queue
+          </RouterLink>
         </div>
 
-        <div class="nav-section">
+        <div v-if="!isAnnotator" class="nav-section">
           <span class="nav-title">ML Development</span>
 
           <RouterLink to="/dataset" class="nav-link"> Datasets </RouterLink>
@@ -20,9 +29,13 @@
           <RouterLink to="/training" class="nav-link"> Training </RouterLink>
 
           <RouterLink to="/models" class="nav-link"> Models </RouterLink>
+
+          <RouterLink to="/experiments" class="nav-link">
+            Experiments
+          </RouterLink>
         </div>
 
-        <div class="nav-section">
+        <div v-if="!isAnnotator" class="nav-section">
           <span class="nav-title">System</span>
 
           <RouterLink to="/administration/users" class="nav-link">
@@ -62,10 +75,20 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { computed } from "vue";
 
 const router = useRouter();
+const isAnnotator = computed(
+  () =>
+    localStorage.getItem("is_annotator") === "true" &&
+    localStorage.getItem("is_staff") !== "true",
+);
 
 const handleSignOut = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("is_staff");
+  localStorage.removeItem("is_annotator");
+  localStorage.removeItem("role");
   router.push("/login");
 };
 </script>

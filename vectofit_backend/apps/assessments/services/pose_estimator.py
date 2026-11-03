@@ -5,15 +5,6 @@ from typing import ClassVar
 import cv2
 import mediapipe as mp
 
-"""
-pose_estimator.py is an abstract lightweight PoseEstimator component reusable across all video feeds.
-
-It contains the following functions:
-
-render_landmarks()
-estimate_pose()
-"""
-
 mp_pose = mp.solutions.pose
 
 
@@ -34,13 +25,27 @@ class PoseEstimator:
     }
 
     def __init__(
-        self, static_image_mode: bool = False, min_detection_confidence: float = 0.5
+        self,
+        static_image_mode: bool = False,
+        model_complexity: int = 1,
+        smooth_landmarks: bool = True,
+        min_detection_confidence: float = 0.5,
+        min_tracking_confidence: float = 0.5,
+        enable_segmentation: bool = False,
     ):
         self.static_image_mode = static_image_mode
         self.min_detection_confidence = min_detection_confidence
+        self.model_complexity = model_complexity
+        self.smooth_landmarks = smooth_landmarks
+        self.min_tracking_confidence = min_tracking_confidence
+        self.enable_segmentation = enable_segmentation
         self.pose = mp_pose.Pose(
             static_image_mode=self.static_image_mode,
+            model_complexity=self.model_complexity,
+            smooth_landmarks=self.smooth_landmarks,
             min_detection_confidence=self.min_detection_confidence,
+            min_tracking_confidence=self.min_tracking_confidence,
+            enable_segmentation=self.enable_segmentation,
         )
 
     def estimate_pose(self, frame):
@@ -78,8 +83,12 @@ class PoseEstimator:
         return [
             [
                 landmark_id,
-                int(lm.x * output_width),
-                int(lm.y * output_height),
+                float(lm.x * output_width),
+                float(lm.y * output_height),
+                float(lm.z),
+                float(lm.visibility),
+                float(lm.x),
+                float(lm.y),
             ]
             for landmark_id, lm in enumerate(results.pose_landmarks.landmark)
         ]
@@ -90,10 +99,14 @@ class PoseEstimator:
         extracted_coords = {}
 
         for name, idx in joint_dict.items():
-            extracted_coords[name] = [
-                landmark_list[idx][1],
-                landmark_list[idx][2],
-            ]
+            extracted_coords[name] = {
+                "x": float(landmark_list[idx][1]),
+                "y": float(landmark_list[idx][2]),
+                "z": float(landmark_list[idx][3]),
+                "visibility": float(landmark_list[idx][4]),
+                "x_normalized": float(landmark_list[idx][5]),
+                "y_normalized": float(landmark_list[idx][6]),
+            }
         return extracted_coords
 
     def close(self):

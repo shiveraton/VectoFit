@@ -1,5 +1,8 @@
+import json
+from pathlib import Path
 from typing import ClassVar
 
+from django.conf import settings
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
@@ -8,8 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from xgboost.core import XGBoostError
 
-from apps.analytics.services.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
-from apps.datasets.models import Dataset
+from apps.analytics.services.features import FEATURE_SCHEMA_VERSION
+from apps.datasets.models import Dataset, Participant
+from apps.training.services.data_loader import (
+    TrainingConfigurationError,
+    resolve_datasets,
+)
+from apps.training.services.evaluation import readiness_report
 from apps.training.services.model_inference import (
     ModelInferenceError,
     predict_with_active_model,
@@ -47,7 +55,12 @@ class TrainingJobCreateView(APIView):
         serializer = TrainingJobRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        feature_selection = data.get("feature_selection") or list(FEATURE_ORDER)
+        feature_selection = data["feature_selection"]
+        split_strategy = (
+            "leave_one_participant_out"
+            if data["evaluation"] == "lopo"
+            else "group_by_participant"
+        )
 
         job = TrainingJob.objects.create(
             algorithm=data["algorithm"],
@@ -57,6 +70,7 @@ class TrainingJobCreateView(APIView):
             hyperparameters=data["hyperparameters"],
             random_seed=data["random_seed"],
             test_size=data["test_size"],
+            split_strategy=split_strategy,
         )
         job.datasets.set(Dataset.objects.filter(pk__in=data["dataset_ids"]))
         run_training_job(
@@ -68,6 +82,8 @@ class TrainingJobCreateView(APIView):
             seed=data["random_seed"],
             view_angle=data["view_angle"],
             prediction_target=data["prediction_target"],
+            model_version=data["model_version"],
+            evaluation=data["evaluation"],
         )
         job.refresh_from_db()
 
@@ -190,3 +206,114 @@ class ModelStateView(APIView):
         )
         serializer = ModelStateSerializer(model, context={"request": request})
         return Response(serializer.data)
+
+
+class ExperimentReadinessView(APIView):
+    permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get(self, request):
+        ids = [
+            int(part)
+            for part in request.query_params.get("dataset_ids", "").split(",")
+            if part.strip().isdigit()
+        ]
+        if not ids:
+            return Response(
+                {"detail": "dataset_ids is required (comma-separated)."}, status=400
+            )
+        view_angle = request.query_params.get("view_angle", "frontal")
+        try:
+            report = readiness_report(resolve_datasets(ids), view_angle)
+        except TrainingConfigurationError as exc:
+            return Response({"detail": str(exc)}, status=400)
+
+        counts = report.get("per_participant_class_counts", {})
+        pks = [int(group.split("-", 1)[1]) for group in counts]
+        codes = dict(
+            Participant.objects.filter(pk__in=pks).values_list("pk", "participant_code")
+        )
+        origin = report.get("per_participant_label_origin", {})
+        participants = [
+            {
+                "group": group,
+                "code": codes.get(int(group.split("-", 1)[1]), group),
+                "good": class_counts.get("1", 0),
+                "bad": class_counts.get("0", 0),
+                "human_labelled": origin.get(group, {}).get("human", 0),
+            }
+            for group, class_counts in counts.items()
+        ]
+        participants.sort(key=lambda row: row["code"])
+        lopo = report.get("lopo", {"viable": False})
+        return Response(
+            {
+                "ok": report["ok"],
+                "reason": report.get("reason", ""),
+                "view_angle": view_angle,
+                "n_reps": report.get("samples", 0),
+                "mixed_pipeline": report.get("mixed_pipeline", False),
+                "pipeline_hash_count": len(report.get("pipeline_config_hashes", {})),
+                "exclusion_counts": report.get("exclusion_counts", {}),
+                "lopo": {
+                    "viable": lopo.get("viable", False),
+                    "folds": lopo.get("folds", 0),
+                    "reason": lopo.get("reason", ""),
+                },
+                "participants": participants,
+            }
+        )
+
+
+EXPERIMENT_BUNDLES = {"main": "", "demo": "demo"}
+
+
+def _experiments_dir() -> Path:
+    default = Path(settings.BASE_DIR).parent / "research" / "experiments"
+    return Path(getattr(settings, "EXPERIMENTS_DIR", default))
+
+
+def _participant_pk(group: str):
+    prefix, _, tail = group.partition("participant-")
+    return int(tail) if prefix == "" and tail.isdigit() else None
+
+
+class ExperimentResultsView(APIView):
+    permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get(self, request):
+        bundle = request.query_params.get("bundle", "main")
+        if bundle not in EXPERIMENT_BUNDLES:
+            return Response({"detail": "Unknown bundle."}, status=400)
+        base = _experiments_dir() / EXPERIMENT_BUNDLES[bundle]
+        results_path, provenance_path = (
+            base / "experiment_results.json",
+            base / "provenance.json",
+        )
+        if not results_path.is_file():
+            return Response({"available": False, "bundle": bundle})
+
+        results = json.loads(results_path.read_text(encoding="utf-8"))
+        provenance = (
+            json.loads(provenance_path.read_text(encoding="utf-8"))
+            if provenance_path.is_file()
+            else None
+        )
+        groups = list(results.get("participants", {}))
+        codes = {}
+        if not results.get("demo"):
+            pks = [pk for pk in map(_participant_pk, groups) if pk is not None]
+            codes = {
+                f"participant-{pk}": code
+                for pk, code in Participant.objects.filter(pk__in=pks).values_list(
+                    "pk", "participant_code"
+                )
+            }
+        return Response(
+            {
+                "available": True,
+                "bundle": bundle,
+                "results": results,
+                "provenance": provenance,
+                "participant_codes": {g: codes.get(g, g) for g in groups},
+            }
+        )

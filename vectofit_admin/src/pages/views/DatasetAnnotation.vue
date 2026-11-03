@@ -16,7 +16,10 @@ const playbackRate = ref(1);
 const videoError = ref("");
 const kneeSides = ["left", "right"] as const;
 const kneeGrades: KneeAlignmentGrade[] = [
-  "aligned", "borderline", "deviated", "unassessable",
+  "aligned",
+  "borderline",
+  "deviated",
+  "unassessable",
 ];
 
 function handleDirectionChange(side: "left" | "right", event: Event) {
@@ -45,7 +48,6 @@ const {
   annotation,
   targetLabel,
   labelledCount,
-  pendingReviewCount,
   isReviewComplete,
   currentSampleLabelState,
   isLoading,
@@ -94,24 +96,6 @@ const activeVideoLabel = computed(() => {
   ]
     .filter(Boolean)
     .join(" · ");
-});
-
-const sourceLabelText = computed(() => {
-  const label = activeVideo.value?.source_label;
-
-  if (label === true) return "GOOD FORM";
-  if (label === false) return "BAD FORM";
-
-  return "UNKNOWN";
-});
-
-const sourceLabelClass = computed(() => {
-  const label = activeVideo.value?.source_label;
-
-  if (label === true) return "good";
-  if (label === false) return "bad";
-
-  return "unknown";
 });
 
 const currentFps = computed(() => {
@@ -247,15 +231,13 @@ onMounted(async () => {
   <div class="annotation-page">
     <header class="annotation-header">
       <div>
-    <div class="eyebrow">DATASET ANNOTATION</div>
+        <div class="eyebrow">DATASET ANNOTATION</div>
 
         <h1>
           {{ session?.dataset.name }}
         </h1>
 
-        <p>
-          Frontal-plane bilateral knee alignment review.
-        </p>
+        <p>Frontal-plane bilateral knee alignment review.</p>
       </div>
 
       <button
@@ -302,6 +284,11 @@ onMounted(async () => {
     <template v-else-if="session && currentSample">
       <section class="annotation-card annotation-meta">
         <div>
+          <span>Annotator</span>
+          <strong>{{ session.annotator_name }}</strong>
+        </div>
+
+        <div>
           <span>Progress</span>
           <strong>{{ currentIndex + 1 }} / {{ samples.length }}</strong>
         </div>
@@ -309,11 +296,6 @@ onMounted(async () => {
         <div>
           <span>Manually Reviewed</span>
           <strong>{{ labelledCount }} / {{ samples.length }}</strong>
-        </div>
-
-        <div>
-          <span>Awaiting Review</span>
-          <strong>{{ pendingReviewCount }}</strong>
         </div>
       </section>
 
@@ -383,7 +365,7 @@ onMounted(async () => {
           <div class="panel-heading">
             <div>
               <span>Rep {{ currentSample.rep_assessment.rep_number }}</span>
-        <h2>Knee Alignment</h2>
+              <h2>Knee Alignment</h2>
               <p
                 v-if="currentSampleLabelState"
                 class="annotation-state"
@@ -399,36 +381,79 @@ onMounted(async () => {
               </p>
             </div>
 
-          <span :class="['verdict', (targetLabel ?? 'pending').toLowerCase()]">
-            {{ targetLabel?.toUpperCase() ?? 'PENDING' }}
+            <span
+              :class="['verdict', (targetLabel ?? 'pending').toLowerCase()]"
+            >
+              {{ targetLabel?.toUpperCase() ?? "PENDING" }}
             </span>
           </div>
 
           <div class="criteria-list">
             <div v-for="side in kneeSides" :key="side" class="criterion">
-              <strong>{{ side === 'left' ? 'Left knee' : 'Right knee' }}</strong>
+              <strong :id="`${side}-knee-label`">{{
+                side === "left" ? "Left knee" : "Right knee"
+              }}</strong>
               <div class="criterion-actions">
-                <button v-for="grade in kneeGrades" :key="grade"
-                  type="button" :class="{ active: annotation[side].grade === grade }"
-                  @click="setKneeGrade(side, grade)">{{ grade }}</button>
+                <button
+                  v-for="grade in kneeGrades"
+                  :key="grade"
+                  type="button"
+                  :class="{ active: annotation[side].grade === grade }"
+                  @click="setKneeGrade(side, grade)"
+                >
+                  {{ grade }}
+                </button>
               </div>
-              <select :value="annotation[side].direction ?? ''" :disabled="annotation[side].grade === null || annotation[side].grade === 'unassessable' || annotation[side].grade === 'aligned'"
-                @change="handleDirectionChange(side, $event)">
-                <option value="uncertain">Direction uncertain</option>
-                <option value="valgus">Valgus</option>
-                <option value="varus">Varus</option>
-              </select>
+              <label class="direction-field" :for="`${side}-direction`">
+                <span :id="`${side}-direction-label`">Deviation direction</span>
+                <select
+                  :id="`${side}-direction`"
+                  class="direction-select"
+                  :aria-labelledby="`${side}-knee-label ${side}-direction-label`"
+                  :value="annotation[side].direction ?? 'uncertain'"
+                  :disabled="
+                    annotation[side].grade === null ||
+                    annotation[side].grade === 'unassessable' ||
+                    annotation[side].grade === 'aligned'
+                  "
+                  @change="handleDirectionChange(side, $event)"
+                >
+                  <option value="uncertain">Direction uncertain</option>
+                  <option value="valgus">Valgus</option>
+                  <option value="varus">Varus</option>
+                </select>
+              </label>
             </div>
           </div>
 
-          <label class="error-label-field"><span>Symmetry observation</span>
-            <select :value="annotation.symmetry_observation" @change="handleSymmetryChange">
-              <option value="not_recorded">Not recorded</option><option value="symmetric">Symmetric</option>
-              <option value="asymmetric">Asymmetric</option><option value="uncertain">Uncertain</option>
+          <label class="annotation-field">
+            <span class="field-label">Symmetry observation</span>
+            <span class="field-hint"
+              >Compare the knees during this repetition.</span
+            >
+            <select
+              class="annotation-control"
+              :value="annotation.symmetry_observation"
+              @change="handleSymmetryChange"
+            >
+              <option value="not_recorded">Not recorded</option>
+              <option value="symmetric">Symmetric</option>
+              <option value="asymmetric">Asymmetric</option>
+              <option value="uncertain">Uncertain</option>
             </select>
           </label>
-          <label class="error-label-field"><span>Notes</span>
-            <textarea :value="annotation.notes" rows="3" @input="handleNotesInput" />
+          <label class="annotation-field notes-field">
+            <span class="field-label">Notes</span>
+            <span class="field-hint"
+              >Add details that support your assessment.</span
+            >
+            <textarea
+              class="annotation-control"
+              :value="annotation.notes"
+              rows="4"
+              placeholder="Describe any visible alignment or review details…"
+              @input="handleNotesInput"
+            />
           </label>
 
           <div class="annotation-actions">
@@ -620,6 +645,37 @@ onMounted(async () => {
   overflow: hidden;
 }
 
+.video-source-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 82px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e8edf3;
+  background: #ffffff;
+}
+
+.video-source-meta > span {
+  color: #8a96a8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.video-source-meta > strong {
+  display: block;
+  max-width: 100%;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .video-panel video {
   display: block;
   width: 100%;
@@ -728,16 +784,19 @@ onMounted(async () => {
 .criteria-list {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #edf1f5;
+  gap: 10px;
 }
 
 .criterion {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  min-height: 58px;
-  border-bottom: 1px solid #edf1f5;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  background: #fbfcfe;
 }
 
 .criterion > div:first-child {
@@ -753,19 +812,21 @@ onMounted(async () => {
 .criterion-actions {
   display: flex;
   gap: 6px;
-  flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .criterion-actions button {
-  min-width: 58px;
-  height: 30px;
-  padding: 0 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 4px 5px;
   border: 1px solid #dce3eb;
   border-radius: 7px;
   background: #ffffff;
   color: #667085;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -796,44 +857,74 @@ onMounted(async () => {
   color: #be123c;
 }
 
-.error-label-field {
+.annotation-field,
+.direction-field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   margin-top: 18px;
 }
 
-.error-label-field span {
-  color: #475467;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.direction-field {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0;
 }
 
-.error-label-field input {
+.field-label,
+.direction-field > span {
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field-hint {
+  color: #8a96a8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.annotation-control,
+.direction-select {
   width: 100%;
-  height: 38px;
-  padding: 0 11px;
+  min-height: 42px;
+  padding: 10px 12px;
   box-sizing: border-box;
   border: 1px solid #dce3eb;
-  border-radius: 8px;
+  border-radius: 9px;
   outline: none;
   background: #ffffff;
   color: #344054;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13px;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 
-.error-label-field input::placeholder {
+.annotation-control::placeholder {
   color: #a0a9b7;
 }
 
-.error-label-field input:focus {
+.annotation-control:focus-visible,
+.direction-select:focus-visible {
   border-color: #f97316;
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.annotation-control:not(textarea),
+.direction-select {
+  cursor: pointer;
+}
+
+.notes-field {
+  margin-top: 16px;
+}
+
+.notes-field textarea {
+  min-height: 104px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .annotation-actions {
@@ -964,31 +1055,16 @@ onMounted(async () => {
   }
 
   .video-source-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 38px 40px;
-    border-bottom: 1px solid #e8edf3;
-    background: #ffffff;
+    min-height: 76px;
+    padding: 14px 16px;
   }
 
   .video-source-meta > span {
-    margin-bottom: 2px;
-    color: #8a96a8;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 9px;
   }
 
   .video-source-meta > strong {
-    color: #344054;
     font-size: 13px;
-    font-weight: 700;
-    line-height: 1.7;
-    white-space: normal;
-    overflow-wrap: anywhere;
   }
 
   .source-chip-row {
@@ -1071,10 +1147,8 @@ onMounted(async () => {
   }
 
   .criterion {
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-    padding: 12px 0;
+    align-items: stretch;
+    padding: 14px;
   }
 
   .criterion-actions {

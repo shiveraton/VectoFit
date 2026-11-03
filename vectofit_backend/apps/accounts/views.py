@@ -1,5 +1,7 @@
 from typing import ClassVar
 
+from django.conf import settings
+from django.db.models import Count
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
@@ -8,7 +10,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Profile
+from apps.datasets.models import DatasetAnnotatorAssignment
+
+from .models import Profile, User
+from .roles import ANNOTATOR_GROUP
 from .serializers import (
     LoginSerializer,
     ProfileSerializer,
@@ -66,19 +71,63 @@ class RegisterAPIView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-
+        if not getattr(settings, "ANNOTATOR_SELF_REGISTRATION", True):
             return Response(
-                {"message": "User registered successfully."},
-                status=status.HTTP_201_CREATED,
+                {"detail": "Public annotator sign-up is disabled."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        print(f"DEBUG: {serializer.errors}")
+        serializer = RegisterSerializer(data=request.data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.save()
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response(
+            {
+                "message": "Account created.",
+                "token": token.key,
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AnnotatorDirectoryView(APIView):
+    permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get(self, request):
+        users = list(
+            User.objects.filter(
+                groups__name=ANNOTATOR_GROUP,
+                is_staff=False,
+            )
+            .order_by("username")
+            .distinct()
+        )
+        assigned = dict(
+            DatasetAnnotatorAssignment.objects.filter(
+                annotator__in=users, is_active=True
+            )
+            .values("annotator")
+            .annotate(total=Count("id"))
+            .values_list("annotator", "total")
+        )
+        return Response(
+            [
+                {
+                    "id": user.pk,
+                    "username": user.username,
+                    "email": user.email,
+                    "date_joined": user.date_joined,
+                    "is_active": user.is_active,
+                    "assigned_datasets": assigned.get(user.pk, 0),
+                }
+                for user in users
+            ]
+        )
 
 
 class LoginAPIView(APIView):
@@ -86,14 +135,11 @@ class LoginAPIView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        print(f"DEBUG: Request data received: {request.data}")
         serializer = LoginSerializer(data=request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data["user"]
             token, created = Token.objects.get_or_create(user=user)
             return Response({"token": token.key}, status=status.HTTP_200_OK)
-
-        print(f"DEBUG: Serializer errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)

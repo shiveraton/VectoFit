@@ -1,26 +1,20 @@
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.assessments.models import AssessmentSession
-from apps.assessments.services.video_processor import VideoProcessor
-
+from apps.analytics.services.repetitions import extract_reps
 from apps.analytics.services.segmentation import (
     _hip_midpoint_y,
     _smooth,
     _turning_points,
-    segment_reps,
-    split_contiguous_pose_runs,
 )
-
-
-TARGET_FPS = 30.0
+from apps.assessments.models import AssessmentSession
 
 
 class Command(BaseCommand):
@@ -44,43 +38,22 @@ class Command(BaseCommand):
         try:
             session = AssessmentSession.objects.get(pk=session_id)
         except AssessmentSession.DoesNotExist as exc:
-            raise CommandError(
-                f"Session {session_id} does not exist."
-            ) from exc
+            raise CommandError(f"Session {session_id} does not exist.") from exc
 
-        result = VideoProcessor.process_video(session.video_file.path)
-
-        if result.get("status") != "success":
-            raise CommandError(
-                f"Video processing failed: {result.get('message')}"
-            )
+        extraction = extract_reps(session.video_file.path)
+        result = extraction["result"]
 
         landmark_data = result.get("landmark_data", [])
 
         if not landmark_data:
             raise CommandError("Video processing returned no landmark data.")
 
-        native_fps = float(result.get("native_fps") or TARGET_FPS)
-
-        if native_fps <= 0:
-            native_fps = TARGET_FPS
-
-        expected_frame_step = max(
-            1,
-            round(native_fps / TARGET_FPS),
-        )
-
-        pose_runs = split_contiguous_pose_runs(
-            landmark_data,
-            expected_frame_step=expected_frame_step,
-        )
+        pose_runs = extraction["pose_runs"]
 
         valid_frame_count = sum(len(run) for run in pose_runs)
 
         if valid_frame_count < 3:
-            raise CommandError(
-                "Not enough valid pose frames to plot."
-            )
+            raise CommandError("Not enough valid pose frames to plot.")
 
         fig, ax = plt.subplots(figsize=(16, 7))
 
@@ -91,10 +64,7 @@ class Command(BaseCommand):
         first_run = True
 
         for run_number, run in enumerate(pose_runs, start=1):
-            landmarks = [
-                entry["landmarks"]
-                for entry in run
-            ]
+            landmarks = [entry["landmarks"] for entry in run]
 
             frame_indices = np.asarray(
                 [int(entry["frame_index"]) for entry in run],
@@ -114,22 +84,14 @@ class Command(BaseCommand):
                 hip_y,
                 alpha=0.35,
                 linewidth=0.8,
-                label=(
-                    "Raw hip midpoint Y"
-                    if first_run
-                    else None
-                ),
+                label=("Raw hip midpoint Y" if first_run else None),
             )
 
             ax.plot(
                 frame_indices,
                 smoothed,
                 linewidth=1.5,
-                label=(
-                    "Smoothed hip midpoint Y"
-                    if first_run
-                    else None
-                ),
+                label=("Smoothed hip midpoint Y" if first_run else None),
             )
 
             first_run = False
@@ -140,11 +102,7 @@ class Command(BaseCommand):
                     smoothed[tops],
                     marker="^",
                     s=45,
-                    label=(
-                        "Detected tops"
-                        if total_tops == len(tops)
-                        else None
-                    ),
+                    label=("Detected tops" if total_tops == len(tops) else None),
                     zorder=4,
                 )
 
@@ -155,9 +113,7 @@ class Command(BaseCommand):
                     marker="v",
                     s=45,
                     label=(
-                        "Detected bottoms"
-                        if total_bottoms == len(bottoms)
-                        else None
+                        "Detected bottoms" if total_bottoms == len(bottoms) else None
                     ),
                     zorder=4,
                 )
@@ -165,16 +121,22 @@ class Command(BaseCommand):
             if len(run) < 3:
                 continue
 
-            segments = segment_reps(landmarks)
+            segments = [
+                {
+                    "start": rep["start_offset"],
+                    "bottom": rep["bottom_offset"],
+                    "end": rep["end_offset"],
+                }
+                for rep in extraction["reps"]
+                if rep["run_number"] == run_number
+            ]
 
             for rep in segments:
                 start = rep["start"]
                 bottom = rep["bottom"]
                 end = rep["end"]
 
-                if not (
-                    0 <= start <= bottom <= end < len(run)
-                ):
+                if not (0 <= start <= bottom <= end < len(run)):
                     self.stderr.write(
                         self.style.WARNING(
                             f"Skipping invalid repetition range "
@@ -187,12 +149,8 @@ class Command(BaseCommand):
                 bottom_frame = int(frame_indices[bottom])
                 end_frame = int(frame_indices[end])
 
-                descent_amplitude = float(
-                    smoothed[bottom] - smoothed[start]
-                )
-                recovery_amplitude = float(
-                    smoothed[bottom] - smoothed[end]
-                )
+                descent_amplitude = float(smoothed[bottom] - smoothed[start])
+                recovery_amplitude = float(smoothed[bottom] - smoothed[end])
 
                 rep_number = len(rep_traces) + 1
 
@@ -213,11 +171,7 @@ class Command(BaseCommand):
                     start_frame,
                     end_frame,
                     alpha=0.08,
-                    label=(
-                        "Detected rep intervals"
-                        if rep_number == 1
-                        else None
-                    ),
+                    label=("Detected rep intervals" if rep_number == 1 else None),
                 )
 
                 ax.axvline(
@@ -240,9 +194,7 @@ class Command(BaseCommand):
                 )
 
         ax.invert_yaxis()
-        ax.set_title(
-            f"VectoFit Session {session_id}: Full Hip Movement Trace"
-        )
+        ax.set_title(f"VectoFit Session {session_id}: Full Hip Movement Trace")
         ax.set_xlabel("Original video frame index")
         ax.set_ylabel("Hip midpoint Y coordinate")
         ax.grid(True, alpha=0.25)
@@ -264,15 +216,13 @@ class Command(BaseCommand):
         fig.savefig(output_path, dpi=160)
         plt.close(fig)
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Plot saved to: {output_path}")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Plot saved to: {output_path}"))
 
         self.stdout.write(
             f"Original entries: {len(landmark_data)} | "
             f"Valid pose frames: {valid_frame_count} | "
             f"Contiguous pose runs: {len(pose_runs)} | "
-            f"Expected frame step: {expected_frame_step}"
+            f"Expected frame step: {extraction['sample_step']}"
         )
 
         self.stdout.write(

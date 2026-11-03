@@ -3,7 +3,10 @@ from typing import ClassVar
 
 from rest_framework import serializers
 
-from apps.analytics.services.features import AVAILABLE_FEATURES, FEATURE_ORDER
+from apps.analytics.services.features import (
+    FeatureExtractionError,
+    validate_features,
+)
 
 from .models import ModelRegistry, TrainingJob
 
@@ -66,6 +69,9 @@ class TrainingJobSerializer(serializers.ModelSerializer):
             "prediction_target": manifest.get(
                 "prediction_target", obj.prediction_target
             ),
+            "model_version": manifest.get("model_version"),
+            "split_strategy": manifest.get("split_strategy", obj.split_strategy),
+            "exclusion_counts": manifest.get("exclusion_counts", {}),
         }
 
     def get_dataset_names(self, obj):
@@ -104,13 +110,25 @@ class TrainingJobRequestSerializer(serializers.Serializer):
         choices=TrainingJob.PredictionTarget.choices,
         default=TrainingJob.PredictionTarget.BINARY_FORM,
     )
+    model_version = serializers.ChoiceField(
+        choices=[("M0", "M0 (FPPA only)"), ("M1", "M1 (FPPA + bilateral asymmetry)")],
+        default="M1",
+        help_text="Feature set: M0 = 4 FPPA features, M1 = M0 + 2 asymmetry features.",
+    )
+    evaluation = serializers.ChoiceField(
+        choices=[
+            ("lopo", "Leave-one-participant-out"),
+            ("holdout", "Single participant-grouped holdout"),
+        ],
+        default="lopo",
+    )
     feature_selection = serializers.ListField(
         child=serializers.CharField(),
         allow_empty=True,
         required=False,
         help_text=(
-            f"Feature names to use. Empty/omitted means all of {FEATURE_ORDER}. "
-            f"Accepted aliases: {AVAILABLE_FEATURES}."
+            "Feature names to use. Empty/omitted means every feature of the "
+            "selected model_version."
         ),
     )
     hyperparameters = serializers.DictField(required=False, default=dict)
@@ -181,6 +199,13 @@ class TrainingJobRequestSerializer(serializers.Serializer):
         dataset_ids = attrs["dataset_ids"]
         angle = attrs["view_angle"]
         target = attrs["prediction_target"]
+        try:
+            attrs["feature_selection"] = validate_features(
+                attrs.get("feature_selection") or None,
+                model_version=attrs["model_version"],
+            )
+        except FeatureExtractionError as exc:
+            raise serializers.ValidationError({"feature_selection": str(exc)}) from exc
         datasets = list(
             Dataset.objects.select_related("view_angle")
             .prefetch_related("videos__view_angle")
@@ -299,19 +324,6 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                 }
             )
         return attrs
-
-    def validate_feature_selection(self, value):
-        from apps.analytics.services.features import (
-            FeatureExtractionError,
-            validate_features,
-        )
-
-        if not value:
-            return list(FEATURE_ORDER)
-        try:
-            return validate_features(value)
-        except FeatureExtractionError as exc:
-            raise serializers.ValidationError(str(exc)) from exc
 
 
 class ModelPredictionRequestSerializer(serializers.Serializer):

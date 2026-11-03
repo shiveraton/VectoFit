@@ -1,0 +1,12 @@
+
+
+class DatasetAnnotatorAssignment(models.Model):
+    django.contrib.auth.models.User
+    dataset = models.ForeignKey('datasets.Dataset', on_delete=models.CASCADE, related_name='annotator_assignments')
+    annotator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='dataset_assignments')
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        unique_together = ('dataset', 'annotator')

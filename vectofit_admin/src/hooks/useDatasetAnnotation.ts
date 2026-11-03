@@ -40,6 +40,21 @@ function deriveTargetLabel(annotation: KneeAnnotation): TargetLabel | null {
   return "good";
 }
 
+function copyAnnotation(annotation: KneeAnnotation): KneeAnnotation {
+  return {
+    left: {
+      grade: annotation.left.grade,
+      direction: annotation.left.direction,
+    },
+    right: {
+      grade: annotation.right.grade,
+      direction: annotation.right.direction,
+    },
+    symmetry_observation: annotation.symmetry_observation,
+    notes: annotation.notes,
+  };
+}
+
 function mergeSavedSample(
   original: DatasetSample,
   saved: DatasetSample,
@@ -114,7 +129,7 @@ export function useDatasetAnnotation() {
 
     annotation.value =
       sample?.knee_annotation != null
-        ? structuredClone(sample.knee_annotation)
+        ? copyAnnotation(sample.knee_annotation)
         : emptyKneeAnnotation();
   };
 
@@ -179,7 +194,7 @@ export function useDatasetAnnotation() {
     error.value = null;
 
     try {
-      const payload: KneeAnnotation = structuredClone(annotation.value);
+      const payload = copyAnnotation(annotation.value);
       const saved = await datasetAnnotationService.save(sample.id, {
         knee_annotation: payload,
       });

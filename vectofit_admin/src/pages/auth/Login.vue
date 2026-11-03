@@ -68,15 +68,23 @@ const handleLogin = async () => {
 
     if (token) {
       localStorage.setItem("token", token);
-      await router.push("/dashboard");
+      const currentUser = await client.get("/accounts/me/");
+      localStorage.setItem("is_staff", String(currentUser.data.is_staff));
+      localStorage.setItem(
+        "is_annotator",
+        String(currentUser.data.is_annotator),
+      );
+      localStorage.setItem("role", currentUser.data.role);
+      await router.push(
+        currentUser.data.is_annotator && !currentUser.data.is_staff
+          ? "/annotation-queue"
+          : "/dashboard",
+      );
     } else {
-      console.error("Token is missing in response payload:", response.data);
     }
-  } catch (error) {
-    console.error("Login failed:", error);
+  } catch {
   } finally {
     isLoading.value = false;
-    console.log("Login request completed.");
   }
 };
 </script>

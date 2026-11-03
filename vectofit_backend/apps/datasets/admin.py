@@ -2,7 +2,31 @@ from typing import ClassVar
 
 from django.contrib import admin
 
-from .models import Dataset, DatasetSample, Participant, ViewAngle
+from .models import (
+    AnnotationEvent,
+    Dataset,
+    DatasetAnnotatorAssignment,
+    DatasetSample,
+    Participant,
+    ViewAngle,
+)
+
+
+@admin.register(AnnotationEvent)
+class AnnotationEventAdmin(admin.ModelAdmin):
+    list_display = ("id", "sample", "annotator", "entered_by", "action", "target_label", "created_at")
+    list_filter = ("action", "annotator", "sample__dataset")
+    search_fields = ("sample__id", "annotator__username", "entered_by__username", "target_label")
+    readonly_fields = tuple(field.name for field in AnnotationEvent._meta.fields)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Participant)
@@ -44,6 +68,22 @@ class DatasetAdmin(admin.ModelAdmin):
         return True
 
     actions: ClassVar[list] = ["delete_selected"]
+
+
+@admin.register(DatasetAnnotatorAssignment)
+class DatasetAnnotatorAssignmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "dataset",
+        "annotator",
+        "is_active",
+        "assigned_by",
+        "assigned_at",
+    )
+    list_filter = ("is_active", "dataset")
+    search_fields = ("dataset__name", "annotator__username", "annotator__email")
+    autocomplete_fields = ("dataset",)
+    raw_id_fields = ("annotator", "assigned_by")
 
 
 @admin.register(DatasetSample)

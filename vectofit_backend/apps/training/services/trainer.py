@@ -10,10 +10,11 @@ from sklearn.metrics import (
     f1_score,
     precision_score,
     recall_score,
+    roc_auc_score,
 )
 from xgboost import XGBClassifier
 
-from .data_loader import SampleSet, group_split
+from .data_loader import SampleSet, group_split, leave_one_participant_out_folds
 
 BASELINE_HYPERPARAMETERS = {
     "n_estimators": 200,
@@ -25,6 +26,12 @@ BASELINE_HYPERPARAMETERS = {
     "reg_lambda": 1.0,
     "objective": "binary:logistic",
     "eval_metric": "logloss",
+}
+
+EVALUATION_STRATEGIES = ("lopo", "holdout")
+STRATEGY_NAMES = {
+    "lopo": "leave_one_participant_out",
+    "holdout": "group_by_participant",
 }
 
 
@@ -86,14 +93,18 @@ def _check_split_viability(train_idx, test_idx, labels):
         )
 
 
-def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42):
-    if not isinstance(sample_set, SampleSet):
-        raise TypeError("train_and_evaluate expects a SampleSet.")
+def _distribution(values, target_names):
+    values = np.asarray(values)
+    return {
+        target_names[int(label)]: int(np.sum(values == label))
+        for label in np.unique(values)
+    }
 
+
+def _encode_targets(sample_set):
     raw_labels = list(sample_set.labels)
     if sample_set.prediction_target == "binary_form":
-        allowed = {0, 1}
-        if not set(raw_labels).issubset(allowed):
+        if not set(raw_labels).issubset({0, 1}):
             raise InsufficientDataError(
                 "binary_form targets must be encoded as 0 or 1."
             )
@@ -102,22 +113,64 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
                 "binary_form training requires both target classes: incorrect (0) "
                 "and correct (1). Add labelled repetitions from both classes."
             )
-        target_names = ["BAD_FORM", "GOOD_FORM"]
-        label_to_index = {0: 0, 1: 1}
-        labels = [label_to_index[label] for label in raw_labels]
-    elif sample_set.prediction_target == "error_type":
+        return ["BAD_FORM", "GOOD_FORM"], [int(label) for label in raw_labels]
+    if sample_set.prediction_target == "error_type":
         target_names = sorted({str(label) for label in raw_labels})
         if len(target_names) < 2:
             raise InsufficientDataError(
                 "error_type requires at least two distinct target classes."
             )
-        label_to_index = {name: index for index, name in enumerate(target_names)}
-        labels = [label_to_index[str(label)] for label in raw_labels]
-    else:
+        mapping = {name: index for index, name in enumerate(target_names)}
+        return target_names, [mapping[str(label)] for label in raw_labels]
+    raise InsufficientDataError(
+        f"Unsupported prediction target {sample_set.prediction_target!r}."
+    )
+
+
+def _score(y_true, y_pred, probabilities, target_names, prediction_target):
+    class_indices = list(range(len(target_names)))
+    averaging = "binary" if prediction_target == "binary_form" else "macro"
+    metrics = {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
+        "f1": float(f1_score(y_true, y_pred, average=averaging, zero_division=0)),
+        "precision": float(
+            precision_score(y_true, y_pred, average=averaging, zero_division=0)
+        ),
+        "recall": float(
+            recall_score(y_true, y_pred, average=averaging, zero_division=0)
+        ),
+        "confusion_matrix": confusion_matrix(
+            y_true, y_pred, labels=class_indices
+        ).tolist(),
+        "classification_report": classification_report(
+            y_true,
+            y_pred,
+            labels=class_indices,
+            target_names=target_names,
+            zero_division=0,
+        ),
+    }
+    if prediction_target == "binary_form" and len(np.unique(y_true)) == 2:
+        metrics["roc_auc"] = float(roc_auc_score(y_true, probabilities[:, 1]))
+    return metrics
+
+
+def _new_model(params, seed):
+    return XGBClassifier(**params, random_state=seed)
+
+
+def train_and_evaluate(
+    sample_set, hyperparameters=None, test_size=0.3, seed=42, evaluation="lopo"
+):
+    if not isinstance(sample_set, SampleSet):
+        raise TypeError("train_and_evaluate expects a SampleSet.")
+    if evaluation not in EVALUATION_STRATEGIES:
         raise InsufficientDataError(
-            f"Unsupported prediction target {sample_set.prediction_target!r}."
+            f"evaluation must be one of {list(EVALUATION_STRATEGIES)}."
         )
 
+    target_names, labels = _encode_targets(sample_set)
     X = np.asarray(sample_set.rows, dtype=float)
     y = np.asarray(labels, dtype=int)
     if X.ndim != 2 or X.shape[1] != len(sample_set.feature_names):
@@ -133,56 +186,54 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
             "The design matrix contains non-finite values; refusing to train."
         )
 
-    train_idx, test_idx = group_split(sample_set.groups, test_size, seed, labels=labels)
-    _check_split_viability(train_idx, test_idx, labels)
-
     params = resolve_hyperparameters(
         hyperparameters,
         prediction_target=sample_set.prediction_target,
         class_count=len(target_names),
     )
-    model = XGBClassifier(**params, random_state=seed)
+    if evaluation == "lopo":
+        return _evaluate_lopo(sample_set, X, y, target_names, params, seed)
+    return _evaluate_holdout(sample_set, X, y, target_names, params, test_size, seed)
+
+
+def _finish_metrics(metrics, sample_set, target_names, y, eval_idx, train_dist_idx):
+    metrics.update(
+        {
+            "target_names": target_names,
+            "class_mapping": {
+                str(index): name for index, name in enumerate(target_names)
+            },
+            "prediction_target": sample_set.prediction_target,
+            "train_class_distribution": _distribution(y[train_dist_idx], target_names),
+            "test_class_distribution": _distribution(y[eval_idx], target_names),
+            "overall_class_distribution": _distribution(y, target_names),
+            "feature_names": list(sample_set.feature_names),
+        }
+    )
+    return metrics
+
+
+def _evaluate_holdout(sample_set, X, y, target_names, params, test_size, seed):
+    labels = y.tolist()
+    train_idx, test_idx = group_split(sample_set.groups, test_size, seed, labels=labels)
+    _check_split_viability(train_idx, test_idx, labels)
+
+    model = _new_model(params, seed)
     model.fit(X[train_idx], y[train_idx])
     y_pred = model.predict(X[test_idx]).astype(int)
     probabilities = model.predict_proba(X[test_idx])
-    class_indices = list(range(len(target_names)))
-    averaging = "binary" if sample_set.prediction_target == "binary_form" else "macro"
-    metrics = {
-        "accuracy": float(accuracy_score(y[test_idx], y_pred)),
-        "balanced_accuracy": float(balanced_accuracy_score(y[test_idx], y_pred)),
-        "f1": float(f1_score(y[test_idx], y_pred, average=averaging, zero_division=0)),
-        "precision": float(
-            precision_score(y[test_idx], y_pred, average=averaging, zero_division=0)
-        ),
-        "recall": float(
-            recall_score(y[test_idx], y_pred, average=averaging, zero_division=0)
-        ),
-        "confusion_matrix": confusion_matrix(
-            y[test_idx], y_pred, labels=class_indices
-        ).tolist(),
-        "classification_report": classification_report(
-            y[test_idx],
-            y_pred,
-            labels=class_indices,
-            target_names=target_names,
-            zero_division=0,
-        ),
-        "target_names": target_names,
-        "class_mapping": {str(index): name for index, name in enumerate(target_names)},
-        "prediction_target": sample_set.prediction_target,
-        "train_class_distribution": _distribution(y[train_idx], target_names),
-        "test_class_distribution": _distribution(y[test_idx], target_names),
-        "overall_class_distribution": _distribution(y, target_names),
-        "feature_names": list(sample_set.feature_names),
-        "feature_importances": {
-            name: float(value)
-            for name, value in zip(sample_set.feature_names, model.feature_importances_)
-        },
-        "held_out_probabilities": [
-            {target_names[i]: float(prob) for i, prob in enumerate(row)}
-            for row in probabilities
-        ],
+    metrics = _score(
+        y[test_idx], y_pred, probabilities, target_names, sample_set.prediction_target
+    )
+    _finish_metrics(metrics, sample_set, target_names, y, test_idx, train_idx)
+    metrics["feature_importances"] = {
+        name: float(value)
+        for name, value in zip(sample_set.feature_names, model.feature_importances_)
     }
+    metrics["held_out_probabilities"] = [
+        {target_names[i]: float(prob) for i, prob in enumerate(row)}
+        for row in probabilities
+    ]
     return {
         "model": model,
         "metrics": metrics,
@@ -193,13 +244,94 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
         "seed": seed,
         "target_names": target_names,
         "class_mapping": metrics["class_mapping"],
+        "evaluation": {
+            "strategy": STRATEGY_NAMES["holdout"],
+            "test_size": test_size,
+        },
+        "oof": None,
     }
 
 
-def _distribution(values, target_names):
+def _evaluate_lopo(sample_set, X, y, target_names, params, seed):
+    folds, skipped = leave_one_participant_out_folds(sample_set.groups, y.tolist())
+    n_samples, n_classes = len(y), len(target_names)
+    probabilities = np.full((n_samples, n_classes), np.nan)
+    per_participant = {}
+
+    for fold in folds:
+        model = _new_model(params, seed)
+        model.fit(X[fold["train_idx"]], y[fold["train_idx"]])
+        fold_proba = model.predict_proba(X[fold["test_idx"]])
+        probabilities[fold["test_idx"]] = fold_proba
+        fold_pred = fold_proba.argmax(axis=1)
+        fold_true = y[fold["test_idx"]]
+        per_participant[fold["group"]] = {
+            "n_reps": len(fold_true),
+            "n_correct": int(np.sum(fold_pred == fold_true)),
+            "accuracy": float(np.mean(fold_pred == fold_true)),
+            "class_counts": _distribution(fold_true, target_names),
+        }
+
+    evaluated = np.flatnonzero(~np.isnan(probabilities[:, 0]))
+    if set(y[evaluated].tolist()) != set(range(n_classes)):
+        raise InsufficientDataError(
+            "The pooled held-out predictions do not contain every target class; "
+            "add data from more participants."
+        )
+    pooled_proba = probabilities[evaluated]
+    pooled_pred = pooled_proba.argmax(axis=1)
+    metrics = _score(
+        y[evaluated],
+        pooled_pred,
+        pooled_proba,
+        target_names,
+        sample_set.prediction_target,
+    )
+
+    final_model = _new_model(params, seed)
+    final_model.fit(X, y)
+    _finish_metrics(
+        metrics, sample_set, target_names, y, evaluated, np.arange(n_samples)
+    )
+    metrics["feature_importances"] = {
+        name: float(value)
+        for name, value in zip(
+            sample_set.feature_names, final_model.feature_importances_
+        )
+    }
+    oof_probabilities = [
+        {target_names[i]: float(prob) for i, prob in enumerate(row)}
+        for row in pooled_proba
+    ]
+    metrics["held_out_probabilities"] = oof_probabilities
+    metrics["held_out_index"] = evaluated.tolist()
+
+    evaluation = {
+        "strategy": STRATEGY_NAMES["lopo"],
+        "n_participants": len({fold["group"] for fold in folds}) + len(skipped),
+        "n_folds": len(folds),
+        "skipped_folds": skipped,
+        "evaluated_samples": len(evaluated),
+        "unevaluated_samples": int(n_samples - len(evaluated)),
+        "per_participant": per_participant,
+    }
+    metrics["evaluation"] = evaluation
     return {
-        target_names[int(label)]: int(np.sum(values == label))
-        for label in np.unique(values)
+        "model": final_model,
+        "train_idx": list(range(n_samples)),
+        "test_idx": evaluated.tolist(),
+        "metrics": metrics,
+        "feature_names": list(sample_set.feature_names),
+        "hyperparameters": params,
+        "seed": seed,
+        "target_names": target_names,
+        "class_mapping": metrics["class_mapping"],
+        "evaluation": evaluation,
+        "oof": {
+            "index": evaluated.tolist(),
+            "predicted": [target_names[int(p)] for p in pooled_pred],
+            "probabilities": oof_probabilities,
+        },
     }
 
 
