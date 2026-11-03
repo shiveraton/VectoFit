@@ -1,12 +1,14 @@
 import random
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from itertools import combinations
 
 from apps.analytics.services.features import (
     FeatureExtractionError,
-    extract_rep_features,
+    extract_features_for_rep,
+    model_version_for,
     to_feature_row,
+    validate_features,
 )
 from apps.datasets.models import Dataset, DatasetSample, DatasetVideo
 
@@ -37,7 +39,13 @@ class SampleSet:
         sample_metadata=None,
         prediction_target="binary_form",
         view_angle="",
+        exclusion_counts=None,
+        model_version="",
+        pipeline_config_hashes=None,
     ):
+        self.exclusion_counts = dict(exclusion_counts or {})
+        self.model_version = model_version
+        self.pipeline_config_hashes = dict(pipeline_config_hashes or {})
         self.features = features
         self.rows = rows
         self.labels = labels
@@ -59,25 +67,6 @@ class SampleSet:
         for label in self.labels:
             counts[str(label)] += 1
         return dict(counts)
-
-
-def _frames_from_landmark_series(raw):
-    frames = []
-    for entry in raw or []:
-        frame = (
-            entry.get("landmarks")
-            if isinstance(entry, dict) and "landmarks" in entry
-            else entry
-        )
-        if frame:
-            frames.append(frame)
-    return frames
-
-
-def _scale_factor_for_session(session):
-    if session is None or session.body_profile_id is None:
-        return None
-    return session.body_profile.scale_factor or None
 
 
 def _available_angles(dataset):
@@ -151,10 +140,7 @@ def _load_labelled_samples(dataset, view_angle):
     samples = samples.order_by("id")
     for sample in samples:
         rep = sample.rep_assessment
-        frames = _frames_from_landmark_series(rep.landmark_series)
-        if len(frames) < 3:
-            continue
-        yield sample, frames, rep.session
+        yield sample, rep, rep.session
 
 
 def _participant_id_for_sample(sample, dataset):
@@ -169,28 +155,50 @@ def _normalise_error_label(value):
 
 
 def build_samples(
-    datasets, selected_features, view_angle=None, prediction_target="binary_form"
+    datasets,
+    selected_features,
+    view_angle=None,
+    prediction_target="binary_form",
+    model_version=None,
+    allow_mixed_pipeline=False,
 ):
     if prediction_target not in {"binary_form", "error_type"}:
         raise TrainingConfigurationError(
             "prediction_target must be 'binary_form' or 'error_type'."
         )
 
+    try:
+        selected_features = validate_features(
+            list(selected_features) if selected_features else None,
+            model_version=model_version or "M1",
+        )
+    except FeatureExtractionError as exc:
+        raise TrainingConfigurationError(str(exc)) from exc
+    model_version = model_version or model_version_for(selected_features)
+
     view_angle = _resolve_view_angle(datasets, view_angle)
     _validate_training_datasets(datasets, view_angle)
 
     rows, labels, groups, sample_ids, sample_metadata = [], [], [], [], []
-    warnings, warning_set, errors = [], set(), []
+    warnings, errors = [], []
+    exclusions = Counter()
+    config_hashes = Counter()
 
     datasets_without_rows = []
     for dataset in datasets:
         dataset_row_start = len(rows)
-        for sample, frames, session in _load_labelled_samples(dataset, view_angle):
+        for sample, rep, session in _load_labelled_samples(dataset, view_angle):
+            where = f"Dataset {dataset.pk}, sample {sample.pk}"
+
+            def exclude(reason, detail=None, where=where):
+                exclusions[reason] += 1
+                errors.append(f"{where}: {detail or reason}")
+
             participant_id = _participant_id_for_sample(sample, dataset)
             if participant_id is None:
-                errors.append(
-                    f"Dataset {dataset.pk}, sample {sample.pk}: no participant is "
-                    "assigned to the video or legacy dataset."
+                exclude(
+                    "no_participant",
+                    "no participant is assigned to the video or legacy dataset.",
                 )
                 continue
 
@@ -201,27 +209,31 @@ def build_samples(
             else:
                 target = _normalise_error_label(sample.error_label)
                 if not target:
-                    errors.append(
-                        f"Dataset {dataset.pk}, sample {sample.pk}: incorrect form has "
-                        "no error_label and was excluded from error_type training."
+                    exclude(
+                        "missing_error_label",
+                        "incorrect form has no error_label and was excluded "
+                        "from error_type training.",
                     )
                     continue
                 if target == "correct_form":
-                    errors.append(
-                        f"Dataset {dataset.pk}, sample {sample.pk}: 'correct_form' is "
-                        "reserved for correct repetitions and cannot be an error_label."
+                    exclude(
+                        "reserved_error_label",
+                        "'correct_form' is reserved for correct repetitions and "
+                        "cannot be an error_label.",
                     )
                     continue
 
             try:
-                extracted = extract_rep_features(
-                    frames,
-                    fps=30.0,
-                    scale_factor=_scale_factor_for_session(session),
+                extracted = extract_features_for_rep(
+                    rep.landmark_data,
+                    frame_width=session.processed_frame_width,
+                    frame_height=session.processed_frame_height,
+                    requested=selected_features,
+                    model_version=model_version,
                 )
                 row = to_feature_row(extracted, selected_features)
             except FeatureExtractionError as exc:
-                errors.append(f"Dataset {dataset.pk}, sample {sample.pk}: {exc}")
+                exclude(str(exc))
                 continue
 
             group = f"participant-{participant_id}"
@@ -229,10 +241,13 @@ def build_samples(
             labels.append(target)
             groups.append(group)
             sample_ids.append(sample.pk)
+            config_hashes[rep.pipeline_config_hash or ""] += 1
             video = sample.dataset_video if sample.dataset_video_id else None
             sample_metadata.append(
                 {
                     "sample_id": sample.pk,
+                    "rep_assessment_id": rep.pk,
+                    "pipeline_config_hash": rep.pipeline_config_hash or "",
                     "dataset_id": dataset.pk,
                     "dataset_name": dataset.name,
                     "dataset_video_id": sample.dataset_video_id,
@@ -242,6 +257,7 @@ def build_samples(
                     "participant_group": group,
                     "view_angle": view_angle,
                     "is_correct": sample.is_correct,
+                    "label_source": sample.label_source,
                     "error_label": sample.error_label or "",
                     "annotator_id": sample.annotator_id,
                     "annotated_at": sample.annotated_at.isoformat()
@@ -252,15 +268,11 @@ def build_samples(
                         "human"
                         if sample.annotator_id is not None
                         or sample.annotated_at is not None
+                        or sample.label_source in {"consensus", "adjudicated"}
                         else "source_or_inherited"
                     ),
                 }
             )
-
-            for warning in extracted.get("_warnings", []):
-                if warning not in warning_set:
-                    warnings.append(warning)
-                    warning_set.add(warning)
 
         if len(rows) == dataset_row_start:
             message = (
@@ -282,6 +294,17 @@ def build_samples(
             + details
         )
 
+    if len(config_hashes) > 1 and not allow_mixed_pipeline:
+        summary = ", ".join(
+            f"{(digest[:12] or '(none)')}: {count} rep(s)"
+            for digest, count in sorted(config_hashes.items())
+        )
+        raise TrainingConfigurationError(
+            "The selected repetitions were produced by different preprocessing "
+            f"pipelines (pipeline_config_hash -> {summary}). Re-process them with "
+            "the frozen pipeline, or pass allow_mixed_pipeline=True to override."
+        )
+
     class_set = set(labels)
     if len(class_set) < 2:
         detail = "The selected data contains only one target class."
@@ -291,6 +314,8 @@ def build_samples(
             )
         else:
             detail += " Include both correct and incorrect repetitions."
+        if errors:
+            detail += " " + " ".join(errors[:10])
         raise DatasetNotUsableError(detail)
 
     return SampleSet(
@@ -305,6 +330,9 @@ def build_samples(
         sample_metadata=sample_metadata,
         prediction_target=prediction_target,
         view_angle=view_angle,
+        exclusion_counts=exclusions,
+        model_version=model_version,
+        pipeline_config_hashes=config_hashes,
     )
 
 
@@ -359,7 +387,7 @@ def group_split(groups, test_size=0.3, seed=42, labels=None, attempts=512):
                 for label in sorted(target_classes, key=str)
             }
             raise InsufficientGroupsError(
-                "Cannot create a participant-level split: target class coverage is "
+                "Cannot create a participant-level split: participant coverage for target classes is "
                 f"insufficient across participants ({coverage}). Dataset has "
                 f"{len(group_ids)} participants and {total_samples} usable samples; "
                 f"class sample counts are {sample_counts}. Collect samples for the "
@@ -439,6 +467,45 @@ def group_split(groups, test_size=0.3, seed=42, labels=None, attempts=512):
         )
 
     return best[1], best[2]
+
+
+def leave_one_participant_out_folds(groups, labels):
+    if len(groups) != len(labels):
+        raise InsufficientGroupsError(
+            "Cannot build folds: groups and labels must contain the same number "
+            f"of entries (got {len(groups)} groups and {len(labels)} labels)."
+        )
+    by_group = defaultdict(list)
+    for index, group in enumerate(groups):
+        by_group[group].append(index)
+    group_ids = sorted(by_group)
+    if len(group_ids) < 2:
+        raise InsufficientGroupsError(
+            "Leave-one-participant-out needs at least two participants; found "
+            f"{len(group_ids)}."
+        )
+
+    classes = set(labels)
+    folds, skipped = [], []
+    for group_id in group_ids:
+        test_idx = by_group[group_id]
+        held_out = set(test_idx)
+        train_idx = [i for i in range(len(groups)) if i not in held_out]
+        if {labels[i] for i in train_idx} != classes:
+            skipped.append(
+                {"group": group_id, "reason": "training_split_missing_class"}
+            )
+            continue
+        folds.append(
+            {"group": group_id, "train_idx": train_idx, "test_idx": list(test_idx)}
+        )
+    if len(folds) < 2:
+        raise InsufficientGroupsError(
+            "Fewer than two participants could be evaluated: removing a "
+            "participant left the training set without every target class "
+            f"({len(skipped)} of {len(group_ids)} participants skipped)."
+        )
+    return folds, skipped
 
 
 def resolve_datasets(dataset_ids: list[int]) -> list[Dataset]:

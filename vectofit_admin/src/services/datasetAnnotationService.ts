@@ -65,6 +65,7 @@ export interface DatasetSample {
 }
 
 export interface AnnotationSession {
+  annotator_name: string;
   dataset: {
     id: number;
     name: string;

@@ -1,0 +1,73 @@
+﻿<script setup lang="ts">
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useDatasetAnnotation } from "../../hooks/useDatasetAnnotation";
+
+const route = useRoute();
+const router = useRouter();
+const datasetId = Number(route.params.id);
+
+if (!Number.isInteger(datasetId) || datasetId <= 0) {
+  await router.push("/dataset");
+  return;
+}
+
+// Initialize the annotation session â€” same logic as DatasetAnnotation.vue
+const {
+  session,
+  samples,
+  currentSample,
+  currentIndex,
+  fps,
+  annotation,
+  targetLabel,
+  labelledCount,
+  isReviewComplete,
+  currentSampleLabelState,
+  isLoading,
+  isSaving,
+  error,
+  load,
+  setKneeGrade,
+  setKneeDirection,
+  setSymmetryObservation,
+  setNotes,
+  save,
+  saveAndNext,
+  clear,
+  previous,
+  next,
+} = useDatasetAnnotation();
+
+watch(
+  () => currentSample.value?.id,
+  async () => {
+    // Pause video and reset when sample changes
+    const video = videoRef.value;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      videoError.value = "";
+    }
+    await nextTick();
+    seekToRep();
+  },
+);
+
+watch(
+  () => annotation.value,
+  async () => {
+    // Sync annotation to sample when it changes
+    if (session.value && currentSample.value) {
+      const saved = await save();
+      if (saved && session.value) {
+        session.value.samples[currentIndex.value] = {
+          ...session.value.samples[currentIndex.value],
+          knee_annotation: saved.knee_annotation ?? annotation.value,
+          target_label: saved.target_label ?? targetLabel.value,
+        };
+      }
+    }
+  },
+);
+</script>

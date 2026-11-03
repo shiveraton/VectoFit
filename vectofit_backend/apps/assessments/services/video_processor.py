@@ -5,6 +5,7 @@ import time
 
 import cv2
 
+from apps.analytics.services.pipeline_config import DEFAULT_PREPROCESSING_CONFIG
 from apps.analytics.services.preprocessing import apply_clahe, preprocess_frame
 
 from .pose_estimator import PoseEstimator
@@ -13,14 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class VideoProcessor:
-    PROCESSING_WIDTH = 640
-    PROCESSING_HEIGHT = 360
+    PROCESSING_WIDTH = DEFAULT_PREPROCESSING_CONFIG.processing_width
+    PROCESSING_HEIGHT = DEFAULT_PREPROCESSING_CONFIG.processing_height
 
-    COORDINATE_WIDTH = 1280
-    COORDINATE_HEIGHT = 720
-
-    CLAHE_CLIP_LIMIT = 2.0
-    CLAHE_TILE_GRID_SIZE = (8, 8)
+    CLAHE_CLIP_LIMIT = DEFAULT_PREPROCESSING_CONFIG.clahe_clip_limit
+    CLAHE_TILE_GRID_SIZE = DEFAULT_PREPROCESSING_CONFIG.clahe_tile_grid_size
 
     @staticmethod
     def initialize_pose_estimator(model_path=None):
@@ -29,7 +27,15 @@ class VideoProcessor:
                 "Custom model_path is not supported by this MediaPipe PoseEstimator."
             )
 
-        return PoseEstimator()
+        config = DEFAULT_PREPROCESSING_CONFIG
+        return PoseEstimator(
+            static_image_mode=config.mediapipe_static_image_mode,
+            model_complexity=config.mediapipe_model_complexity,
+            smooth_landmarks=config.mediapipe_smooth_landmarks,
+            min_detection_confidence=config.mediapipe_min_detection_confidence,
+            min_tracking_confidence=config.mediapipe_min_tracking_confidence,
+            enable_segmentation=config.mediapipe_enable_segmentation,
+        )
 
     @staticmethod
     def open_video_source(video_path):
@@ -77,8 +83,8 @@ class VideoProcessor:
         enable_denoise=False,
         processing_width=PROCESSING_WIDTH,
         processing_height=PROCESSING_HEIGHT,
-        coordinate_width=COORDINATE_WIDTH,
-        coordinate_height=COORDINATE_HEIGHT,
+        coordinate_width=None,
+        coordinate_height=None,
     ):
         try:
             target_fps = float(target_fps)
@@ -99,7 +105,9 @@ class VideoProcessor:
                 "landmark_data": [],
             }
 
-        if coordinate_width <= 0 or coordinate_height <= 0:
+        if (coordinate_width is not None and coordinate_width <= 0) or (
+            coordinate_height is not None and coordinate_height <= 0
+        ):
             return {
                 "status": "error",
                 "message": "Coordinate width and height must be positive.",
@@ -132,6 +140,20 @@ class VideoProcessor:
             step_size = max(1, round(native_fps / target_fps))
             source_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
             source_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
+            orientation_property = getattr(cv2, "CAP_PROP_ORIENTATION_META", None)
+            rotation_degrees = (
+                int(cap.get(orientation_property) or 0)
+                if orientation_property is not None
+                else 0
+            )
+            rotation_auto_property = getattr(cv2, "CAP_PROP_ORIENTATION_AUTO", None)
+            rotation_auto = (
+                bool(cap.get(rotation_auto_property))
+                if rotation_auto_property is not None
+                else False
+            )
+            coordinate_width = int(coordinate_width or processing_width)
+            coordinate_height = int(coordinate_height or processing_height)
             frame_counter = 0
             extracted_landmark_frames = []
 
@@ -200,14 +222,25 @@ class VideoProcessor:
                 for entry in extracted_landmark_frames
                 if not entry.get("landmarks")
             ]
-            missing_gaps = [
-                (previous, current, current - previous)
-                for previous, current in zip(
-                    missing_frame_indices,
-                    missing_frame_indices[1:],
-                )
-                if current - previous > step_size
-            ]
+            missing_runs = []
+            for entry in extracted_landmark_frames:
+                if entry.get("landmarks"):
+                    continue
+                frame_index = entry["frame_index"]
+                if (
+                    missing_runs
+                    and frame_index == missing_runs[-1]["end_frame"] + step_size
+                ):
+                    missing_runs[-1]["end_frame"] = frame_index
+                    missing_runs[-1]["count"] += 1
+                else:
+                    missing_runs.append(
+                        {
+                            "start_frame": frame_index,
+                            "end_frame": frame_index,
+                            "count": 1,
+                        }
+                    )
 
             result = {
                 "status": "success",
@@ -219,10 +252,17 @@ class VideoProcessor:
                 "source_height": source_height,
                 "sample_step": step_size,
                 "missing_pose_frames_count": len(missing_frame_indices),
+                "missing_runs": missing_runs,
+                "landmark_schema_version": "landmarks_v2",
                 "processing_width": int(processing_width),
                 "processing_height": int(processing_height),
                 "coordinate_width": int(coordinate_width),
                 "coordinate_height": int(coordinate_height),
+                "processed_frame_width": int(processing_width),
+                "processed_frame_height": int(processing_height),
+                "rotation_metadata_degrees": rotation_degrees,
+                "rotation_auto_enabled": rotation_auto,
+                "orientation_policy": "opencv_decode_no_additional_rotation",
                 "processing_seconds": round(elapsed_seconds, 3),
                 "landmark_data": extracted_landmark_frames,
             }
@@ -241,7 +281,7 @@ class VideoProcessor:
                 else 0.0,
                 len(missing_frame_indices),
                 missing_frame_indices[:20],
-                len(missing_gaps),
+                len(missing_runs),
                 source_width,
                 source_height,
                 processing_width,

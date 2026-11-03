@@ -6,11 +6,14 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from apps.analytics.services.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
+from apps.analytics.services.features import (
+    FEATURE_ORDERS,
+    FEATURE_SCHEMA_VERSION,
+)
 
 from ..models import ModelRegistry, TrainingJob
 from .data_loader import build_samples, resolve_datasets
-from .trainer import serialize_model, train_and_evaluate
+from .trainer import STRATEGY_NAMES, serialize_model, train_and_evaluate
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,6 @@ def _next_version(model_name: str) -> str:
 
 
 def _register_model(job, model_name, serialized_model, metrics):
-    """Create a uniquely versioned registry row; retry if concurrent jobs race."""
     for attempt in range(5):
         try:
             with transaction.atomic():
@@ -63,16 +65,33 @@ def _build_manifest(
 ):
     train_indices = set(result["train_idx"])
     test_indices = set(result["test_idx"])
+    evaluation = result["evaluation"]
+    is_lopo = evaluation["strategy"] == STRATEGY_NAMES["lopo"]
+    oof_by_index = {}
+    if result.get("oof"):
+        oof = result["oof"]
+        for position, sample_index in enumerate(oof["index"]):
+            oof_by_index[sample_index] = {
+                "predicted": oof["predicted"][position],
+                "probabilities": oof["probabilities"][position],
+            }
     sample_rows = []
     for index, metadata in enumerate(sample_set.sample_metadata):
         row = dict(metadata)
-        row["split"] = (
-            "train"
-            if index in train_indices
-            else "test"
-            if index in test_indices
-            else "unassigned"
-        )
+        if is_lopo:
+            row["split"] = (
+                "lopo_evaluated" if index in test_indices else "lopo_unevaluated"
+            )
+            if index in oof_by_index:
+                row["out_of_fold"] = oof_by_index[index]
+        else:
+            row["split"] = (
+                "train"
+                if index in train_indices
+                else "test"
+                if index in test_indices
+                else "unassigned"
+            )
         row["features"] = {
             feature_name: float(value)
             for feature_name, value in zip(
@@ -82,7 +101,7 @@ def _build_manifest(
         sample_rows.append(row)
 
     manifest = {
-        "manifest_version": 1,
+        "manifest_version": 2,
         "job_id": job.pk,
         "created_at": timezone.now().isoformat(),
         "dataset_ids": [dataset.pk for dataset in datasets],
@@ -93,12 +112,14 @@ def _build_manifest(
         "view_angle": view_angle,
         "prediction_target": prediction_target,
         "feature_schema_version": FEATURE_SCHEMA_VERSION,
+        "model_version": sample_set.model_version,
         "selected_features": list(sample_set.feature_names),
         "algorithm": job.algorithm,
         "hyperparameters": result["hyperparameters"],
         "random_seed": seed,
-        "test_size": test_size,
-        "split_strategy": "group_by_participant",
+        "test_size": None if is_lopo else test_size,
+        "split_strategy": evaluation["strategy"],
+        "evaluation": evaluation,
         "sample_count": len(sample_set),
         "train_sample_ids": [
             sample_set.sample_ids[index] for index in result["train_idx"]
@@ -107,13 +128,34 @@ def _build_manifest(
             sample_set.sample_ids[index] for index in result["test_idx"]
         ],
         "samples": sample_rows,
+        "label_snapshot": sorted(
+            [
+                [
+                    row["sample_id"],
+                    int(bool(row["is_correct"])),
+                    row.get("label_source", ""),
+                ]
+                for row in sample_set.sample_metadata
+            ]
+        ),
+        "label_source_counts": {
+            source: sum(
+                row.get("label_source", "") == source
+                for row in sample_set.sample_metadata
+            )
+            for source in sorted(
+                {row.get("label_source", "") for row in sample_set.sample_metadata}
+            )
+        },
         "class_mapping": result["class_mapping"],
         "target_names": result["target_names"],
         "metrics": result["metrics"],
         "feature_warnings": list(sample_set.warnings),
+        "exclusion_counts": dict(sample_set.exclusion_counts),
+        "pipeline_config_hashes": dict(sample_set.pipeline_config_hashes),
+        "frame_timing": "derived_from_landmark_timestamps",
         "data_warnings": list(sample_set.errors[:250]),
         "data_warning_count": len(sample_set.errors),
-        "fps_assumption": 30.0,
     }
     canonical_manifest = json.dumps(
         manifest,
@@ -121,6 +163,11 @@ def _build_manifest(
         separators=(",", ":"),
         ensure_ascii=False,
     ).encode("utf-8")
+    manifest["label_snapshot_sha256"] = hashlib.sha256(
+        json.dumps(
+            manifest["label_snapshot"], separators=(",", ":"), ensure_ascii=False
+        ).encode("utf-8")
+    ).hexdigest()
     manifest["manifest_sha256"] = hashlib.sha256(canonical_manifest).hexdigest()
     return manifest
 
@@ -136,6 +183,9 @@ def run_training_job(
     model_name: str = "vectofit-squat-classifier",
     view_angle: str | None = None,
     prediction_target: str | None = None,
+    model_version: str | None = None,
+    evaluation: str = "lopo",
+    allow_mixed_pipeline: bool = False,
 ) -> TrainingJob:
     job.status = TrainingJob.Status.RUNNING
     job.started_at = timezone.now()
@@ -145,7 +195,9 @@ def run_training_job(
     try:
         target_ids = dataset_ids or list(job.datasets.values_list("id", flat=True))
         datasets = resolve_datasets(target_ids)
-        selected_features = feature_selection or list(FEATURE_ORDER)
+        if model_version is None and not feature_selection:
+            model_version = "M1"
+        selected_features = feature_selection or list(FEATURE_ORDERS[model_version])
         prediction_target = (
             prediction_target
             or job.prediction_target
@@ -157,6 +209,8 @@ def run_training_job(
             selected_features=selected_features,
             view_angle=view_angle or job.view_angle or None,
             prediction_target=prediction_target,
+            model_version=model_version,
+            allow_mixed_pipeline=allow_mixed_pipeline,
         )
         view_angle = sample_set.view_angle
 
@@ -165,6 +219,7 @@ def run_training_job(
             hyperparameters=hyperparameters or {},
             test_size=test_size,
             seed=seed,
+            evaluation=evaluation,
         )
         serialized_model = serialize_model(result["model"])
         manifest = _build_manifest(
@@ -184,7 +239,7 @@ def run_training_job(
         job.feature_schema_version = FEATURE_SCHEMA_VERSION
         job.test_size = test_size
         job.random_seed = seed
-        job.split_strategy = "group_by_participant"
+        job.split_strategy = result["evaluation"]["strategy"]
         job.model_artifact.save(
             f"training_jobs/job_{job.pk}_model.json",
             ContentFile(serialized_model),
@@ -193,7 +248,7 @@ def run_training_job(
         job.sample_count = len(sample_set)
         job.train_count = len(result["train_idx"])
         job.test_count = len(result["test_idx"])
-        job.feature_selection = selected_features
+        job.feature_selection = list(sample_set.feature_names)
         job.hyperparameters = result["hyperparameters"]
         job.metrics = result["metrics"]
         job.feature_warnings = list(sample_set.warnings)
@@ -260,6 +315,9 @@ if __name__ == "__main__":
     parser.add_argument("--features", nargs="*")
     parser.add_argument("--hyperparameters", type=str, default="{}")
     parser.add_argument("--test-size", type=float, default=0.3)
+    parser.add_argument("--model-version", choices=["M0", "M1"])
+    parser.add_argument("--evaluation", choices=["lopo", "holdout"], default="lopo")
+    parser.add_argument("--allow-mixed-pipeline", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--view-angle", choices=["diagonal", "frontal", "sagittal"])
     parser.add_argument(
@@ -280,6 +338,9 @@ if __name__ == "__main__":
             seed=args.seed,
             view_angle=args.view_angle,
             prediction_target=args.prediction_target,
+            model_version=args.model_version,
+            evaluation=args.evaluation,
+            allow_mixed_pipeline=args.allow_mixed_pipeline,
         )
     except TrainingJob.DoesNotExist:
         print(

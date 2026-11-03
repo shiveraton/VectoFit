@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    DatasetAnnotatorAssignmentViewSet,
     DatasetBulkImportView,
     DatasetImportPreviewView,
     DatasetSampleViewSet,
@@ -13,6 +14,11 @@ from .views import (
 
 router = DefaultRouter()
 
+router.register(
+    r"annotator-assignments",
+    DatasetAnnotatorAssignmentViewSet,
+    basename="annotator-assignment",
+)
 router.register(r"", DatasetViewSet, basename="dataset")
 router.register(r"dataset-samples", DatasetSampleViewSet, basename="dataset-sample")
 router.register(r"dataset-videos", DatasetVideoViewSet, basename="dataset-video")

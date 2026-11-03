@@ -16,13 +16,13 @@ from rest_framework.response import Response
 from apps.analytics.services.analysis_engine import analyze
 from apps.analytics.services.features import (
     FEATURE_SCHEMA_VERSION,
-    FeatureExtractionError,
-    extract_rep_features,
+    compute_rep_fppa,
 )
-from apps.analytics.services.segmentation import (
-    segment_reps,
-    split_contiguous_pose_runs,
+from apps.analytics.services.landmark_schema import (
+    legacy_frame,
+    serialize_landmark_frames,
 )
+from apps.analytics.services.repetitions import extract_reps
 from apps.analytics.services.session_report import build_session_report
 from apps.training.services.model_inference import (
     ModelInferenceError,
@@ -42,109 +42,22 @@ from .services.snapshot_overlay import (
     reference_landmarks,
     reference_template_from_profile,
 )
-from .services.video_processor import VideoProcessor
 
 logger = logging.getLogger(__name__)
-
-
-def _scale_factor_for_session(session):
-    if session is None or session.body_profile_id is None:
-        return None
-
-    return session.body_profile.scale_factor or None
-
-
-def _split_contiguous_pose_runs(
-    landmark_data: list[dict[str, Any]],
-    expected_frame_step: int,
-) -> list[list[dict[str, Any]]]:
-    return split_contiguous_pose_runs(
-        landmark_data,
-        expected_frame_step,
-    )
-
-
-def _collect_repetition_entries(
-    session_id: int,
-    landmark_data: list[dict[str, Any]],
-    expected_frame_step: int,
-) -> list[dict[str, Any]]:
-    pose_runs = _split_contiguous_pose_runs(
-        landmark_data,
-        expected_frame_step=expected_frame_step,
-    )
-
-    repetition_entries: list[dict[str, Any]] = []
-
-    run_gaps = [
-        (previous[-1]["frame_index"], current[0]["frame_index"])
-        for previous, current in zip(pose_runs, pose_runs[1:])
-    ]
-    logger.info(
-        "[RepCount] session=%s pose_runs=%s run_lengths=%s "
-        "run_ranges=%s gaps=%s",
-        session_id,
-        len(pose_runs),
-        [len(run) for run in pose_runs],
-        [
-            (run[0]["frame_index"], run[-1]["frame_index"])
-            for run in pose_runs
-        ],
-        run_gaps,
-    )
-
-    for run_index, run in enumerate(pose_runs, start=1):
-        if len(run) < 3:
-            continue
-
-        landmark_series = [entry["landmarks"] for entry in run]
-
-        repetitions = segment_reps(landmark_series)
-
-        logger.info(
-            "[RepCount] session=%s run=%s frames=%s reps=%s",
-            session_id,
-            run_index,
-            len(run),
-            len(repetitions),
-        )
-
-        for repetition in repetitions:
-            try:
-                start_index = int(repetition["start"])
-                bottom_index = int(repetition["bottom"])
-                end_index = int(repetition["end"])
-            except (KeyError, TypeError, ValueError) as exc:
-                raise RuntimeError(
-                    f"Invalid repetition boundaries: {repetition}"
-                ) from exc
-
-            if not (0 <= start_index <= bottom_index <= end_index < len(run)):
-                raise RuntimeError(f"Invalid repetition range: {repetition}")
-
-            rep_entries = run[start_index : end_index + 1]
-
-            if rep_entries:
-                repetition_entries.append(
-                    {
-                        "entries": rep_entries,
-                        "key_frame_index": rep_entries[bottom_index - start_index][
-                            "frame_index"
-                        ],
-                    }
-                )
-
-    if not repetition_entries:
-        raise RuntimeError("No complete squat repetitions were detected.")
-
-    return repetition_entries
 
 
 def _prepare_assessments(
     session: AssessmentSession,
     repetition_entries: list[dict[str, Any]],
     thresholds: dict[str, Any],
+    *,
+    frame_width: int,
+    frame_height: int,
+    native_fps: float,
+    sample_step: int,
+    config_hash: str,
 ) -> list[dict[str, Any]]:
+    del native_fps, sample_step
     prepared_assessments: list[dict[str, Any]] = []
 
     for rep_number, rep_entry in enumerate(
@@ -152,7 +65,7 @@ def _prepare_assessments(
         start=1,
     ):
         entries = rep_entry["entries"]
-        rep_landmarks = [entry["landmarks"] for entry in entries]
+        rep_landmarks = [legacy_frame(entry) for entry in entries]
 
         analysis_result = analyze(
             rep_landmarks,
@@ -174,6 +87,18 @@ def _prepare_assessments(
         if reference_template is not None:
             analysis_result["reference_template"] = reference_template
 
+        landmark_data = serialize_landmark_frames(entries)
+        fppa, fppa_status = compute_rep_fppa(
+            landmark_data,
+            frame_width=frame_width,
+            frame_height=frame_height,
+        )
+        analysis_result["fppa_v2"] = {
+            "schema_version": FEATURE_SCHEMA_VERSION,
+            "validity": fppa_status,
+            **({"features": fppa} if fppa is not None else {}),
+        }
+
         model_prediction = {
             "status": "not_assessed",
             "reason": None,
@@ -181,28 +106,20 @@ def _prepare_assessments(
 
         if not session.view_angle:
             model_prediction["reason"] = "missing_view_angle"
+        elif fppa is None:
+            model_prediction = {
+                "status": "not_assessed",
+                "reason": "feature_extraction_failed",
+                "detail": fppa_status.get("reason", "fppa_invalid"),
+            }
         else:
             try:
-                features = extract_rep_features(
-                    rep_landmarks,
-                    fps=30.0,
-                    scale_factor=_scale_factor_for_session(session),
-                )
-
                 model_prediction = predict_with_active_model(
-                    features=features,
+                    features=fppa,
                     view_angle=session.view_angle,
                     prediction_target="binary_form",
                     feature_schema_version=FEATURE_SCHEMA_VERSION,
                 )
-
-            except FeatureExtractionError as exc:
-                model_prediction = {
-                    "status": "not_assessed",
-                    "reason": "feature_extraction_failed",
-                    "detail": str(exc),
-                }
-
             except ModelInferenceError as exc:
                 model_prediction = {
                     "status": "not_assessed",
@@ -217,6 +134,11 @@ def _prepare_assessments(
             {
                 "rep_number": rep_number,
                 "landmark_series": rep_landmarks,
+                "landmark_data": landmark_data,
+                "missing_runs": [],
+                "landmark_schema_version": "landmarks_v2",
+                "pipeline_config_hash": config_hash,
+                "feature_schema_version": FEATURE_SCHEMA_VERSION,
                 "asymmetry_series": analysis_result.get("asymmetry_series"),
                 "start_frame": entries[0]["frame_index"],
                 "end_frame": entries[-1]["frame_index"],
@@ -244,6 +166,11 @@ def _save_assessments(
                 start_frame=assessment["start_frame"],
                 end_frame=assessment["end_frame"],
                 key_frame_index=assessment["key_frame_index"],
+                landmark_data=assessment["landmark_data"],
+                missing_runs=assessment["missing_runs"],
+                landmark_schema_version=assessment["landmark_schema_version"],
+                pipeline_config_hash=assessment["pipeline_config_hash"],
+                feature_schema_version=assessment["feature_schema_version"],
                 analysis_result=assessment["analysis_result"],
             )
 
@@ -536,17 +463,9 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
         )
 
         try:
-            result = VideoProcessor.process_video(
-                session.video_file.path,
-            )
-
-            if result.get("status") != "success":
-                raise ValueError(result.get("message", "Video processing failed."))
-
-            landmark_data = result.get("landmark_data", [])
-
-            if not landmark_data:
-                raise RuntimeError("No landmark frames were produced from the video.")
+            extraction = extract_reps(session.video_file.path)
+            result = extraction["result"]
+            landmark_data = result["landmark_data"]
 
             valid_pose_frames = sum(
                 bool(entry.get("landmarks")) for entry in landmark_data
@@ -574,16 +493,12 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
             if not np.isfinite(native_fps) or native_fps <= 0:
                 native_fps = 30.0
 
-            expected_frame_step = max(
-                1,
-                round(native_fps / 30.0),
-            )
-
-            repetition_entries = _collect_repetition_entries(
-                session_id=session.pk,
-                landmark_data=landmark_data,
-                expected_frame_step=expected_frame_step,
-            )
+            repetition_entries = [
+                {"entries": rep["entries"], "key_frame_index": rep["key_frame_index"]}
+                for rep in extraction["reps"]
+            ]
+            if not repetition_entries:
+                raise RuntimeError("No complete squat repetitions were detected.")
 
             thresholds = session.exercise_variant.get_thresholds()
 
@@ -591,6 +506,11 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
                 session,
                 repetition_entries,
                 thresholds,
+                frame_width=result["processed_frame_width"],
+                frame_height=result["processed_frame_height"],
+                native_fps=native_fps,
+                sample_step=extraction["sample_step"],
+                config_hash=extraction["pipeline_config_hash"],
             )
 
             _save_assessments(
@@ -602,9 +522,27 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
                 session,
                 thresholds,
             )
+            fppa_invalid = sum(
+                not item["analysis_result"]["fppa_v2"]["validity"]["valid"]
+                for item in prepared_assessments
+            )
+            if session.report is None:
+                session.report = {}
+            session.report["fppa_v2_summary"] = {
+                "total_reps": len(prepared_assessments),
+                "invalid_reps": fppa_invalid,
+                "valid_reps": len(prepared_assessments) - fppa_invalid,
+            }
 
             session.status = AssessmentSession.Status.COMPLETED
             session.error_message = ""
+            session.processed_frame_width = result["processed_frame_width"]
+            session.processed_frame_height = result["processed_frame_height"]
+            session.rotation_metadata_degrees = result["rotation_metadata_degrees"]
+            session.rotation_auto_enabled = result["rotation_auto_enabled"]
+            session.pipeline_config_hash = extraction["pipeline_config_hash"]
+            session.landmark_schema_version = "landmarks_v2"
+            session.missing_runs = result["missing_runs"]
 
         except Exception as exc:
             logger.exception(
@@ -612,7 +550,6 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
                 session.pk,
             )
 
-            # A failed run must not expose stale or partially written reps.
             RepAssessment.objects.filter(session=session).delete()
 
             session.status = AssessmentSession.Status.FAILED
@@ -628,6 +565,13 @@ class AssessmentSessionViewSet(viewsets.ModelViewSet):
                     "error_message",
                     "processed_at",
                     "report",
+                    "processed_frame_width",
+                    "processed_frame_height",
+                    "rotation_metadata_degrees",
+                    "rotation_auto_enabled",
+                    "pipeline_config_hash",
+                    "landmark_schema_version",
+                    "missing_runs",
                 ],
             )
 

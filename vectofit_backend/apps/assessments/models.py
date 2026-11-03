@@ -82,6 +82,13 @@ class AssessmentSession(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
 
     report = models.JSONField(null=True, blank=True)
+    processed_frame_width = models.PositiveIntegerField(null=True, blank=True)
+    processed_frame_height = models.PositiveIntegerField(null=True, blank=True)
+    rotation_metadata_degrees = models.IntegerField(null=True, blank=True)
+    rotation_auto_enabled = models.BooleanField(null=True, blank=True)
+    pipeline_config_hash = models.CharField(max_length=64, blank=True, default="")
+    landmark_schema_version = models.CharField(max_length=32, default="legacy_v1")
+    missing_runs = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering: ClassVar[list] = ["-created_at"]
@@ -122,6 +129,15 @@ class RepAssessment(models.Model):
     landmark_series = models.JSONField(
         help_text="Numeric landmark coordinate time-series for this rep's frame window. No raw frames are stored."
     )
+    landmark_data = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Raw float landmarks with visibility, frame timestamps, and landmark schema version.",
+    )
+    missing_runs = models.JSONField(default=list, blank=True)
+    landmark_schema_version = models.CharField(max_length=32, default="legacy_v1")
+    pipeline_config_hash = models.CharField(max_length=64, blank=True, default="")
+    feature_schema_version = models.CharField(max_length=48, blank=True, default="")
 
     asymmetry_series = models.JSONField(
         null=True,

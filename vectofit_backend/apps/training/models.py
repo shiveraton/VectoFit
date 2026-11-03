@@ -56,7 +56,7 @@ class TrainingJob(models.Model):
 
     feature_schema_version = models.CharField(
         max_length=48,
-        default="python_rep_features_v1",
+        default="fppa_v2",
         help_text="Version of the numerical feature definitions used by this run.",
     )
 
@@ -93,9 +93,11 @@ class TrainingJob(models.Model):
         max_length=32,
         default="group_by_participant",
         help_text=(
-            "How the held-out test set was formed. 'group_by_participant' keeps "
-            "all repetitions from the same research participant on one side of "
-            "the split to avoid subject-level data leakage."
+            "How the model was evaluated. 'leave_one_participant_out' holds out "
+            "each participant once and pools the out-of-fold predictions; "
+            "'group_by_participant' is a single grouped holdout split. Both keep "
+            "all repetitions from one participant on the same side to avoid "
+            "subject-level data leakage."
         ),
     )
 

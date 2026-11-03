@@ -49,20 +49,6 @@ const hasSamples = (dataset: Dataset) => dataset.sample_count > 0;
 const hasUnlabelledSamples = (dataset: Dataset) =>
   dataset.sample_count > dataset.labelled_sample_count;
 
-const pendingReviewCount = (dataset: Dataset) => {
-  const count = reviewMetrics(dataset).pending_review_sample_count;
-
-  if (typeof count === "number" && Number.isFinite(count)) {
-    return Math.max(0, count);
-  }
-
-  if (!isZipCollection(dataset)) {
-    return 0;
-  }
-
-  return Math.max(0, dataset.sample_count - dataset.labelled_sample_count);
-};
-
 const humanReviewedSummary = (dataset: Dataset) => {
   const metrics = reviewMetrics(dataset);
   const reviewed = metrics.human_reviewed_sample_count;

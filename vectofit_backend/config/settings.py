@@ -175,3 +175,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+ANNOTATION_RUBRIC_VERSION = "v1"
+ANNOTATION_TARGET_TO_IS_CORRECT = {"good": True, "bad": False}
+
+ANNOTATOR_SELF_REGISTRATION = env.bool("ANNOTATOR_SELF_REGISTRATION", default=True)
+ANNOTATOR_INVITE_CODE = env("ANNOTATOR_INVITE_CODE", default="")

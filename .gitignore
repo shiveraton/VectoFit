@@ -95,6 +95,7 @@ cache/
 # ==========================================
 # Node (Angular/Ionic Frontend, if separate)
 # ==========================================
+vectofit_frontend/android/app/.cxx/
 node_modules/
 npm-debug.log*
 

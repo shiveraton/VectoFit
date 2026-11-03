@@ -1,22 +1,21 @@
-from django.db.models import Q
-from rest_framework import serializers
-
-upload_token = serializers.UUIDField(
-    source="upload_token", help_text="Token returned by the archive preview endpoint."
-)
-
 from typing import ClassVar
+
+from django.db.models import Exists, OuterRef, Q
+from rest_framework import serializers
 
 from apps.assessments.serializers import RepAssessmentSerializer
 
 from .models import (
+    AnnotationEvent,
     Dataset,
+    DatasetAnnotatorAssignment,
     DatasetSample,
     DatasetVideo,
     KneeAnnotation,
     Participant,
     ViewAngle,
 )
+from .services.annotation import clear_annotation, derive_target_label, save_annotation
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
@@ -35,10 +34,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         last_participant = Participant.objects.order_by("-id").first()
-
         next_number = last_participant.id + 1 if last_participant else 1
         participant_code = f"P{next_number:03d}"
-
         return Participant.objects.create(participant_code=participant_code)
 
 
@@ -56,8 +53,14 @@ class ViewAngleSerializer(serializers.ModelSerializer):
 
 
 class KneeAnnotationField(serializers.Field):
+    def get_attribute(self, instance):
+        return instance
+
     def to_representation(self, sample):
-        record = getattr(sample, "knee_annotation_record", None)
+        user = self.context.get("request").user if self.context.get("request") else None
+        record = (
+            sample.knee_annotations.filter(annotator=user).first() if user else None
+        )
         return record.annotation if record else None
 
     def to_internal_value(self, value):
@@ -109,7 +112,11 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
 
     dataset_video = serializers.SerializerMethodField()
     video_fps = serializers.SerializerMethodField()
-    is_manually_annotated = serializers.SerializerMethodField()
+
+    is_manually_annotated = serializers.BooleanField(read_only=True)
+    has_knee_annotation = serializers.BooleanField(read_only=True)
+    has_legacy_label = serializers.BooleanField(read_only=True)
+    annotation_source = serializers.CharField(read_only=True)
 
     rep_assessment = RepAssessmentSerializer(read_only=True)
 
@@ -121,6 +128,9 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
             "dataset_video",
             "video_fps",
             "is_manually_annotated",
+            "has_knee_annotation",
+            "has_legacy_label",
+            "annotation_source",
             "knee_annotation",
             "target_label",
             "rep_assessment",
@@ -136,6 +146,10 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
             "annotator",
             "annotated_at",
             "created_at",
+            "is_manually_annotated",
+            "has_knee_annotation",
+            "has_legacy_label",
+            "annotation_source",
         ]
 
     def get_dataset_video(self, obj):
@@ -158,41 +172,36 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
         }
 
     def get_knee_annotation(self, obj):
-        record = getattr(obj, "knee_annotation_record", None)
+        request = self.context.get("request")
+        record = (
+            obj.knee_annotations.filter(annotator=request.user).first()
+            if request
+            else None
+        )
         return record.annotation if record else None
 
     def get_target_label(self, obj):
         annotation = self.get_knee_annotation(obj)
-        if not annotation:
-            return None
-        grades = [annotation.get(side, {}).get("grade") for side in ("left", "right")]
-        if any(grade is None for grade in grades):
-            return None
-        if "unassessable" in grades:
-            return "unassessable"
-        if "borderline" in grades:
-            return "borderline"
-        if "deviated" in grades:
-            return "bad"
-        return "good"
+        return derive_target_label(annotation)
 
     def update(self, instance, validated_data):
         annotation = validated_data.pop("knee_annotation", serializers.empty)
+        request = self.context.get("request")
+        user = request.user if request else None
+        if user and not user.is_staff and set(validated_data):
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied("Annotators may only change their knee annotation.")
         instance = super().update(instance, validated_data)
         if annotation is not serializers.empty:
             if annotation is None:
-                KneeAnnotation.objects.filter(sample=instance).delete()
+                clear_annotation(instance, user)
             else:
-                KneeAnnotation.objects.update_or_create(
-                    sample=instance, defaults={"annotation": annotation}
-                )
+                save_annotation(instance, user, annotation)
         return instance
 
     def get_video_fps(self, obj):
         return self.context.get("video_fps_by_id", {}).get(obj.dataset_video_id)
-
-    def get_is_manually_annotated(self, obj):
-        return obj.annotator_id is not None or obj.annotated_at is not None
 
 
 class DatasetSerializer(serializers.ModelSerializer):
@@ -319,11 +328,6 @@ class DatasetSerializer(serializers.ModelSerializer):
             annotated_at__isnull=True,
         ).count()
 
-    def get_human_reviewed_sample_count(self, obj):
-        return obj.samples.filter(
-            Q(annotator__isnull=False) | Q(annotated_at__isnull=False)
-        ).count()
-
     def get_review_selected_sample_count(self, obj):
         return obj.samples.filter(
             dataset_video__requires_manual_review=True,
@@ -334,16 +338,26 @@ class DatasetSerializer(serializers.ModelSerializer):
             obj.samples.filter(
                 dataset_video__requires_manual_review=True,
             )
-            .filter(Q(annotator__isnull=False) | Q(annotated_at__isnull=False))
+            .filter(
+                Q(is_correct__isnull=False)
+                | ~Q(error_label="")
+                | Exists(KneeAnnotation.objects.filter(sample=OuterRef("pk")))
+            )
             .count()
         )
 
     def get_pending_review_sample_count(self, obj):
-        return obj.samples.filter(
-            dataset_video__requires_manual_review=True,
-            annotator__isnull=True,
-            annotated_at__isnull=True,
-        ).count()
+        return (
+            obj.samples.filter(
+                dataset_video__requires_manual_review=True,
+            )
+            .exclude(
+                Q(is_correct__isnull=False)
+                | ~Q(error_label="")
+                | Exists(KneeAnnotation.objects.filter(sample=OuterRef("pk")))
+            )
+            .count()
+        )
 
     def get_participant_count(self, obj):
         return (
@@ -365,7 +379,6 @@ class DatasetSerializer(serializers.ModelSerializer):
         return angles
 
     def get_angle_training_stats(self, obj):
-        """Return the label counts the training configuration needs per view."""
         stats = {}
         has_videos = obj.videos.exists()
 
@@ -456,6 +469,93 @@ class DatasetVideoSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(url) if request else url
 
 
+class AnnotationEventSerializer(serializers.ModelSerializer):
+    annotator_username = serializers.CharField(
+        source="annotator.username", read_only=True, allow_null=True
+    )
+    entered_by_username = serializers.CharField(
+        source="entered_by.username", read_only=True, allow_null=True
+    )
+
+    class Meta:
+        model = AnnotationEvent
+        fields: ClassVar[list] = [
+            "id",
+            "sample",
+            "annotator_username",
+            "entered_by_username",
+            "action",
+            "target_label",
+            "payload",
+            "rubric_version",
+            "created_at",
+        ]
+
+
+class DatasetAnnotatorAssignmentSerializer(serializers.ModelSerializer):
+    annotator_username = serializers.CharField(
+        source="annotator.username", read_only=True
+    )
+    annotator_email = serializers.CharField(source="annotator.email", read_only=True)
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+    assigned_by_username = serializers.CharField(
+        source="assigned_by.username", read_only=True, allow_null=True
+    )
+
+    class Meta:
+        model = DatasetAnnotatorAssignment
+        fields: ClassVar[list] = [
+            "id",
+            "dataset",
+            "dataset_name",
+            "annotator",
+            "annotator_username",
+            "annotator_email",
+            "assigned_by_username",
+            "assigned_at",
+            "is_active",
+        ]
+        read_only_fields: ClassVar[list] = [
+            "id",
+            "assigned_at",
+        ]
+
+    def validate(self, attrs):
+        dataset = attrs.get("dataset") or getattr(self.instance, "dataset", None)
+        annotator = attrs.get("annotator") or getattr(self.instance, "annotator", None)
+
+        if dataset and annotator:
+            duplicate = DatasetAnnotatorAssignment.objects.filter(
+                dataset=dataset, annotator=annotator
+            )
+            if self.instance is not None:
+                duplicate = duplicate.exclude(pk=self.instance.pk)
+            if duplicate.exists():
+                raise serializers.ValidationError(
+                    {
+                        "annotator": (
+                            "That annotator already has an assignment for this "
+                            "dataset."
+                        )
+                    }
+                )
+
+        return attrs
+
+    def validate_annotator(self, value):
+        from apps.accounts.roles import is_annotator
+
+        if value.is_staff:
+            raise serializers.ValidationError(
+                "Staff accounts already have full dataset access."
+            )
+        if not is_annotator(value):
+            raise serializers.ValidationError(
+                "That account is not in the Annotators group."
+            )
+        return value
+
+
 class DatasetBulkImportSerializer(serializers.Serializer):
     upload_token = serializers.UUIDField(
         help_text="Token returned by the archive preview endpoint."
@@ -513,10 +613,8 @@ class DatasetBulkImportSerializer(serializers.Serializer):
 
     def validate_name(self, value):
         value = value.strip()
-
         if not value:
             raise serializers.ValidationError("Dataset name cannot be empty.")
-
         return value
 
     def validate(self, attrs):

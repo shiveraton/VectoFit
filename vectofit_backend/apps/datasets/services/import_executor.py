@@ -261,7 +261,9 @@ def _create_dataset_records(
             secondary_target=validated_data.get(
                 "secondary_target", "biomechanical_errors"
             ),
-            review_policy=validated_data.get("review_policy", Dataset.ReviewPolicy.SOURCE),
+            review_policy=validated_data.get(
+                "review_policy", Dataset.ReviewPolicy.SOURCE
+            ),
             selection_method=validated_data.get(
                 "selection_method", Dataset.SelectionMethod.STRATIFIED
             ),
@@ -337,8 +339,6 @@ def _create_dataset_records(
             batch_size=DB_INSERT_BATCH_SIZE,
         )
 
-        # This dataset was just created, so all its video rows belong
-        # to this import.
         video_ids = list(
             DatasetVideo.objects.filter(dataset=dataset)
             .order_by("id")

@@ -1,38 +1,27 @@
 import numpy as np
 
-from .bilateral_asymmetry import calculate_asymmetry_series
-from .joint_angle_analysis import calculate_angle_series
-from .kinematic_velocity import calculate_velocity_series
-from .range_of_motion import calculate_rom
-from .trunk_angle_analysis import calculate_trunk_angle_series
+from .fppa import (  # noqa: F401
+    FEATURE_SCHEMA_VERSION,
+    effective_fps,
+    extract_fppa_features,
+)
+from .landmark_schema import LANDMARK_SCHEMA_VERSION
 
-FEATURE_SCHEMA_VERSION = "python_rep_features_v1"
-
-
-AVAILABLE_FEATURES = [
-    "hip_angle",
-    "knee_angle",
-    "rom",
-    "asymmetry",
-    "trunk_angle",
-    "velocity",
+M0_FEATURE_ORDER = [
+    "fppa_l_bottom",
+    "fppa_r_bottom",
+    "fppa_l_peak",
+    "fppa_r_peak",
 ]
+M1_FEATURE_ORDER = [*M0_FEATURE_ORDER, "asym_bottom", "asym_peak"]
 
-FEATURE_ORDER = [
-    "hip_angle",
-    "knee_angle",
-    "rom",
-    "asymmetry",
-    "trunk_angle_mean",
-    "trunk_angle_max",
-    "trunk_angle_range",
-    "velocity_mean",
-    "velocity_peak",
-]
+FEATURE_ORDERS = {"M0": M0_FEATURE_ORDER, "M1": M1_FEATURE_ORDER}
+M0_FEATURES = M0_FEATURE_ORDER
+M1_FEATURES = M1_FEATURE_ORDER
+FEATURE_ORDER = M1_FEATURE_ORDER
+ASYMMETRY_FEATURES = ("asym_bottom", "asym_peak")
 
-REQUIRED_LANDMARKS = [
-    "left_shoulder",
-    "right_shoulder",
+FPPA_REQUIRED_LANDMARKS = [
     "left_hip",
     "right_hip",
     "left_knee",
@@ -40,136 +29,99 @@ REQUIRED_LANDMARKS = [
     "left_ankle",
     "right_ankle",
 ]
+REQUIRED_LANDMARKS = ["left_shoulder", "right_shoulder", *FPPA_REQUIRED_LANDMARKS]
 
 
 class FeatureExtractionError(Exception):
     """Raised when a repetition's landmarks cannot yield usable features."""
 
 
-def validate_features(requested):
+def validate_features(requested=None, model_version="M1"):
+    if model_version not in FEATURE_ORDERS:
+        raise FeatureExtractionError(
+            f"Unknown model version: {model_version}. Available: {list(FEATURE_ORDERS)}"
+        )
+    available = FEATURE_ORDERS[model_version]
     if requested is None:
-        return list(FEATURE_ORDER)
-
+        return list(available)
     if not isinstance(requested, (list, tuple)):
         raise FeatureExtractionError("feature_selection must be a list of names.")
-
-    unknown = [f for f in requested if f not in AVAILABLE_FEATURES]
+    unknown = [name for name in requested if name not in available]
     if unknown:
         raise FeatureExtractionError(
-            f"Unknown feature(s) {unknown}. Available: {AVAILABLE_FEATURES}"
+            f"Unknown feature(s) for {model_version}: {unknown}. Available: {available}"
         )
-
-    selected = []
-    for name in requested:
-        if name == "trunk_angle":
-            selected.extend(
-                ["trunk_angle_mean", "trunk_angle_max", "trunk_angle_range"]
-            )
-        elif name == "velocity":
-            selected.extend(["velocity_mean", "velocity_peak"])
-        else:
-            selected.append(name)
-
-    return [f for f in FEATURE_ORDER if f in set(selected)]
+    selected = set(requested)
+    return [name for name in available if name in selected]
 
 
-def _validate_series(landmark_series):
-    if not landmark_series:
-        raise FeatureExtractionError("Repetition has no landmark frames.")
-
-    for index, frame in enumerate(landmark_series):
-        missing = [name for name in REQUIRED_LANDMARKS if name not in frame]
-        if missing:
-            raise FeatureExtractionError(
-                f"Frame {index} is missing landmarks: {missing}"
-            )
-
-        for name in REQUIRED_LANDMARKS:
-            point = np.asarray(frame[name], dtype=float)
-            if point.shape != (2,) or not np.all(np.isfinite(point)):
-                raise FeatureExtractionError(
-                    f"Frame {index} landmark {name!r} is not a finite [x, y] pair."
-                )
-            if not np.any(point):
-                raise FeatureExtractionError(
-                    f"Frame {index} landmark {name!r} is degenerate (all zeros)."
-                )
+def model_version_for(selected_features):
+    return "M1" if set(selected_features) & set(ASYMMETRY_FEATURES) else "M0"
 
 
-def extract_rep_features(landmark_series, fps=30.0, scale_factor=None):
-    _validate_series(landmark_series)
-
-    if fps is None or fps <= 0:
-        raise FeatureExtractionError(
-            "A positive fps is required to compute velocity (KVT)."
-        )
-
-    left_knee_angles = calculate_angle_series(
-        landmark_series, "left_hip", "left_knee", "left_ankle"
+def extract_rep_features(
+    landmark_series,
+    requested=None,
+    model_version="M1",
+    *,
+    frame_width,
+    frame_height,
+    native_fps,
+    sample_step=1,
+):
+    selected = validate_features(requested=requested, model_version=model_version)
+    fppa, status = extract_fppa_features(
+        landmark_series,
+        frame_width=frame_width,
+        frame_height=frame_height,
+        native_fps=native_fps,
+        sample_step=sample_step,
     )
-    right_knee_angles = calculate_angle_series(
-        landmark_series, "right_hip", "right_knee", "right_ankle"
-    )
-    left_hip_angles = calculate_angle_series(
-        landmark_series, "left_shoulder", "left_hip", "left_knee"
-    )
-    right_hip_angles = calculate_angle_series(
-        landmark_series, "right_shoulder", "right_hip", "right_knee"
+    if fppa is None:
+        raise FeatureExtractionError(status.get("reason", "fppa_invalid"))
+    return {name: float(fppa[name]) for name in selected}
+
+
+def compute_rep_fppa(landmark_data, *, frame_width, frame_height):
+    def invalid(reason):
+        return None, {"valid": False, "reason": reason}
+
+    if not isinstance(landmark_data, dict):
+        return invalid("missing_landmark_data")
+    if landmark_data.get("schema_version") != LANDMARK_SCHEMA_VERSION:
+        return invalid("unsupported_landmark_schema")
+    frames = landmark_data.get("frames")
+    if not frames:
+        return invalid("missing_landmark_frames")
+    if not frame_width or not frame_height:
+        return invalid("missing_frame_size")
+    fps = effective_fps(frames)
+    if fps is None:
+        return invalid("missing_frame_timing")
+    return extract_fppa_features(
+        frames,
+        frame_width=frame_width,
+        frame_height=frame_height,
+        native_fps=fps,
+        sample_step=1,
     )
 
-    rom_degrees = calculate_rom(left_knee_angles)
 
-    asymmetry_values = calculate_asymmetry_series(left_knee_angles, right_knee_angles)
-    asymmetry_values = [a for a in asymmetry_values if a is not None]
-    max_asymmetry = max(asymmetry_values) if asymmetry_values else 0.0
-
-    trunk_angles = np.asarray(
-        calculate_trunk_angle_series(landmark_series), dtype=float
+def extract_features_for_rep(
+    landmark_data,
+    *,
+    frame_width,
+    frame_height,
+    requested=None,
+    model_version="M1",
+):
+    selected = validate_features(requested=requested, model_version=model_version)
+    fppa, status = compute_rep_fppa(
+        landmark_data, frame_width=frame_width, frame_height=frame_height
     )
-
-    hip_midpoints = []
-    for frame in landmark_series:
-        left = np.asarray(frame["left_hip"], dtype=float)
-        right = np.asarray(frame["right_hip"], dtype=float)
-        hip_midpoints.append({"hip_midpoint": (left + right) / 2.0})
-
-    frame_interval = 1.0 / float(fps)
-    velocity_series = calculate_velocity_series(
-        hip_midpoints, "hip_midpoint", frame_interval
-    )
-
-    if not velocity_series:
-        raise FeatureExtractionError(
-            "Repetition is too short to compute a velocity (KVT) series."
-        )
-
-    features = {
-        "hip_angle": float(min(min(left_hip_angles), min(right_hip_angles))),
-        "knee_angle": float(min(min(left_knee_angles), min(right_knee_angles))),
-        "rom": float(rom_degrees),
-        "asymmetry": float(max_asymmetry),
-        "trunk_angle_mean": float(np.mean(trunk_angles)),
-        "trunk_angle_max": float(np.max(trunk_angles)),
-        "trunk_angle_range": float(np.max(trunk_angles) - np.min(trunk_angles)),
-        "velocity_mean": float(np.mean(velocity_series)),
-        "velocity_peak": float(np.max(velocity_series)),
-    }
-
-    warnings = []
-    if scale_factor:
-        for key in ("velocity_mean", "velocity_peak"):
-            features[key] = features[key] / float(scale_factor)
-    else:
-        warnings.append(
-            "No scale_factor supplied: velocity remains in pixel units. "
-            "Velocity comparisons across subjects are not normalized."
-        )
-
-    if not warnings:
-        pass
-
-    features["_warnings"] = warnings
-    return features
+    if fppa is None:
+        raise FeatureExtractionError(status.get("reason", "fppa_invalid"))
+    return {name: float(fppa[name]) for name in selected}
 
 
 def to_feature_row(features, selected_features):
