@@ -39,9 +39,30 @@ const {
   startTraining,
   availableDatasets,
   filteredDatasets,
+  trainingJobs,
+  selectedJob,
+  selectJob,
 } = useTraining();
 
-const latestJob = ref<TrainingJob | null>(null);
+const handleStartTraining = async () => {
+  const job = await startTraining();
+  if (job) {
+    selectJob(job.id);
+  }
+};
+
+const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString();
+
+const selectedJobId = computed<number | null>({
+  get: () => selectedJob.value?.id ?? null,
+  set: (jobId) => {
+    if (jobId !== null) {
+      selectJob(jobId);
+    }
+  },
+});
+
+const latestJob = computed<TrainingJob | null>(() => selectedJob.value);
 
 const configurationStatus = computed(() => {
   if (isTraining.value) return "TRAINING";
@@ -53,10 +74,6 @@ const scrollToConfiguration = () => {
     behavior: "smooth",
     block: "start",
   });
-};
-
-const handleStartTraining = async () => {
-  latestJob.value = await startTraining();
 };
 </script>
 
@@ -84,13 +101,22 @@ const handleStartTraining = async () => {
       </button>
     </header>
 
-    <section class="summary-grid" aria-label="Training summary">
+    <section class="content-card" aria-label="Training history">
+  <div class="section-header">
+    <h2>Training History</h2>
+    <select v-model="selectedJobId" class="job-select">
+      <option v-for="job in trainingJobs" :key="job.id" :value="job.id">
+        {{ job.id }} – {{ formatDate(job.created_at) }} – {{ job.status }}
+      </option>
+    </select>
+  </div>
+</section>
+
       <SummaryCard
         v-for="card in summaryCards"
         :key="card.label"
         v-bind="card"
       />
-    </section>
 
     <section ref="configurationSection" class="content-card">
       <div class="section-header">

@@ -11,6 +11,15 @@ import {
 import { datasetService, type Dataset } from "../services/datasetService";
 
 const trainingJobs = ref<TrainingJob[]>([]);
+
+const selectedJob = ref<TrainingJob | null>(null);
+
+const selectJob = (jobId: number) => {
+  const job = trainingJobs.value.find((j) => j.id === jobId);
+  if (job) {
+    selectedJob.value = job;
+  }
+};
 const datasets = ref<Dataset[]>([]);
 const features = ref<FeatureOption[]>([]);
 const algorithms = ref<AlgorithmOption[]>([]);
@@ -103,6 +112,10 @@ const fetchTrainingData = async (force = false) => {
     ]);
 
     trainingJobs.value = trainingJobsResponse;
+    selectedJob.value =
+      trainingJobs.value.find((job) => job.id === selectedJob.value?.id) ??
+      trainingJobs.value[0] ??
+      null;
     datasets.value = datasetsResponse;
     features.value = featureOptions;
     algorithms.value = algorithmOptions;
@@ -212,18 +225,18 @@ const canStartTraining = computed(
 
 const summaryCards = computed(() => [
   {
-    label: "Training Runs",
+    label: "Total Runs",
     value: trainingJobs.value.length,
-    description: "Recorded model experiments",
+    description: "All recorded model experiments",
     icon: "R",
     variant: "samples" as const,
   },
   {
-    label: "Selected Datasets",
-    value: selectedDatasetIds.value.length,
-    description: "Datasets included in this run",
-    icon: "D",
-    variant: "samples" as const,
+    label: "Completed Runs",
+    value: completedJobs.value.length,
+    description: "Successfully finished experiments",
+    icon: "C",
+    variant: "correct" as const,
   },
   {
     label: "Active Jobs",
@@ -233,11 +246,11 @@ const summaryCards = computed(() => [
     variant: "samples" as const,
   },
   {
-    label: "Best F1 Score",
-    value: bestF1Score.value,
-    description: "Best completed experiment",
-    icon: "F1",
-    variant: "correct" as const,
+    label: "Failed Runs",
+    value: trainingJobs.value.filter((j) => j.status === "FAILED").length,
+    description: "Experiments that ended with errors",
+    icon: "F",
+    variant: "incorrect" as const,
   },
 ]);
 
@@ -338,6 +351,7 @@ const startTraining = async () => {
     });
 
     trainingJobs.value.unshift(job);
+    selectedJob.value = job;
 
     if (job.status === "COMPLETED") {
       invalidateModels();
@@ -406,6 +420,8 @@ export function useTraining() {
     isTraining,
     isInitialized,
     error,
+    selectedJob,
+    selectJob,
     canStartTraining,
     fetchTrainingData,
     selectViewAngle,
