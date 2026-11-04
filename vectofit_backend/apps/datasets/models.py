@@ -3,6 +3,15 @@ from pathlib import PurePosixPath
 from typing import ClassVar
 
 from django.db import models
+from django.db.models import Q
+
+
+def dataset_upload_to(instance, filename):
+    safe_name = PurePosixPath(filename.replace("\\", "/")).name
+    return (
+        f"dataset_videos/dataset_{instance.dataset_id}"
+        f"{uuid.uuid4().hex}_{safe_name}"
+    )
 
 
 class Participant(models.Model):
@@ -165,22 +174,33 @@ class DatasetSample(models.Model):
 
 
 class KneeAnnotation(models.Model):
-    sample = models.OneToOneField(
-        DatasetSample, on_delete=models.CASCADE, related_name="knee_annotation_record"
+    sample = models.ForeignKey(
+        DatasetSample,
+        on_delete=models.CASCADE,
+        related_name="knee_annotation_records",
     )
-    annotation = models.JSONField()
+    annotation = models.JSONField(null=True, blank=True)
+    annotator = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="knee_annotations",
+    )
+    rubric_version = models.CharField(max_length=32, default="knee_v1")
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints: ClassVar[list] = [
+            models.UniqueConstraint(
+                fields=["sample"],
+                condition=Q(annotator__isnull=True),
+                name="unique_unowned_knee_annotation_per_sample",
+            ),
+        ]
 
     def __str__(self):
         return f"KneeAnnotation(sample={self.sample_id})"
-
-    def dataset_upload_to(instance, filename):
-        safe_name = PurePosixPath(filename.replace("\\", "/")).name
-        return (
-            f"dataset_videos/dataset_{instance.dataset_id}"
-            f"{uuid.uuid4().hex}_{safe_name}"
-        )
 
 
 class DatasetVideo(models.Model):

@@ -17,6 +17,8 @@ from .models import (
     Participant,
     ViewAngle,
 )
+from .services.annotation import latest_annotation
+from .services.knee_label import knee_target
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
@@ -56,8 +58,12 @@ class ViewAngleSerializer(serializers.ModelSerializer):
 
 
 class KneeAnnotationField(serializers.Field):
-    def to_representation(self, sample):
-        record = getattr(sample, "knee_annotation_record", None)
+    def get_attribute(self, instance):
+        request = self.context.get("request")
+        user = request.user if request and request.user.is_authenticated else None
+        return latest_annotation(instance, user)
+
+    def to_representation(self, record):
         return record.annotation if record else None
 
     def to_internal_value(self, value):
@@ -158,7 +164,9 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
         }
 
     def get_knee_annotation(self, obj):
-        record = getattr(obj, "knee_annotation_record", None)
+        request = self.context.get("request")
+        user = request.user if request and request.user.is_authenticated else None
+        record = latest_annotation(obj, user)
         return record.annotation if record else None
 
     def get_target_label(self, obj):
@@ -168,24 +176,19 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
         grades = [annotation.get(side, {}).get("grade") for side in ("left", "right")]
         if any(grade is None for grade in grades):
             return None
-        if "unassessable" in grades:
-            return "unassessable"
-        if "borderline" in grades:
-            return "borderline"
-        if "deviated" in grades:
-            return "bad"
-        return "good"
+        return knee_target(annotation)
 
     def update(self, instance, validated_data):
         annotation = validated_data.pop("knee_annotation", serializers.empty)
         instance = super().update(instance, validated_data)
         if annotation is not serializers.empty:
-            if annotation is None:
-                KneeAnnotation.objects.filter(sample=instance).delete()
-            else:
-                KneeAnnotation.objects.update_or_create(
-                    sample=instance, defaults={"annotation": annotation}
-                )
+            request = self.context.get("request")
+            user = request.user if request else None
+            KneeAnnotation.objects.create(
+                sample=instance,
+                annotation=annotation,
+                annotator=user if user and user.is_authenticated else None,
+            )
         return instance
 
     def get_video_fps(self, obj):
@@ -317,11 +320,6 @@ class DatasetSerializer(serializers.ModelSerializer):
             is_correct__isnull=False,
             annotator__isnull=True,
             annotated_at__isnull=True,
-        ).count()
-
-    def get_human_reviewed_sample_count(self, obj):
-        return obj.samples.filter(
-            Q(annotator__isnull=False) | Q(annotated_at__isnull=False)
         ).count()
 
     def get_review_selected_sample_count(self, obj):

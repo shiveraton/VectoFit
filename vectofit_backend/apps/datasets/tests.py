@@ -11,10 +11,45 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Dataset
+from apps.assessments.models import AssessmentSession, RepAssessment
+from apps.accounts.models import Profile
+from apps.exercises.models import ExerciseVariant
+
+from .models import Dataset, DatasetSample, KneeAnnotation
 from .serializers import DatasetBulkImportSerializer
+from .services.knee_label import final_knee_target, knee_target
 
 User = get_user_model()
+
+KNEE_TARGET_CASES = [
+    ("aligned", "aligned", "good"),
+    ("aligned", "borderline", "borderline"),
+    ("aligned", "deviated", "bad"),
+    ("aligned", "unassessable", "unassessable"),
+    ("borderline", "aligned", "borderline"),
+    ("borderline", "borderline", "borderline"),
+    ("borderline", "deviated", "bad"),
+    ("borderline", "unassessable", "unassessable"),
+    ("deviated", "aligned", "bad"),
+    ("deviated", "borderline", "bad"),
+    ("deviated", "deviated", "bad"),
+    ("deviated", "unassessable", "bad"),
+    ("unassessable", "aligned", "unassessable"),
+    ("unassessable", "borderline", "unassessable"),
+    ("unassessable", "deviated", "bad"),
+    ("unassessable", "unassessable", "unassessable"),
+]
+
+
+class KneeLabelTests(APITestCase):
+    def test_knee_target_grade_table(self):
+        for left, right, expected in KNEE_TARGET_CASES:
+            with self.subTest(left=left, right=right):
+                annotation = {
+                    "left": {"grade": left},
+                    "right": {"grade": right},
+                }
+                self.assertEqual(knee_target(annotation), expected)
 
 
 class DatasetAPITests(APITestCase):
@@ -65,6 +100,210 @@ class DatasetAPITests(APITestCase):
         response = self.client.post(self.list_url, payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Dataset.objects.count(), 2)
+
+
+class KneeAnnotationAPITests(APITestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(
+            username="annotation-admin",
+            email="annotation-admin@example.com",
+            password="test-password",
+        )
+        self.client.force_authenticate(user=self.admin_user)
+        dataset = Dataset.objects.create(
+            name="Annotation Dataset",
+            description="Annotation round-trip test",
+            exercise_type="bodyweight_squat",
+            purpose="training",
+        )
+        variant = ExerciseVariant.objects.create(
+            exercise_variant="bodyweight_squat",
+            name="Test Squat",
+            variant_type=ExerciseVariant.VariantType.BODYWEIGHT,
+        )
+        session = AssessmentSession.objects.create(
+            user=self.admin_user,
+            exercise_variant=variant,
+            video_file="test.mp4",
+        )
+        rep = RepAssessment.objects.create(
+            session=session,
+            rep_number=1,
+            landmark_series=[],
+        )
+        self.sample = DatasetSample.objects.create(dataset=dataset, rep_assessment=rep)
+        self.url = reverse("dataset-sample-detail", args=[self.sample.pk])
+
+    def test_saved_knee_annotation_is_returned_by_get(self):
+        annotation = {
+            "left": {"grade": "aligned", "direction": "none"},
+            "right": {"grade": "deviated", "direction": "valgus"},
+            "symmetry_observation": "asymmetric",
+            "notes": "Round-trip annotation",
+        }
+
+        response = self.client.patch(
+            self.url,
+            {"knee_annotation": annotation},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["knee_annotation"], annotation)
+
+        self.sample.refresh_from_db()
+        self.assertEqual(self.sample.annotator, self.admin_user)
+        self.assertIsNotNone(self.sample.annotated_at)
+
+        response = self.client.patch(
+            self.url,
+            {"knee_annotation": None},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        self.sample.refresh_from_db()
+        self.assertIsNone(self.sample.annotator)
+        self.assertIsNone(self.sample.annotated_at)
+
+    def test_admin_can_view_annotation_pool_activity(self):
+        annotation = {
+            "left": {"grade": "aligned", "direction": "none"},
+            "right": {"grade": "aligned", "direction": "none"},
+            "symmetry_observation": "symmetric",
+            "notes": "Pool activity",
+        }
+        save_response = self.client.patch(
+            self.url,
+            {"knee_annotation": annotation},
+            format="json",
+        )
+        self.assertEqual(save_response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(reverse("annotation-pool"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.sample.dataset_id)
+        self.assertEqual(response.data[0]["job_status"], "COMPLETED")
+        self.assertEqual(response.data[0]["reviewed_count"], 1)
+        self.assertEqual(response.data[0]["activity_count"], 1)
+        self.assertEqual(response.data[0]["activity"][0]["sample_id"], self.sample.id)
+
+    def test_annotator_can_use_shared_annotation_pool(self):
+        annotator = User.objects.create_user(
+            username="public-annotator",
+            email="public@example.com",
+            password="test-pass",
+        )
+        Profile.objects.create(user=annotator, is_annotator=True)
+        self.client.force_authenticate(user=annotator)
+
+        dataset_response = self.client.get(
+            reverse("annotation-dataset-list")
+        )
+        self.assertEqual(dataset_response.status_code, status.HTTP_200_OK)
+
+        annotation = {
+            "left": {"grade": "aligned", "direction": "none"},
+            "right": {"grade": "aligned", "direction": "none"},
+            "symmetry_observation": "symmetric",
+            "notes": "Public annotator answer",
+        }
+        response = self.client.patch(
+            self.url,
+            {"knee_annotation": annotation},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(
+            KneeAnnotation.objects.filter(
+                sample=self.sample,
+                annotator=annotator,
+            ).count(),
+            1,
+        )
+
+    def test_regular_user_cannot_annotate(self):
+        regular_user = User.objects.create_user(
+            username="regular-user",
+            email="regular@example.com",
+            password="test-pass",
+        )
+        self.client.force_authenticate(user=regular_user)
+        response = self.client.patch(
+            self.url,
+            {"knee_annotation": None},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_latest_annotation_is_scoped_to_requesting_user(self):
+        other_user = User.objects.create_user(
+            username="other-annotator",
+            email="other@example.com",
+            password="test-password",
+        )
+        first = {
+            "left": {"grade": "aligned", "direction": "none"},
+            "right": {"grade": "aligned", "direction": "none"},
+            "symmetry_observation": "symmetric",
+            "notes": "First",
+        }
+        second = {**first, "notes": "Second"}
+        KneeAnnotation.objects.create(
+            sample=self.sample,
+            annotation=first,
+            annotator=self.admin_user,
+        )
+        KneeAnnotation.objects.create(
+            sample=self.sample,
+            annotation=second,
+            annotator=self.admin_user,
+        )
+        KneeAnnotation.objects.create(
+            sample=self.sample,
+            annotation={
+                **first,
+                "right": {"grade": "deviated", "direction": "valgus"},
+            },
+            annotator=other_user,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["knee_annotation"]["notes"], "Second")
+
+    def test_final_knee_target_uses_latest_annotator_answers(self):
+        good = {
+            "left": {"grade": "aligned"},
+            "right": {"grade": "aligned"},
+        }
+        bad = {
+            "left": {"grade": "deviated"},
+            "right": {"grade": "aligned"},
+        }
+        other_user = User.objects.create_user(
+            username="consensus-annotator",
+            email="consensus@example.com",
+            password="test-password",
+        )
+        KneeAnnotation.objects.create(
+            sample=self.sample, annotation=bad, annotator=self.admin_user
+        )
+        KneeAnnotation.objects.create(
+            sample=self.sample, annotation=good, annotator=self.admin_user
+        )
+        KneeAnnotation.objects.create(
+            sample=self.sample, annotation=bad, annotator=other_user
+        )
+
+        self.assertEqual(final_knee_target(self.sample), "disputed")
 
 
 class DatasetImportContractTests(APITestCase):

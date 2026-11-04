@@ -1,6 +1,9 @@
 from typing import ClassVar
 
+import json
 from django.db import transaction
+from django.conf import settings
+from pathlib import Path
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -190,3 +193,17 @@ class ModelStateView(APIView):
         )
         serializer = ModelStateSerializer(model, context={"request": request})
         return Response(serializer.data)
+
+
+class PilotResultsView(APIView):
+    permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get(self, request):
+        path = Path(settings.PILOT_RESULTS_PATH)
+        if not path.is_file():
+            return Response({"detail": "No pilot results have been generated."}, status=404)
+        try:
+            results = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            return Response({"detail": f"Pilot results cannot be read: {exc}"}, status=500)
+        return Response(results)

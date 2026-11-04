@@ -67,9 +67,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_annotator = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields: ClassVar[list] = ["id", "username", "email"]
+        fields: ClassVar[list] = ["id", "username", "email", "is_annotator"]
+
+    def get_is_annotator(self, obj):
+        profile = getattr(obj, "profile", None)
+        return bool(profile and profile.is_annotator)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -77,6 +83,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     password = serializers.CharField(style={"input_type": "password"}, write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    is_annotator = serializers.BooleanField(default=False, write_only=True)
 
     class Meta:
         model = User
@@ -85,6 +92,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "confirm_password",
+            "is_annotator",
         ]
 
     def validate(self, attrs):
@@ -102,6 +110,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
+        )
+        Profile.objects.create(
+            user=user,
+            email=user.email,
+            is_annotator=validated_data.get("is_annotator", False),
         )
 
         return user

@@ -10,6 +10,7 @@ from .views import (
     ParticipantViewSet,
     ViewAngleViewSet,
 )
+from .views import AnnotationDatasetListView, AnnotationPoolView
 
 router = DefaultRouter()
 
@@ -28,4 +29,14 @@ urlpatterns = [
         name="dataset-import-preview",
     ),
     path("import/", DatasetBulkImportView.as_view(), name="dataset_bulk_import"),
+    path(
+        "annotation-datasets/",
+        AnnotationDatasetListView.as_view(),
+        name="annotation-dataset-list",
+    ),
+    path(
+        "annotation-pool/",
+        AnnotationPoolView.as_view(),
+        name="annotation-pool",
+    ),
 ]

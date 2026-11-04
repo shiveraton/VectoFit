@@ -9,6 +9,10 @@ from apps.analytics.services.features import (
     to_feature_row,
 )
 from apps.datasets.models import Dataset, DatasetSample, DatasetVideo
+from apps.datasets.services.knee_label import (
+    final_knee_target,
+    latest_annotator_ids,
+)
 
 
 class DatasetNotUsableError(Exception):
@@ -130,12 +134,14 @@ def _validate_training_datasets(datasets, view_angle):
         )
 
 
-def _load_labelled_samples(dataset, view_angle):
+def _load_labelled_samples(dataset, view_angle, prediction_target):
     samples = DatasetSample.objects.select_related(
         "rep_assessment__session__body_profile",
         "dataset_video__participant",
         "dataset_video__view_angle",
-    ).filter(dataset=dataset, is_correct__isnull=False)
+    ).filter(dataset=dataset)
+    if prediction_target != "knee_alignment":
+        samples = samples.filter(is_correct__isnull=False)
 
     if dataset.videos.exists():
         samples = samples.filter(
@@ -171,9 +177,10 @@ def _normalise_error_label(value):
 def build_samples(
     datasets, selected_features, view_angle=None, prediction_target="binary_form"
 ):
-    if prediction_target not in {"binary_form", "error_type"}:
+    if prediction_target not in {"binary_form", "error_type", "knee_alignment"}:
         raise TrainingConfigurationError(
-            "prediction_target must be 'binary_form' or 'error_type'."
+            "prediction_target must be 'binary_form', 'error_type', or "
+            "'knee_alignment'."
         )
 
     view_angle = _resolve_view_angle(datasets, view_angle)
@@ -185,7 +192,9 @@ def build_samples(
     datasets_without_rows = []
     for dataset in datasets:
         dataset_row_start = len(rows)
-        for sample, frames, session in _load_labelled_samples(dataset, view_angle):
+        for sample, frames, session in _load_labelled_samples(
+            dataset, view_angle, prediction_target
+        ):
             participant_id = _participant_id_for_sample(sample, dataset)
             if participant_id is None:
                 errors.append(
@@ -194,8 +203,17 @@ def build_samples(
                 )
                 continue
 
+            annotator_ids = latest_annotator_ids(sample)
             if prediction_target == "binary_form":
                 target = 1 if sample.is_correct else 0
+            elif prediction_target == "knee_alignment":
+                target = final_knee_target(sample)
+                if target not in {"good", "bad"}:
+                    errors.append(
+                        f"Dataset {dataset.pk}, sample {sample.pk}: knee target "
+                        f"{target or 'missing'} was excluded from training."
+                    )
+                    continue
             elif sample.is_correct:
                 target = "correct_form"
             else:
@@ -244,6 +262,7 @@ def build_samples(
                     "is_correct": sample.is_correct,
                     "error_label": sample.error_label or "",
                     "annotator_id": sample.annotator_id,
+                    "annotator_ids": annotator_ids,
                     "annotated_at": sample.annotated_at.isoformat()
                     if sample.annotated_at
                     else None,

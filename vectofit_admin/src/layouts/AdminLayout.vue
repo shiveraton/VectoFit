@@ -20,6 +20,10 @@
           <RouterLink to="/training" class="nav-link"> Training </RouterLink>
 
           <RouterLink to="/models" class="nav-link"> Models </RouterLink>
+
+          <RouterLink to="/pilot-results" class="nav-link">
+            Pilot Results
+          </RouterLink>
         </div>
 
         <div class="nav-section">
@@ -72,7 +76,7 @@ const handleSignOut = () => {
 
 <style scoped>
 .admin-layout {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   background: #f8f6f5;
   color: #25201e;
@@ -80,8 +84,10 @@ const handleSignOut = () => {
 }
 
 .sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
   width: 240px;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -177,6 +183,8 @@ const handleSignOut = () => {
 
 .admin-main {
   flex: 1;
+  margin-left: 240px;
+  height: 100vh;
   min-width: 0;
   display: flex;
   flex-direction: column;

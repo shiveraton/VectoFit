@@ -218,7 +218,9 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                 )
                 continue
 
-            samples = dataset.samples.filter(is_correct__isnull=False)
+            samples = dataset.samples.all()
+            if target != TrainingJob.PredictionTarget.KNEE_ALIGNMENT:
+                samples = samples.filter(is_correct__isnull=False)
             if dataset.videos.exists():
                 samples = samples.filter(
                     dataset_video__view_angle__angle_variant=angle,
@@ -237,6 +239,13 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                     incompatible.append(
                         f"{dataset.name}: no labelled samples for {angle}"
                     )
+            elif target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT:
+                from apps.datasets.services.knee_label import final_knee_target
+
+                for sample in samples:
+                    target_value = final_knee_target(sample)
+                    if target_value in {"good", "bad"}:
+                        target_classes.add(target_value)
             else:
                 for sample in samples.values("is_correct", "error_label"):
                     if sample["is_correct"]:
@@ -295,6 +304,18 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                         "Error-type training requires at least two target classes: "
                         "correct_form and one or more populated error_label categories. "
                         "Annotate incorrect repetitions with specific error labels first."
+                    )
+                }
+            )
+        if (
+            target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT
+            and target_classes != {"good", "bad"}
+        ):
+            raise serializers.ValidationError(
+                {
+                    "prediction_target": (
+                        "Knee-alignment training requires both good and bad "
+                        "final annotator targets."
                     )
                 }
             )

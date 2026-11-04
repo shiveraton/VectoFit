@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 
 import { useDatasets } from "../../hooks/useDatasets";
 import { useParticipants } from "../../hooks/useParticipants.ts";
+import { useAnnotationPool } from "../../hooks/useAnnotationPool";
 import { VIEW_ANGLE_BY_ID, type Dataset } from "../../services/datasetService";
 
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
@@ -34,6 +35,19 @@ const {
 
 const { participants, fetchParticipants, createParticipant } =
   useParticipants();
+const {
+  filteredJobs,
+  selectedJob,
+  search: annotationSearch,
+  statusFilter: annotationStatusFilter,
+  isLoading: isAnnotationPoolLoading,
+  error: annotationPoolError,
+  fetchJobs: fetchAnnotationJobs,
+  selectJob,
+  clearSelection,
+} = useAnnotationPool();
+
+const activeTab = ref<"datasets" | "annotation-pool">("datasets");
 
 type DatasetReviewMetrics = {
   human_reviewed_sample_count?: number | null;
@@ -211,8 +225,20 @@ function videoSummary(dataset: Dataset): string {
   return `${ready}/${total} ready - ${failed} failed`;
 }
 
+function formatActivityDate(value: string): string {
+  return new Date(value).toLocaleString();
+}
+
+function annotationStatusLabel(status: string): string {
+  return status.replace("_", " ");
+}
+
 onMounted(async () => {
-  await Promise.all([fetchParticipants(), fetchDatasets()]);
+  await Promise.all([
+    fetchParticipants(),
+    fetchDatasets(),
+    fetchAnnotationJobs(),
+  ]);
 });
 </script>
 
@@ -242,6 +268,26 @@ onMounted(async () => {
       </div>
     </header>
 
+    <nav class="page-tabs" aria-label="Dataset views">
+      <button
+        type="button"
+        class="page-tab"
+        :class="{ active: activeTab === 'datasets' }"
+        @click="activeTab = 'datasets'"
+      >
+        Datasets
+      </button>
+
+      <button
+        type="button"
+        class="page-tab"
+        :class="{ active: activeTab === 'annotation-pool' }"
+        @click="activeTab = 'annotation-pool'"
+      >
+        Annotation Pool
+      </button>
+    </nav>
+
     <div v-if="successMessage" class="feedback-message success">
       {{ successMessage }}
     </div>
@@ -250,7 +296,7 @@ onMounted(async () => {
       {{ errorMessage }}
     </div>
 
-    <section class="summary-grid">
+    <section v-if="activeTab === 'datasets'" class="summary-grid">
       <SummaryCard
         label="Datasets"
         :value="totalDatasets"
@@ -284,7 +330,7 @@ onMounted(async () => {
       />
     </section>
 
-    <section class="content-card">
+    <section v-if="activeTab === 'datasets'" class="content-card">
       <div class="section-header">
         <div class="section-title-row">
           <div class="section-marker"></div>
@@ -497,7 +543,7 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section class="content-card">
+    <section v-if="activeTab === 'datasets'" class="content-card">
       <div class="section-header">
         <div class="section-title-row">
           <div class="section-marker"></div>
@@ -510,6 +556,186 @@ onMounted(async () => {
       </div>
 
       <StructureGrid />
+    </section>
+
+    <section v-else class="content-card annotation-pool-card">
+      <div class="section-header">
+        <div class="section-title-row">
+          <div class="section-marker"></div>
+
+          <div>
+            <h2>Annotation Pool</h2>
+            <p>Dataset-level annotation jobs and their complete activity log.</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          :disabled="isAnnotationPoolLoading"
+          @click="fetchAnnotationJobs"
+        >
+          Refresh
+        </button>
+      </div>
+
+      <div class="annotation-pool-toolbar">
+        <input
+          v-model="annotationSearch"
+          class="pool-search"
+          type="search"
+          placeholder="Search dataset or annotator"
+          aria-label="Search annotation jobs"
+        />
+
+        <select
+          v-model="annotationStatusFilter"
+          class="pool-filter"
+          aria-label="Filter annotation jobs by status"
+        >
+          <option value="ALL">All statuses</option>
+          <option value="QUEUED">Queued</option>
+          <option value="IN_PROGRESS">In progress</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="NO_SAMPLES">No samples</option>
+        </select>
+      </div>
+
+      <div v-if="annotationPoolError" class="pool-message error">
+        {{ annotationPoolError }}
+      </div>
+
+      <div v-else-if="isAnnotationPoolLoading" class="loading-state">
+        <span class="loading-dot" aria-hidden="true"></span>
+        Loading annotation activity...
+      </div>
+
+      <div v-else-if="filteredJobs.length === 0" class="empty-state">
+        No annotation jobs match the current filters.
+      </div>
+
+      <div v-else class="annotation-pool-layout">
+        <div class="pool-table-wrapper">
+          <table class="dataset-table pool-table">
+            <thead>
+              <tr>
+                <th>Dataset</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Activity</th>
+                <th>Annotators</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                v-for="job in filteredJobs"
+                :key="job.id"
+                class="pool-row"
+                :class="{ selected: selectedJob?.id === job.id }"
+                tabindex="0"
+                @click="selectJob(job)"
+                @keydown.enter="selectJob(job)"
+              >
+                <td>
+                  <div class="dataset-name">
+                    <strong>{{ job.name }}</strong>
+                    <span class="dataset-id">Job #{{ job.id }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span
+                    class="pool-status"
+                    :class="`pool-status-${job.job_status.toLowerCase()}`"
+                  >
+                    {{ annotationStatusLabel(job.job_status) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="sample-count">
+                    {{ job.reviewed_count }} / {{ job.sample_count }}
+                  </span>
+                  <span class="pool-subtext">samples reviewed</span>
+                </td>
+                <td>
+                  <span class="sample-count">{{ job.activity_count }}</span>
+                  <span class="pool-subtext">logged actions</span>
+                </td>
+                <td>
+                  <span class="pool-subtext">
+                    {{
+                      job.annotators.length
+                        ? job.annotators
+                            .map((item) => item.annotator?.username ?? "Unassigned")
+                            .join(", ")
+                        : "No activity"
+                    }}
+                  </span>
+                </td>
+                <td>
+                  <span class="pool-subtext">
+                    {{ formatActivityDate(job.last_activity_at) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside v-if="selectedJob" class="pool-details">
+          <div class="pool-details-header">
+            <div>
+              <span class="dataset-id">DATASET #{{ selectedJob.id }}</span>
+              <h3>{{ selectedJob.name }}</h3>
+            </div>
+
+            <button
+              type="button"
+              class="close-details"
+              aria-label="Close annotation details"
+              @click="clearSelection"
+            >
+              ×
+            </button>
+          </div>
+
+          <div class="pool-metrics">
+            <div>
+              <strong>{{ selectedJob.sample_count }}</strong>
+              <span>Samples</span>
+            </div>
+            <div>
+              <strong>{{ selectedJob.reviewed_count }}</strong>
+              <span>Reviewed</span>
+            </div>
+            <div>
+              <strong>{{ selectedJob.pending_count }}</strong>
+              <span>Pending</span>
+            </div>
+          </div>
+
+          <h4>Activity log</h4>
+
+          <div v-if="selectedJob.activity.length === 0" class="pool-subtext">
+            No annotation activity has been logged yet.
+          </div>
+
+          <ul v-else class="activity-list">
+            <li v-for="activity in selectedJob.activity" :key="activity.id">
+              <div>
+                <strong>Sample #{{ activity.sample_id }}</strong>
+                <span>
+                  {{ activity.annotator?.username ?? "Unassigned" }}
+                </span>
+              </div>
+              <time :datetime="activity.created_at">
+                {{ formatActivityDate(activity.created_at) }}
+              </time>
+            </li>
+          </ul>
+        </aside>
+      </div>
     </section>
 
     <CreateDatasetModal
@@ -554,6 +780,34 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--vf-border, #e4e4e7);
+}
+
+.page-tab {
+  padding: 10px 14px;
+  color: var(--vf-muted, #71717a);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.page-tab:hover,
+.page-tab.active {
+  color: var(--vf-orange-dark, #c2410c);
+}
+
+.page-tab.active {
+  border-bottom-color: var(--vf-orange, #f97316);
 }
 
 .eyebrow {
@@ -634,6 +888,207 @@ onMounted(async () => {
   border: 1px solid var(--vf-border, #e4e4e7);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(24, 24, 27, 0.025);
+}
+
+.annotation-pool-toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
+}
+
+.pool-search,
+.pool-filter {
+  min-height: 34px;
+  padding: 7px 10px;
+  color: var(--vf-dark, #18181b);
+  background: #ffffff;
+  border: 1px solid var(--vf-border, #e4e4e7);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.pool-search {
+  flex: 1;
+  min-width: 180px;
+}
+
+.pool-filter {
+  min-width: 150px;
+}
+
+.pool-message {
+  padding: 20px 22px;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.annotation-pool-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+}
+
+.pool-table-wrapper {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pool-table {
+  min-width: 760px;
+}
+
+.pool-row {
+  cursor: pointer;
+}
+
+.pool-row:focus,
+.pool-row.selected {
+  background: #fff7ed;
+  outline: none;
+}
+
+.pool-status {
+  display: inline-flex;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pool-status-queued {
+  color: #a16207;
+  background: #fefce8;
+}
+
+.pool-status-in_progress {
+  color: #c2410c;
+  background: #fff7ed;
+}
+
+.pool-status-completed {
+  color: #15803d;
+  background: #f0fdf4;
+}
+
+.pool-status-no_samples {
+  color: #71717a;
+  background: #f4f4f5;
+}
+
+.pool-subtext {
+  display: block;
+  margin-top: 3px;
+  color: var(--vf-muted, #71717a);
+  font-size: 10px;
+}
+
+.pool-details {
+  padding: 20px;
+  border-left: 1px solid var(--vf-border-light, #f1f1f2);
+  background: #fffdfb;
+}
+
+.pool-details-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pool-details-header h3 {
+  margin: 6px 0 0;
+  color: var(--vf-dark, #18181b);
+  font-size: 16px;
+}
+
+.close-details {
+  width: 28px;
+  height: 28px;
+  color: var(--vf-muted, #71717a);
+  background: transparent;
+  border: 1px solid var(--vf-border, #e4e4e7);
+  border-radius: 6px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pool-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.pool-metrics div {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid var(--vf-border-light, #f1f1f2);
+  border-radius: 6px;
+}
+
+.pool-metrics strong,
+.pool-metrics span {
+  display: block;
+}
+
+.pool-metrics strong {
+  color: var(--vf-dark, #18181b);
+  font-size: 16px;
+}
+
+.pool-metrics span {
+  margin-top: 3px;
+  color: var(--vf-muted, #71717a);
+  font-size: 9px;
+}
+
+.pool-details h4 {
+  margin: 0 0 10px;
+  color: var(--vf-dark, #18181b);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.activity-list {
+  max-height: 360px;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.activity-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
+}
+
+.activity-list strong,
+.activity-list span,
+.activity-list time {
+  display: block;
+  font-size: 10px;
+}
+
+.activity-list strong {
+  color: var(--vf-dark, #18181b);
+}
+
+.activity-list span,
+.activity-list time {
+  margin-top: 3px;
+  color: var(--vf-muted, #71717a);
+}
+
+.activity-list time {
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .section-header {
@@ -934,6 +1389,19 @@ onMounted(async () => {
 
   .page-actions button {
     width: 100%;
+  }
+
+  .annotation-pool-toolbar {
+    flex-direction: column;
+  }
+
+  .annotation-pool-layout {
+    display: block;
+  }
+
+  .pool-details {
+    border-top: 1px solid var(--vf-border-light, #f1f1f2);
+    border-left: none;
   }
 }
 </style>

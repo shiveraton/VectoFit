@@ -16,6 +16,7 @@ class TrainingJob(models.Model):
     class PredictionTarget(models.TextChoices):
         BINARY_FORM = "binary_form", "Correct vs incorrect form"
         ERROR_TYPE = "error_type", "Correct form vs specific error type"
+        KNEE_ALIGNMENT = "knee_alignment", "Frontal-plane knee alignment"
 
     VIEW_ANGLE_CHOICES: ClassVar[list] = [
         ("", "Legacy/unspecified"),

@@ -47,6 +47,7 @@
 import { reactive, ref } from "vue";
 import router from "../../router";
 import client from "../../config/client";
+import { accountService } from "../../services/accountService";
 
 const isLoading = ref(false);
 
@@ -68,7 +69,8 @@ const handleLogin = async () => {
 
     if (token) {
       localStorage.setItem("token", token);
-      await router.push("/dashboard");
+      const user = await accountService.getCurrentUser();
+      await router.push(user.is_annotator ? "/annotator" : "/dashboard");
     } else {
       console.error("Token is missing in response payload:", response.data);
     }

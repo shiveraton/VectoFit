@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ModelRegistryViewSet,
     ModelStateView,
+    PilotResultsView,
     TrainingJobCreateView,
     TrainingJobViewSet,
 )
@@ -16,5 +17,6 @@ router.register("models", ModelRegistryViewSet, basename="model-registry")
 urlpatterns = [
     path("jobs/create/", TrainingJobCreateView.as_view(), name="training-job-create"),
     path("models/<int:pk>/state/", ModelStateView.as_view(), name="model-state"),
+    path("pilot-results/", PilotResultsView.as_view(), name="pilot-results"),
     path("", include(router.urls)),
 ]

@@ -264,7 +264,7 @@ if __name__ == "__main__":
     parser.add_argument("--view-angle", choices=["diagonal", "frontal", "sagittal"])
     parser.add_argument(
         "--prediction-target",
-        choices=["binary_form", "error_type"],
+        choices=["binary_form", "error_type", "knee_alignment"],
         default="binary_form",
     )
     args = parser.parse_args()

@@ -11,6 +11,12 @@ from apps.analytics.services.segmentation import (
     segment_reps,
     split_contiguous_pose_runs,
 )
+from apps.analytics.services.fppa import (
+    FEATURE_SCHEMA_VERSION as FPPA_SCHEMA_VERSION,
+    M0_FEATURES,
+    M1_FEATURES,
+    extract_fppa_features,
+)
 from apps.analytics.services.session_report import build_session_report
 from apps.assessments.models import AssessmentSession, RepAssessment
 from apps.exercises.models import ExerciseVariant
@@ -124,6 +130,38 @@ class RepetitionSegmentationRegressionTests(APITestCase):
             _deduplicate_repetitions(candidates, signal),
             [candidates[0]],
         )
+
+
+class FppaFeatureTests(APITestCase):
+    # Verify signed FPPA features and the M0/M1 schema on synthetic landmarks.
+    def test_extracts_signed_filtered_fppa_features(self):
+        frames = []
+        for hip_y in (1, 2, 3, 4, 5, 4, 3, 2, 1):
+            frames.append(
+                {
+                    "left_hip": [0.0, hip_y],
+                    "right_hip": [10.0, hip_y],
+                    "left_knee": [1.0, hip_y + 5.0],
+                    "right_knee": [9.0, hip_y + 5.0],
+                    "left_ankle": [0.0, hip_y + 10.0],
+                    "right_ankle": [10.0, hip_y + 10.0],
+                }
+            )
+
+        features, metadata = extract_fppa_features(
+            frames,
+            frame_width=100,
+            frame_height=100,
+            native_fps=30,
+        )
+
+        self.assertTrue(metadata["valid"])
+        self.assertEqual(FPPA_SCHEMA_VERSION, "fppa_v2")
+        self.assertEqual(len(M0_FEATURES), 4)
+        self.assertEqual(len(M1_FEATURES), 6)
+        self.assertEqual(set(M0_FEATURES), set(features).intersection(M0_FEATURES))
+        self.assertTrue(features["fppa_l_bottom"] > 0)
+        self.assertTrue(features["fppa_r_bottom"] > 0)
 
 
 def _create_session_with_reps(user, variant, hybrid_score, created_at=None):

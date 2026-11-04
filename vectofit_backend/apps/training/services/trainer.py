@@ -113,6 +113,14 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
             )
         label_to_index = {name: index for index, name in enumerate(target_names)}
         labels = [label_to_index[str(label)] for label in raw_labels]
+    elif sample_set.prediction_target == "knee_alignment":
+        if set(raw_labels) != {"good", "bad"}:
+            raise InsufficientDataError(
+                "knee_alignment requires both good and bad target classes."
+            )
+        target_names = ["bad", "good"]
+        label_to_index = {"bad": 0, "good": 1}
+        labels = [label_to_index[label] for label in raw_labels]
     else:
         raise InsufficientDataError(
             f"Unsupported prediction target {sample_set.prediction_target!r}."
@@ -193,6 +201,57 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
         "seed": seed,
         "target_names": target_names,
         "class_mapping": metrics["class_mapping"],
+    }
+
+
+def lopo_evaluate(sample_set, hyperparameters=None, seed=42):
+    labels = np.asarray([{"bad": 0, "good": 1}[label] for label in sample_set.labels])
+    groups = np.asarray(sample_set.groups)
+    X = np.asarray(sample_set.rows, dtype=float)
+    predictions = np.full(len(labels), -1, dtype=int)
+    params = resolve_hyperparameters(
+        hyperparameters,
+        prediction_target="knee_alignment",
+        class_count=2,
+    )
+    for participant in sorted(set(groups)):
+        test_idx = np.flatnonzero(groups == participant)
+        train_idx = np.flatnonzero(groups != participant)
+        if set(labels[train_idx]) != {0, 1}:
+            raise InsufficientDataError(
+                f"LOPO participant {participant!r} leaves one class out of training."
+            )
+        model = XGBClassifier(**params, random_state=seed)
+        model.fit(X[train_idx], labels[train_idx])
+        predictions[test_idx] = model.predict(X[test_idx]).astype(int)
+    return _lopo_metrics(labels, predictions, groups)
+
+
+def _lopo_metrics(labels, predictions, groups):
+    per_participant = []
+    for participant in sorted(set(groups)):
+        indices = np.flatnonzero(groups == participant)
+        per_participant.append(
+            {
+                "participant": str(participant),
+                "macro_f1": float(
+                    f1_score(
+                        labels[indices],
+                        predictions[indices],
+                        labels=[0, 1],
+                        average="macro",
+                        zero_division=0,
+                    )
+                ),
+                "sample_count": int(len(indices)),
+            }
+        )
+    return {
+        "macro_f1": float(
+            f1_score(labels, predictions, labels=[0, 1], average="macro", zero_division=0)
+        ),
+        "confusion_matrix": confusion_matrix(labels, predictions, labels=[0, 1]).tolist(),
+        "per_participant": per_participant,
     }
 
 

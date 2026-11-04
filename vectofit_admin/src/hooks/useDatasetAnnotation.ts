@@ -25,16 +25,16 @@ function deriveTargetLabel(annotation: KneeAnnotation): TargetLabel | null {
     return null;
   }
 
+  if (left === "deviated" || right === "deviated") {
+    return "bad";
+  }
+
   if (left === "unassessable" || right === "unassessable") {
     return "unassessable";
   }
 
   if (left === "borderline" || right === "borderline") {
     return "borderline";
-  }
-
-  if (left === "deviated" || right === "deviated") {
-    return "bad";
   }
 
   return "good";

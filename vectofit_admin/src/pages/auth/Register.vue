@@ -51,19 +51,26 @@
             </div>
 
             <div class="form-group">
-                <label form="confirmPassword">
+                <label for="confirmPassword">
                     Confirm Password
                 </label>
 
                 <input
-                    id="password",
-                    v-model="form.password"
+                    id="confirmPassword"
+                    v-model="form.confirmPassword"
                     type="password"
                     placeholder="Re-enter password"
                     autocomplete="new-password"
                     required
                 />
             </div>
+
+            <label class="annotator-option">
+                <input v-model="form.isAnnotator" type="checkbox" />
+                Sign up as an annotator
+            </label>
+
+            <p v-if="error" class="error" role="alert">{{ error }}</p>
 
             <button
                 type="submit"
@@ -84,17 +91,34 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from "vue";
+import router from "../../router";
+import { accountService } from "../../services/accountService";
 
 const form = reactive({
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: "",
+    isAnnotator: true,
 })
 
-const handleRegister = () => {
-    console.log('Registration submitted:', form)
+const error = ref<string | null>(null);
+
+const handleRegister = async () => {
+    error.value = null;
+    try {
+        await accountService.register({
+            username: form.username,
+            email: form.email,
+            password: form.password,
+            confirm_password: form.confirmPassword,
+            is_annotator: form.isAnnotator,
+        });
+        await router.push("/login");
+    } catch {
+        error.value = "Registration failed. Check the form and try again.";
+    }
 }
 </script>
 

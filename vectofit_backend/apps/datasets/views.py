@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 import cv2
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, IntegerField, Q, Value, When
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -9,7 +9,14 @@ from rest_framework.parsers import BaseParser, FormParser, JSONParser, MultiPart
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Dataset, DatasetSample, DatasetVideo, Participant, ViewAngle
+from .models import (
+    Dataset,
+    DatasetSample,
+    DatasetVideo,
+    KneeAnnotation,
+    Participant,
+    ViewAngle,
+)
 from .serializers import (
     DatasetBulkImportSerializer,
     DatasetSampleSerializer,
@@ -21,6 +28,25 @@ from .serializers import (
 from .services.bulk_import import create_archive_preview
 from .services.import_executor import execute_bulk_import
 from .services.tasks import process_dataset_video_task
+from .permissions import IsAnnotator
+
+
+# Return review metadata for a knee annotation change.
+def _annotation_review_fields(serializer, user):
+    if "knee_annotation" not in serializer.validated_data:
+        return {}
+    if serializer.validated_data["knee_annotation"] is None:
+        return {"annotator": None, "annotated_at": None}
+    return {"annotator": user, "annotated_at": timezone.now()}
+
+
+# Return review metadata for a coarse label change.
+def _label_review_fields(annotation_changed, label, user):
+    if annotation_changed:
+        return {}
+    if label is None:
+        return {"annotator": None, "annotated_at": None}
+    return {"annotator": user, "annotated_at": timezone.now()}
 
 
 class ParticipantViewSet(viewsets.ModelViewSet):
@@ -139,6 +165,11 @@ class DatasetViewSet(viewsets.ModelViewSet):
     queryset = Dataset.objects.all().order_by("-created_at")
     serializer_class = DatasetSerializer
     permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get_permissions(self):
+        if self.action == "annotation":
+            return [IsAnnotator()]
+        return super().get_permissions()
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def perform_create(self, serializer):
@@ -154,6 +185,11 @@ class DatasetSampleViewSet(viewsets.ModelViewSet):
     serializer_class = DatasetSampleSerializer
     permission_classes: ClassVar[list] = [permissions.IsAdminUser]
 
+    def get_permissions(self):
+        if self.action in {"partial_update", "update"}:
+            return [IsAnnotator()]
+        return super().get_permissions()
+
     def get_queryset(self):
         queryset = super().get_queryset()
 
@@ -165,8 +201,18 @@ class DatasetSampleViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_update(self, serializer):
+        if (
+            not self.request.user.is_staff
+            and set(serializer.validated_data) != {"knee_annotation"}
+        ):
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied("Annotators may only update knee_annotation.")
+        annotation_changed = "knee_annotation" in serializer.validated_data
+        review_fields = _annotation_review_fields(serializer, self.request.user)
+
         if "is_correct" not in serializer.validated_data:
-            serializer.save()
+            serializer.save(**review_fields)
             return
 
         label = serializer.validated_data.get(
@@ -186,14 +232,129 @@ class DatasetSampleViewSet(viewsets.ModelViewSet):
             serializer.save(
                 is_correct=base_label,
                 error_label="",
-                annotator=None,
-                annotated_at=None,
+                **(
+                    review_fields
+                    or _label_review_fields(
+                        annotation_changed, label, self.request.user
+                    )
+                ),
             )
         else:
             serializer.save(
-                annotator=self.request.user,
-                annotated_at=timezone.now(),
+                **(
+                    review_fields
+                    or _label_review_fields(
+                        annotation_changed, label, self.request.user
+                    )
+                )
             )
+
+
+class AnnotationPoolView(APIView):
+    permission_classes: ClassVar[list] = [permissions.IsAdminUser]
+
+    def get(self, request):
+        datasets = Dataset.objects.all().order_by("-updated_at", "-id")
+        response = []
+
+        for dataset in datasets:
+            samples = dataset.samples.all()
+            if dataset.videos.exists():
+                samples = samples.filter(dataset_video__requires_manual_review=True)
+
+            sample_count = samples.count()
+            reviewed_samples = samples.filter(
+                Q(annotator__isnull=False) | Q(annotated_at__isnull=False)
+            )
+            reviewed_count = reviewed_samples.count()
+            pending_count = max(0, sample_count - reviewed_count)
+
+            records = list(
+                KneeAnnotation.objects.filter(sample__in=samples)
+                .select_related("annotator", "sample")
+                .order_by("-created_at", "-id")
+            )
+            annotator_activity = {}
+            for record in records:
+                if record.annotator_id is None:
+                    annotator_key = "unassigned"
+                    annotator = None
+                else:
+                    annotator_key = str(record.annotator_id)
+                    annotator = {
+                        "id": record.annotator_id,
+                        "username": record.annotator.username,
+                    }
+
+                activity = annotator_activity.setdefault(
+                    annotator_key,
+                    {
+                        "annotator": annotator,
+                        "activity_count": 0,
+                        "last_activity_at": record.created_at,
+                    },
+                )
+                activity["activity_count"] += 1
+
+            if sample_count == 0:
+                job_status = "NO_SAMPLES"
+            elif pending_count == 0:
+                job_status = "COMPLETED"
+            elif reviewed_count:
+                job_status = "IN_PROGRESS"
+            else:
+                job_status = "QUEUED"
+
+            response.append(
+                {
+                    "id": dataset.id,
+                    "name": dataset.name,
+                    "dataset_status": dataset.status,
+                    "job_status": job_status,
+                    "sample_count": sample_count,
+                    "reviewed_count": reviewed_count,
+                    "pending_count": pending_count,
+                    "activity_count": len(records),
+                    "created_at": dataset.created_at,
+                    "updated_at": dataset.updated_at,
+                    "last_activity_at": (
+                        records[0].created_at if records else dataset.updated_at
+                    ),
+                    "annotators": list(annotator_activity.values()),
+                    "activity": [
+                        {
+                            "id": record.id,
+                            "sample_id": record.sample_id,
+                            "annotator": (
+                                {
+                                    "id": record.annotator_id,
+                                    "username": record.annotator.username,
+                                }
+                                if record.annotator_id
+                                else None
+                            ),
+                            "created_at": record.created_at,
+                            "has_annotation": record.annotation is not None,
+                        }
+                        for record in records
+                    ],
+                }
+            )
+
+        return Response(response)
+
+
+class AnnotationDatasetListView(APIView):
+    permission_classes: ClassVar[list] = [IsAnnotator]
+
+    def get(self, request):
+        datasets = Dataset.objects.filter(
+            status="READY",
+            samples__dataset_video__requires_manual_review=True,
+        ).distinct().order_by("name")
+        return Response(
+            [{"id": item.pk, "name": item.name} for item in datasets]
+        )
 
 
 class DatasetVideoViewSet(viewsets.ReadOnlyModelViewSet):

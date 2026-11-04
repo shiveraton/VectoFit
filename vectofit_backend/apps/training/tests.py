@@ -1,3 +1,4 @@
+import json
 import shutil
 import tempfile
 
@@ -15,6 +16,7 @@ from apps.datasets.models import (
     Participant,
     ViewAngle,
 )
+from apps.datasets.models import KneeAnnotation
 from apps.exercises.models import ExerciseVariant
 
 from .models import ModelRegistry, TrainingJob
@@ -26,6 +28,7 @@ from .services.data_loader import (
 )
 from .services.run_training_job import run_training_job
 from .services.trainer import InsufficientDataError, train_and_evaluate
+from .services.trainer import lopo_evaluate
 
 
 def make_landmark_series():
@@ -44,6 +47,21 @@ def make_landmark_series():
 
 User = get_user_model()
 TEMP = tempfile.mkdtemp()
+
+
+class PilotResultsViewTests(APITestCase):
+    @override_settings(PILOT_RESULTS_PATH=TEMP + "/pilot-results.json")
+    def test_admin_can_read_pilot_results_json(self):
+        path = TEMP + "/pilot-results.json"
+        with open(path, "w", encoding="utf-8") as result_file:
+            json.dump({"label": "exploratory pilot", "M0": {"macro_f1": 0.5}}, result_file)
+        admin = User.objects.create_superuser("pilot-admin", "pilot@example.com", "pass")
+        self.client.force_authenticate(user=admin)
+
+        response = self.client.get(reverse("pilot-results"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["label"], "exploratory pilot")
 
 
 class GroupSplitTests(TestCase):
@@ -140,6 +158,26 @@ class CorePipelineTests(TestCase):
         ss.labels = [1] * len(ss.labels)
         with self.assertRaises(InsufficientDataError):
             train_and_evaluate(ss)
+
+    def test_lopo_reports_macro_f1_for_each_participant(self):
+        sample_set = SampleSet(
+            rows=[[float(label), float(label)] for label in (0, 1) * 4],
+            labels=["bad", "good"] * 4,
+            groups=[f"participant-{index}" for index in range(4) for _ in (0, 1)],
+            features=["fppa_l_bottom", "fppa_r_bottom"],
+            feature_names=["fppa_l_bottom", "fppa_r_bottom"],
+            warnings=[],
+            errors=[],
+            prediction_target="knee_alignment",
+        )
+
+        result = lopo_evaluate(
+            sample_set,
+            hyperparameters={"n_estimators": 5, "max_depth": 2},
+        )
+
+        self.assertIn("macro_f1", result)
+        self.assertEqual(len(result["per_participant"]), 4)
 
 
 class DBAndAPITests(APITestCase):
@@ -272,6 +310,34 @@ class DBAndAPITests(APITestCase):
         )
         self.assertEqual(len(result["metrics"]["confusion_matrix"]), 3)
         self.assertEqual(result["metrics"]["prediction_target"], "error_type")
+
+    def test_knee_alignment_loader_keeps_only_final_good_and_bad_targets(self):
+        samples = list(
+            self.dataset.samples.filter(
+                dataset_video__view_angle=self.view_angle
+            ).order_by("id")[:2]
+        )
+        for sample, grade in zip(samples, ("aligned", "deviated")):
+            KneeAnnotation.objects.create(
+                sample=sample,
+                annotation={
+                    "left": {"grade": grade},
+                    "right": {"grade": "aligned"},
+                },
+                annotator=self.admin,
+            )
+
+        sample_set = build_samples(
+            [self.dataset],
+            list(FEATURE_ORDER),
+            view_angle="diagonal",
+            prediction_target="knee_alignment",
+        )
+
+        self.assertEqual(set(sample_set.labels), {"good", "bad"})
+        self.assertTrue(
+            all(item["annotator_ids"] == [self.admin.pk] for item in sample_set.sample_metadata)
+        )
 
     def test_build_samples_excludes_pending_review_samples(self):
         existing_sample = self.dataset.samples.first()
