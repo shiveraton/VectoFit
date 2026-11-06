@@ -1,0 +1,335 @@
+{
+  "results": [
+    {
+      "test": "1280 /dashboard",
+      "value": {
+        "title": "Dashboard",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /dataset",
+      "value": {
+        "title": "Datasets",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /training",
+      "value": {
+        "title": "Training",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /models",
+      "value": {
+        "title": "Models",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /pilot-results",
+      "value": {
+        "title": "M0 / M1 Results",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /login",
+      "value": {
+        "title": "Sign in to VectoFit",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /register",
+      "value": {
+        "title": "Create an account",
+        "overflow": false
+      }
+    },
+    {
+      "test": "1280 /dataset/1/annotate",
+      "value": {
+        "title": "Synthetic frontal cohort with a long descriptive name",
+        "overflow": false
+      }
+    },
+    {
+      "test": "allowed model activation",
+      "value": true
+    },
+    {
+      "test": "clear saved annotation",
+      "value": true
+    },
+    {
+      "test": "admin sign-out clears token",
+      "value": true
+    },
+    {
+      "test": "annotator sign-out clears token",
+      "value": true
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/activate/"
+    },
+    {
+      "method": "POST",
+      "path": "/training/models/1/activate/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-datasets/"
+    }
+  ]
+}

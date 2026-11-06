@@ -1,0 +1,1944 @@
+{
+  "results": [
+    {
+      "test": "React /dashboard",
+      "width": 1440,
+      "value": {
+        "title": "Dashboard",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /dataset",
+      "width": 1440,
+      "value": {
+        "title": "Datasets",
+        "overflow": false,
+        "buttons": 7
+      }
+    },
+    {
+      "test": "React /training",
+      "width": 1440,
+      "value": {
+        "title": "Training",
+        "overflow": false,
+        "buttons": 15
+      }
+    },
+    {
+      "test": "React /models",
+      "width": 1440,
+      "value": {
+        "title": "Models",
+        "overflow": false,
+        "buttons": 4
+      }
+    },
+    {
+      "test": "React /pilot-results",
+      "width": 1440,
+      "value": {
+        "title": "M0 / M1 Results",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /login",
+      "width": 1440,
+      "value": {
+        "title": "Sign in to VectoFit",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /register",
+      "width": 1440,
+      "value": {
+        "title": "Create an account",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /dataset/1/annotate",
+      "width": 1440,
+      "value": {
+        "title": "Synthetic frontal cohort with a long descriptive name",
+        "overflow": false,
+        "buttons": 16
+      }
+    },
+    {
+      "test": "React /dashboard",
+      "width": 768,
+      "value": {
+        "title": "Dashboard",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /dataset",
+      "width": 768,
+      "value": {
+        "title": "Datasets",
+        "overflow": false,
+        "buttons": 7
+      }
+    },
+    {
+      "test": "React /training",
+      "width": 768,
+      "value": {
+        "title": "Training",
+        "overflow": false,
+        "buttons": 15
+      }
+    },
+    {
+      "test": "React /models",
+      "width": 768,
+      "value": {
+        "title": "Models",
+        "overflow": false,
+        "buttons": 4
+      }
+    },
+    {
+      "test": "React /pilot-results",
+      "width": 768,
+      "value": {
+        "title": "M0 / M1 Results",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /login",
+      "width": 768,
+      "value": {
+        "title": "Sign in to VectoFit",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /register",
+      "width": 768,
+      "value": {
+        "title": "Create an account",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /dataset/1/annotate",
+      "width": 768,
+      "value": {
+        "title": "Synthetic frontal cohort with a long descriptive name",
+        "overflow": false,
+        "buttons": 16
+      }
+    },
+    {
+      "test": "React /dashboard",
+      "width": 360,
+      "value": {
+        "title": "Dashboard",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /dataset",
+      "width": 360,
+      "value": {
+        "title": "Datasets",
+        "overflow": false,
+        "buttons": 7
+      }
+    },
+    {
+      "test": "React /training",
+      "width": 360,
+      "value": {
+        "title": "Training",
+        "overflow": false,
+        "buttons": 15
+      }
+    },
+    {
+      "test": "React /models",
+      "width": 360,
+      "value": {
+        "title": "Models",
+        "overflow": false,
+        "buttons": 4
+      }
+    },
+    {
+      "test": "React /pilot-results",
+      "width": 360,
+      "value": {
+        "title": "M0 / M1 Results",
+        "overflow": false,
+        "buttons": 3
+      }
+    },
+    {
+      "test": "React /login",
+      "width": 360,
+      "value": {
+        "title": "Sign in to VectoFit",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /register",
+      "width": 360,
+      "value": {
+        "title": "Create an account",
+        "overflow": false,
+        "buttons": 1
+      }
+    },
+    {
+      "test": "React /dataset/1/annotate",
+      "width": 360,
+      "value": {
+        "title": "Synthetic frontal cohort with a long descriptive name",
+        "overflow": false,
+        "buttons": 16
+      }
+    },
+    {
+      "test": "annotator home",
+      "value": true
+    },
+    {
+      "test": "model selection",
+      "value": true
+    },
+    {
+      "test": "model activation blocker",
+      "value": true
+    },
+    {
+      "test": "create dialog focused",
+      "value": true
+    },
+    {
+      "test": "create dialog escape",
+      "value": true
+    },
+    {
+      "test": "import preview selection",
+      "value": true
+    },
+    {
+      "test": "import commit closes dialog",
+      "value": true
+    },
+    {
+      "test": "single video create closes dialog",
+      "value": true
+    },
+    {
+      "test": "training eligible selection",
+      "value": true
+    },
+    {
+      "test": "parameter help",
+      "value": true
+    },
+    {
+      "test": "training start request",
+      "value": true
+    },
+    {
+      "test": "annotation completion",
+      "value": true
+    },
+    {
+      "test": "state empty",
+      "value": {
+        "alert": false,
+        "text": "Skip to content\nWORKSPACE\nOverview\nDatasets\nTraining\nModel Registry\nPilot Results\nADMINISTRATION\nUsers\nUnavailable\nActivity Logs\nUnavailable\nSettings\nUnavailable\nVectoFit Admin Portal\nSign out\nWorkspace\n/\nDatasets\nAdministrator\nVECTOFIT DATA PIPELINE\nDatasets\n\nManage datasets used for VectoFit model training and evaluation.\n\nAdd Single Video\n↑\nImport Dataset\nDatasets\nAnnotation Pool\nDatasets\n0\nRegistered datasets\nSamples\n0\nCompleted squat repetitions\nTraining Ready\n0\nDatasets with labelled samples\nProcessing\n0\nCurrently being processed\nDatasets\n\nRegistered exercise data and preprocessing status.\n\nNo datasets available\n\nCreate or upload your first dataset to start defining biomechanical squat features and training models.\n\n+\nCreate Dataset\nDataset Structure\n\nEach completed squat repetition represents one sample.\n\nFEATURES\nROM, asymmetry, angles, velocity\nPRIMARY TARGET\nCorrect / Incorrect\nSECONDARY TARGETS\nBiomechanical error labels\nSAMPLE UNIT\nOne completed squat repetition"
+      }
+    },
+    {
+      "test": "state error",
+      "value": {
+        "alert": true,
+        "text": "Skip to content\nWORKSPACE\nOverview\nDatasets\nTraining\nModel Registry\nPilot Results\nADMINISTRATION\nUsers\nUnavailable\nActivity Logs\nUnavailable\nSettings\nUnavailable\nVectoFit Admin Portal\nSign out\nWorkspace\n/\nDatasets\nAdministrator\nVECTOFIT DATA PIPELINE\nDatasets\n\nManage datasets used for VectoFit model training and evaluation.\n\nAdd Single Video\n↑\nImport Dataset\nDatasets\nAnnotation Pool\nUnable to load datasets.\nDatasets\n0\nRegistered datasets\nSamples\n0\nCompleted squat repetitions\nTraining Ready\n0\nDatasets with labelled samples\nProcessing\n0\nCurrently being processed\nDatasets\n\nRegistered exercise data and preprocessing status.\n\nNo datasets available\n\nCreate or upload your first dataset to start defining biomechanical squat features and training models.\n\n+\nCreate Dataset\nDataset Structure\n\nEach completed squat repetition represents one sample.\n\nFEATURES\nROM, asymmetry, angles, velocity\nPRIMARY TARGET\nCorrect / Incorrect\nSECONDARY TARGETS\nBiomechanical error labels\nSAMPLE UNIT\nOne completed squat repetition"
+      }
+    },
+    {
+      "test": "state RUNNING",
+      "value": {
+        "alert": false,
+        "text": "Skip to content\nWORKSPACE\nOverview\nDatasets\nTraining\nModel Registry\nPilot Results\nADMINISTRATION\nUsers\nUnavailable\nActivity Logs\nUnavailable\nSettings\nUnavailable\nVectoFit Admin Portal\nSign out\nWorkspace\n/\nTraining\nAdministrator\nVECTOFIT MODEL TRAINING\nTraining\n\nTrain and inspect frontal-plane knee-alignment models using FPPA v2.\n\n+\nNew Training Run\nFPPA Training History\n1 – 11/1/2026, 4:00:00 PM – RUNNING\nTotal Runs\n1\nFPPA v2 knee-alignment experiments\nCompleted Runs\n0\nCompleted FPPA M1 runs\nActive Jobs\n1\nPending or running jobs\nFailed Runs\n0\nExperiments that ended with errors\nTraining Configuration\n\nConfigure an FPPA v2 M1 training experiment for the frontal view.\n\nTRAINING\nView Angle\nFPPA measures bilateral knee alignment from a front-facing camera view.\nF\nFrontal\nRequired FPPA view\nTraining and assessment use the same frontal-plane measurement schema.\nDatasets\nSelect prepared datasets that belong to the same camera view.\nSynthetic frontal cohort with a long descriptive name\n#1\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\nSynthetic upload\n#2\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\n0 datasets selected\nChoose at least one dataset to train.\n\nCounts reflect stored labels. Repetitions with invalid or incomplete landmarks are excluded during feature extraction, so the final training sample count may be lower. Only good and bad knee-alignment labels are trainable; borderline, unassessable, disputed, and missing labels are reported but excluded.\n\nFPPA v2 Feature Schema\nSix fixed inputs used by the current M1 model.\n✓\nLeft FPPA at squat bottom\nSigned left knee angle at squat bottom.\n✓\nRight FPPA at squat bottom\nSigned right knee angle at squat bottom.\n✓\nLeft peak FPPA\nLargest absolute filtered left FPPA in the repetition.\n✓\nRight peak FPPA\nLargest absolute filtered right FPPA in the repetition.\n✓\nBottom bilateral asymmetry\nAbsolute left-right FPPA difference at squat bottom.\n✓\nPeak bilateral asymmetry\nAbsolute left-right difference between peak FPPA values.\n\nThe fixed schema keeps training inputs aligned with frontal-plane FPPA assessment and model provenance.\n\nCurrent Model\nThe FPPA M1 experiment uses a fixed XGBoost classifier.\nXGB\nXGBoost · FPPA M1\nPredicts human-reviewed good/bad knee-alignment labels from the fixed FPPA v2 feature schema.\n\nM0 uses four FPPA features; M1 adds bilateral asymmetry. Both are XGBoost models. The fixed 10-degree threshold rule is evaluated separately on the M0 / M1 Results page.\n\nTraining Parameters\nConfigure the XGBoost baseline and reproducible experiment settings.\nHow to use these controls\n\nUse the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.\n\n5 settings\nXGBoost Hyperparameters\nNumber of Trees\nn_estimators\n?\nHow many decision trees should the model build?\n200\nFewer\nMore\nBaseline\n200\nTree Complexity\nmax_depth\n?\nHow complex can each decision tree become?\n4\nSimpler\nMore detailed\nBaseline\n4\nLearning Rate\nlearning_rate\n?\nHow strongly should each new tree affect the model?\n0.1\nGradual\nAggressive\nBaseline\n0.10\nExperiment Settings\nTest Set Size\ntest_size\n?\nHow much labelled data should be held out for testing?\n30%\nSmaller\nLarger\nBaseline\n30%\nRandom Seed\nrandom_seed\n?\nWhich reproducible seed should this experiment use?\n42\nSeed\nSeed\n4\n5\n6\n7\n8\nBaseline\n42\nObjective\nbinary:logistic\nEvaluation Metric\nlogloss\nSplit Strategy\ngroup_by_participant\nCONFIGURATION SUMMARY\nNo datasets · frontal view · FPPA knee alignment · six fixed FPPA features · XGBoost M1\nTraining...\nTraining Result\n\nHeld-out evaluation for the selected FPPA v2 training run.\n\nRUNNING\nTRAINING JOB\n#1\nSAMPLES\n100\nTRAIN / TEST REPETITIONS\n70 / 30\nCOMPLETED\nNov 1, 2026, 4:00 PM\n…\nTraining is in progress\n\nThe configuration is active. Final evaluation metrics will appear here once the job completes."
+      }
+    },
+    {
+      "test": "state FAILED",
+      "value": {
+        "alert": false,
+        "text": "Skip to content\nWORKSPACE\nOverview\nDatasets\nTraining\nModel Registry\nPilot Results\nADMINISTRATION\nUsers\nUnavailable\nActivity Logs\nUnavailable\nSettings\nUnavailable\nVectoFit Admin Portal\nSign out\nWorkspace\n/\nTraining\nAdministrator\nVECTOFIT MODEL TRAINING\nTraining\n\nTrain and inspect frontal-plane knee-alignment models using FPPA v2.\n\n+\nNew Training Run\nFPPA Training History\n1 – 11/1/2026, 4:00:00 PM – FAILED\nTotal Runs\n1\nFPPA v2 knee-alignment experiments\nCompleted Runs\n0\nCompleted FPPA M1 runs\nActive Jobs\n0\nPending or running jobs\nFailed Runs\n1\nExperiments that ended with errors\nTraining Configuration\n\nConfigure an FPPA v2 M1 training experiment for the frontal view.\n\nINCOMPLETE\nView Angle\nFPPA measures bilateral knee alignment from a front-facing camera view.\nF\nFrontal\nRequired FPPA view\nTraining and assessment use the same frontal-plane measurement schema.\nDatasets\nSelect prepared datasets that belong to the same camera view.\nSynthetic frontal cohort with a long descriptive name\n#1\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\nSynthetic upload\n#2\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\n0 datasets selected\nChoose at least one dataset to train.\n\nCounts reflect stored labels. Repetitions with invalid or incomplete landmarks are excluded during feature extraction, so the final training sample count may be lower. Only good and bad knee-alignment labels are trainable; borderline, unassessable, disputed, and missing labels are reported but excluded.\n\nFPPA v2 Feature Schema\nSix fixed inputs used by the current M1 model.\n✓\nLeft FPPA at squat bottom\nSigned left knee angle at squat bottom.\n✓\nRight FPPA at squat bottom\nSigned right knee angle at squat bottom.\n✓\nLeft peak FPPA\nLargest absolute filtered left FPPA in the repetition.\n✓\nRight peak FPPA\nLargest absolute filtered right FPPA in the repetition.\n✓\nBottom bilateral asymmetry\nAbsolute left-right FPPA difference at squat bottom.\n✓\nPeak bilateral asymmetry\nAbsolute left-right difference between peak FPPA values.\n\nThe fixed schema keeps training inputs aligned with frontal-plane FPPA assessment and model provenance.\n\nCurrent Model\nThe FPPA M1 experiment uses a fixed XGBoost classifier.\nXGB\nXGBoost · FPPA M1\nPredicts human-reviewed good/bad knee-alignment labels from the fixed FPPA v2 feature schema.\n\nM0 uses four FPPA features; M1 adds bilateral asymmetry. Both are XGBoost models. The fixed 10-degree threshold rule is evaluated separately on the M0 / M1 Results page.\n\nTraining Parameters\nConfigure the XGBoost baseline and reproducible experiment settings.\nHow to use these controls\n\nUse the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.\n\n5 settings\nXGBoost Hyperparameters\nNumber of Trees\nn_estimators\n?\nHow many decision trees should the model build?\n200\nFewer\nMore\nBaseline\n200\nTree Complexity\nmax_depth\n?\nHow complex can each decision tree become?\n4\nSimpler\nMore detailed\nBaseline\n4\nLearning Rate\nlearning_rate\n?\nHow strongly should each new tree affect the model?\n0.1\nGradual\nAggressive\nBaseline\n0.10\nExperiment Settings\nTest Set Size\ntest_size\n?\nHow much labelled data should be held out for testing?\n30%\nSmaller\nLarger\nBaseline\n30%\nRandom Seed\nrandom_seed\n?\nWhich reproducible seed should this experiment use?\n42\nSeed\nSeed\n4\n5\n6\n7\n8\nBaseline\n42\nObjective\nbinary:logistic\nEvaluation Metric\nlogloss\nSplit Strategy\ngroup_by_participant\nCONFIGURATION SUMMARY\nNo datasets · frontal view · FPPA knee alignment · six fixed FPPA features · XGBoost M1\nStart Training\nTraining Result\n\nHeld-out evaluation for the selected FPPA v2 training run.\n\nFAILED\nTRAINING JOB\n#1\nSAMPLES\n100\nTRAIN / TEST REPETITIONS\n70 / 30\nCOMPLETED\nNov 1, 2026, 4:00 PM\n!\nTraining failed\n\nSynthetic training failure: no artifact was produced."
+      }
+    },
+    {
+      "test": "state COMPLETED",
+      "value": {
+        "alert": false,
+        "text": "Skip to content\nWORKSPACE\nOverview\nDatasets\nTraining\nModel Registry\nPilot Results\nADMINISTRATION\nUsers\nUnavailable\nActivity Logs\nUnavailable\nSettings\nUnavailable\nVectoFit Admin Portal\nSign out\nWorkspace\n/\nTraining\nAdministrator\nVECTOFIT MODEL TRAINING\nTraining\n\nTrain and inspect frontal-plane knee-alignment models using FPPA v2.\n\n+\nNew Training Run\nFPPA Training History\n1 – 11/1/2026, 4:00:00 PM – COMPLETED\nTotal Runs\n1\nFPPA v2 knee-alignment experiments\nCompleted Runs\n1\nCompleted FPPA M1 runs\nActive Jobs\n0\nPending or running jobs\nFailed Runs\n0\nExperiments that ended with errors\nTraining Configuration\n\nConfigure an FPPA v2 M1 training experiment for the frontal view.\n\nINCOMPLETE\nView Angle\nFPPA measures bilateral knee alignment from a front-facing camera view.\nF\nFrontal\nRequired FPPA view\nTraining and assessment use the same frontal-plane measurement schema.\nDatasets\nSelect prepared datasets that belong to the same camera view.\nSynthetic frontal cohort with a long descriptive name\n#1\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\nSynthetic upload\n#2\nbodyweight_squat\n50 good knee · 50 bad knee\n100 usable knee labels\n10 participants\n1 videos\n0 datasets selected\nChoose at least one dataset to train.\n\nCounts reflect stored labels. Repetitions with invalid or incomplete landmarks are excluded during feature extraction, so the final training sample count may be lower. Only good and bad knee-alignment labels are trainable; borderline, unassessable, disputed, and missing labels are reported but excluded.\n\nFPPA v2 Feature Schema\nSix fixed inputs used by the current M1 model.\n✓\nLeft FPPA at squat bottom\nSigned left knee angle at squat bottom.\n✓\nRight FPPA at squat bottom\nSigned right knee angle at squat bottom.\n✓\nLeft peak FPPA\nLargest absolute filtered left FPPA in the repetition.\n✓\nRight peak FPPA\nLargest absolute filtered right FPPA in the repetition.\n✓\nBottom bilateral asymmetry\nAbsolute left-right FPPA difference at squat bottom.\n✓\nPeak bilateral asymmetry\nAbsolute left-right difference between peak FPPA values.\n\nThe fixed schema keeps training inputs aligned with frontal-plane FPPA assessment and model provenance.\n\nCurrent Model\nThe FPPA M1 experiment uses a fixed XGBoost classifier.\nXGB\nXGBoost · FPPA M1\nPredicts human-reviewed good/bad knee-alignment labels from the fixed FPPA v2 feature schema.\n\nM0 uses four FPPA features; M1 adds bilateral asymmetry. Both are XGBoost models. The fixed 10-degree threshold rule is evaluated separately on the M0 / M1 Results page.\n\nTraining Parameters\nConfigure the XGBoost baseline and reproducible experiment settings.\nHow to use these controls\n\nUse the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.\n\n5 settings\nXGBoost Hyperparameters\nNumber of Trees\nn_estimators\n?\nHow many decision trees should the model build?\n200\nFewer\nMore\nBaseline\n200\nTree Complexity\nmax_depth\n?\nHow complex can each decision tree become?\n4\nSimpler\nMore detailed\nBaseline\n4\nLearning Rate\nlearning_rate\n?\nHow strongly should each new tree affect the model?\n0.1\nGradual\nAggressive\nBaseline\n0.10\nExperiment Settings\nTest Set Size\ntest_size\n?\nHow much labelled data should be held out for testing?\n30%\nSmaller\nLarger\nBaseline\n30%\nRandom Seed\nrandom_seed\n?\nWhich reproducible seed should this experiment use?\n42\nSeed\nSeed\n4\n5\n6\n7\n8\nBaseline\n42\nObjective\nbinary:logistic\nEvaluation Metric\nlogloss\nSplit Strategy\ngroup_by_participant\nCONFIGURATION SUMMARY\nNo datasets · frontal view · FPPA knee alignment · six fixed FPPA features · XGBoost M1\nStart Training\nTraining Result\n\nHeld-out evaluation for the selected FPPA v2 training run.\n\nCOMPLETED\nTRAINING JOB\n#1\nSAMPLES\n100\nTRAIN / TEST REPETITIONS\n70 / 30\nCOMPLETED\nNov 1, 2026, 4:00 PM\n\nEvaluation: participant-grouped holdout. These scores are separate from the pilot LOPO comparison. Train / test participants: -- / --.\n\nAccuracy\n?\n85.0%\n\nHow often did the model make the correct overall decision?\n\nBalanced Accuracy\n?\n85.0%\n\nDid the model perform reasonably across every class?\n\nMacro Precision\n?\n85.0%\n\nHow precise are predictions across good and bad knee-alignment labels?\n\nMacro Recall\n?\n85.0%\n\nHow well does the model identify both knee-alignment labels?\n\nMacro F1\n?\n85.0%\n\nHow well does the model balance precision and recall?\n\n?\nWhat does this result mean?\n\nThe held-out test repetitions produced a macro F1 of 85.0% and balanced accuracy of 85.0%. Review both together with the confusion matrix before considering the trained FPPA model for activation.\n\nWhat influenced the model?\n\nRelative feature importance reported by the trained XGBoost model.\n\nTop: fppa_l_bottom\nfppa_l_bottom\n50.0%\nfppa_r_bottom\n30.0%\nasym_bottom\n20.0%\nHow to interpret this\n\nLarger values indicate a greater contribution to the trained model's decision process. They do not mean the feature independently causes correct or incorrect squat form.\n\nClassification Results\n\nHow predictions compared with the known test-set labels. Rows are actual labels; columns are predicted labels.\n\n0 = Bad\n1 = Good\nActual ↓ / Predicted →\nBad\nGood\nBad\n13\n87% of actual bad\n2\n13% of actual bad\nGood\n3\n20% of actual good\n12\n80% of actual good\nWhat to watch: Rows are the human-reviewed FPPA labels (bad or good); columns are the model predictions. Inspect which knee-alignment class is confused before activating the model.\nExperiment Configuration Used\n\nThe configuration stored with this training run.\n\nmax_depth\n3\nRequested test fraction\n30.0%\nrandom_seed\n42\nview_angle\nfrontal\nsplit_strategy\nparticipant\nFeatures\nLeft FPPA at bottom · Right FPPA at bottom · Bottom bilateral asymmetry"
+      }
+    },
+    {
+      "test": "comparison /dashboard",
+      "measurements": [
+        {
+          "title": "Dashboard",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 959,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1136,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 373,
+              "width": 1136,
+              "height": 180,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 218,
+              "width": 1136,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        },
+        {
+          "title": "Dashboard",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 959,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1136,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 373,
+              "width": 1136,
+              "height": 180,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 218,
+              "width": 1136,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "test": "comparison /dataset",
+      "measurements": [
+        {
+          "title": "Datasets",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 817,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 434,
+              "width": 1121,
+              "height": 304,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 279,
+              "width": 1121,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        },
+        {
+          "title": "Datasets",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 817,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 434,
+              "width": 1121,
+              "height": 304,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 279,
+              "width": 1121,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "test": "comparison /training",
+      "measurements": [
+        {
+          "title": "Training",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 942,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 218,
+              "width": 1121,
+              "height": 83,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 321,
+              "width": 1121,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        },
+        {
+          "title": "Training",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 942,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 218,
+              "width": 1121,
+              "height": 83,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 321,
+              "width": 1121,
+              "height": 128,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "test": "comparison /models",
+      "measurements": [
+        {
+          "title": "Models",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 1121,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 112,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 560,
+              "width": 1121,
+              "height": 549,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 387,
+              "width": 1121,
+              "height": 146,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".hero-card",
+              "x": 268,
+              "y": 240,
+              "width": 1121,
+              "height": 132,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            }
+          ]
+        },
+        {
+          "title": "Models",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 1121,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 112,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".content-card",
+              "x": 268,
+              "y": 560,
+              "width": 1121,
+              "height": 549,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".summary-grid",
+              "x": 268,
+              "y": 387,
+              "width": 1121,
+              "height": 146,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            {
+              "selector": ".hero-card",
+              "x": 268,
+              "y": 240,
+              "width": 1121,
+              "height": 132,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "test": "comparison /pilot-results",
+      "measurements": [
+        {
+          "title": "M0 / M1 Results",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 1023,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "title": "M0 / M1 Results",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 1023,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1121,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null,
+            null,
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "test": "comparison /dataset/1/annotate",
+      "measurements": [
+        {
+          "title": "Synthetic frontal cohort with a long descriptive name",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 984,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1136,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "title": "Synthetic frontal cohort with a long descriptive name",
+          "styles": [
+            {
+              "selector": "h1",
+              "x": 268,
+              "y": 125,
+              "width": 984,
+              "height": 35,
+              "font": "28px",
+              "color": "rgb(24, 24, 27)"
+            },
+            {
+              "selector": ".page-header",
+              "x": 268,
+              "y": 100,
+              "width": 1136,
+              "height": 90,
+              "font": "14px",
+              "color": "rgb(39, 39, 42)"
+            },
+            null,
+            null,
+            null
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/2/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/2/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/import/preview/"
+    },
+    {
+      "method": "POST",
+      "path": "/datasets/import/preview/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/import/"
+    },
+    {
+      "method": "POST",
+      "path": "/datasets/import/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "POST",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/create/"
+    },
+    {
+      "method": "POST",
+      "path": "/training/jobs/create/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/datasets/dataset-samples/1/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/dataset-samples/2/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/datasets/dataset-samples/2/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/participant/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/annotation-pool/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/jobs/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/models/1/state/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "GET",
+      "path": "/training/pilot-results/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/me/"
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/datasets/1/annotation/"
+    },
+    {
+      "method": "GET",
+      "path": "/datasets/1/annotation/"
+    }
+  ]
+}

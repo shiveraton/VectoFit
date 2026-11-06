@@ -1,0 +1,182 @@
+
+.evaluation-body[data-v-model-evaluation-state] {
+  padding: 24px;
+}
+.metric-grid[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--vf-border-light);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.metric-item[data-v-model-evaluation-state] {
+  padding: 15px 16px;
+  background: #fff;
+}
+.metric-item + .metric-item[data-v-model-evaluation-state] {
+  border-left: 1px solid var(--vf-border-light);
+}
+.metric-label[data-v-model-evaluation-state] {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--vf-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.metric-item strong[data-v-model-evaluation-state] {
+  color: var(--vf-dark);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.evaluation-bottom[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+.subheading[data-v-model-evaluation-state] {
+  color: var(--vf-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+.helper[data-v-model-evaluation-state] {
+  margin: 5px 0 14px;
+  color: var(--vf-muted);
+  font-size: 13px;
+}
+.matrix[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: 92px 1fr 1fr;
+  max-width: 560px;
+  border: 1px solid var(--vf-border-light);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.matrix[data-v-model-evaluation-state] > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 6px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.matrix-empty[data-v-model-evaluation-state] {
+  max-width: 360px;
+  padding: 18px;
+  border: 1px dashed var(--vf-border-light);
+  border-radius: 10px;
+  color: var(--vf-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.matrix-axis[data-v-model-evaluation-state],
+.matrix-corner[data-v-model-evaluation-state] {
+  background: #fafafa;
+  color: var(--vf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.row-axis[data-v-model-evaluation-state] {
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+.matrix-cell[data-v-model-evaluation-state] {
+  border-top: 1px solid var(--vf-border-light);
+  border-left: 1px solid var(--vf-border-light);
+  color: var(--vf-dark);
+  font-size: 15px;
+  font-weight: 700;
+}
+.distribution-grid[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.distribution-card[data-v-model-evaluation-state] {
+  padding: 12px;
+  border: 1px solid var(--vf-border-light);
+  border-radius: 9px;
+  background: #fafafa;
+}
+.distribution-card > span[data-v-model-evaluation-state] {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--vf-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+.distribution-values[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 7px;
+}
+.distribution-values small[data-v-model-evaluation-state] {
+  color: var(--vf-muted);
+  font-size: 11px;
+}
+.distribution-values strong[data-v-model-evaluation-state] {
+  color: var(--vf-dark);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.per-class-wrap[data-v-model-evaluation-state] {
+  margin-top: 24px;
+}
+.per-class-scroll[data-v-model-evaluation-state] {
+  overflow-x: auto;
+}
+.per-class-table[data-v-model-evaluation-state] {
+  min-width: 560px;
+  overflow: hidden;
+  border: 1px solid var(--vf-border-light);
+  border-radius: 10px;
+}
+.per-class-row[data-v-model-evaluation-state] {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) repeat(5, minmax(0, 1fr));
+  gap: 0;
+}
+.per-class-row + .per-class-row[data-v-model-evaluation-state] {
+  border-top: 1px solid var(--vf-border-light);
+}
+.per-class-row[data-v-model-evaluation-state] > * {
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
+  color: var(--vf-dark);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.per-class-row[data-v-model-evaluation-state] > * + * {
+  border-left: 1px solid var(--vf-border-light);
+}
+.per-class-row strong[data-v-model-evaluation-state] {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.per-class-header[data-v-model-evaluation-state] > * {
+  color: var(--vf-muted);
+  background: #fafafa;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@media (max-width: 1000px) {
+.metric-grid[data-v-model-evaluation-state] {
+    grid-template-columns: repeat(2, 1fr);
+}
+.metric-item + .metric-item[data-v-model-evaluation-state] {
+    border-left: 0;
+    border-top: 1px solid var(--vf-border-light);
+}
+.evaluation-bottom[data-v-model-evaluation-state] {
+    grid-template-columns: 1fr;
+}
+}
+

@@ -1,0 +1,65 @@
+
+.active-endpoint-details[data-v-dashboard] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+.detail-group[data-v-dashboard] {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detail-label[data-v-dashboard] {
+  font-size: 12px;
+  color: var(--vf-muted);
+}
+.detail-value[data-v-dashboard] {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  color: var(--vf-dark);
+}
+.empty-endpoint[data-v-dashboard] {
+  color: var(--vf-muted);
+  font-size: 13px;
+  text-align: left;
+  padding: 8px 0;
+}
+@media (max-width: 1000px) {
+.active-endpoint-details[data-v-dashboard] {
+    grid-template-columns: repeat(2, 1fr);
+}
+}
+.refresh-status[data-v-dashboard] { margin: -12px 0 16px; color: var(--vf-muted); font-size: 12px;
+}
+.empty-endpoint h3[data-v-dashboard] { margin: 0 0 8px; color: var(--vf-dark); font-size: 16px; font-weight: 600;
+}
+.empty-endpoint p[data-v-dashboard] { margin: 0 0 20px;
+}
+.workspace-tasks[data-v-dashboard] { margin-top: 32px;
+}
+.tasks-heading[data-v-dashboard] { margin-bottom: 12px;
+}
+.tasks-heading h2[data-v-dashboard] { margin: 0 0 4px; color: var(--vf-dark); font-size: 16px; font-weight: 600;
+}
+.tasks-heading p[data-v-dashboard] { margin: 0; color: var(--vf-muted); font-size: 13px;
+}
+.task-link[data-v-dashboard] { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--vf-border); color: var(--vf-text); text-decoration: none;
+}
+.task-link > div[data-v-dashboard] { flex: 1;
+}
+.task-link strong[data-v-dashboard] { font-size: 14px; font-weight: 600;
+}
+.task-link p[data-v-dashboard] { margin: 4px 0 0; color: var(--vf-muted); font-size: 13px;
+}
+.task-number[data-v-dashboard] { color: var(--vf-muted); font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.task-link:hover strong[data-v-dashboard] { color: var(--vf-orange); text-decoration: underline; text-underline-offset: 3px;
+}
+@media (max-width: 600px) {
+.active-endpoint-details[data-v-dashboard] { grid-template-columns: 1fr;
+}
+.task-link[data-v-dashboard] { gap: 12px;
+}
+}
+

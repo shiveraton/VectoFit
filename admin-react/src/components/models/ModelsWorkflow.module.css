@@ -1,0 +1,65 @@
+
+.workflow-grid[data-v-models-workflow] {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 22px;
+}
+.workflow-card[data-v-models-workflow] {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border: 1px solid var(--vf-border-light);
+  border-radius: 8px;
+  background: #fafafa;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.workflow-card[data-v-models-workflow]:hover {
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.step-badge-row[data-v-models-workflow] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.step-badge[data-v-models-workflow] {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--vf-orange);
+}
+.step-connector[data-v-models-workflow] {
+  flex-grow: 1;
+  height: 1px;
+  background: var(--vf-border-light);
+}
+.step-title[data-v-models-workflow] {
+  margin: 0 0 6px;
+  color: var(--vf-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+.step-description[data-v-models-workflow] {
+  margin: 0;
+  color: var(--vf-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+@media (max-width: 1000px) {
+.workflow-grid[data-v-models-workflow] {
+    grid-template-columns: repeat(2, 1fr);
+}
+}
+@media (max-width: 600px) {
+.workflow-grid[data-v-models-workflow] {
+    grid-template-columns: 1fr;
+}
+}
+

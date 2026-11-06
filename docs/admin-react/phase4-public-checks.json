@@ -1,0 +1,107 @@
+{
+  "results": [
+    {
+      "test": "public /",
+      "title": "Choose a Dataset"
+    },
+    {
+      "test": "public /annotator",
+      "title": "Choose a Dataset"
+    },
+    {
+      "test": "public /annotator/1",
+      "title": "Synthetic frontal cohort with a long descriptive name"
+    },
+    {
+      "test": "public /annotator/login",
+      "title": "Annotator sign in"
+    },
+    {
+      "test": "public /annotator/register",
+      "title": "Create annotator account"
+    },
+    {
+      "test": "public /dashboard",
+      "title": "404"
+    },
+    {
+      "test": "public /dataset",
+      "title": "404"
+    },
+    {
+      "test": "public /training",
+      "title": "404"
+    },
+    {
+      "test": "public /models",
+      "title": "404"
+    },
+    {
+      "test": "public /pilot-results",
+      "title": "404"
+    },
+    {
+      "test": "public /annotator/not-a-number",
+      "title": "404"
+    },
+    {
+      "test": "public annotation completion",
+      "value": true
+    },
+    {
+      "test": "public CSRF and rating endpoints",
+      "value": true
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/annotator/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/datasets/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/datasets/1/session/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/me/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/datasets/1/session/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/csrf/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/annotator/samples/1/rating/"
+    },
+    {
+      "method": "GET",
+      "path": "/annotator/csrf/"
+    },
+    {
+      "method": "PATCH",
+      "path": "/annotator/samples/2/rating/"
+    }
+  ]
+}

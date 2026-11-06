@@ -1,0 +1,88 @@
+
+.feature-layout[data-v-model-feature-state] {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+.feature-group + .feature-group[data-v-model-feature-state] {
+  margin-top: 18px;
+}
+.group-title[data-v-model-feature-state] {
+  margin-bottom: 8px;
+  color: var(--vf-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.feature-list[data-v-model-feature-state] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.feature-chip[data-v-model-feature-state] {
+  padding: 8px 10px;
+  border: 1px solid var(--vf-border-light);
+  border-radius: 8px;
+  background: #fafafa;
+  color: var(--vf-dark);
+  font-size: 13px;
+}
+.importance-panel[data-v-model-feature-state] {
+  border-left: 1px solid var(--vf-border-light);
+  padding-left: 24px;
+}
+.subheading[data-v-model-feature-state] {
+  color: var(--vf-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+.helper[data-v-model-feature-state] {
+  margin: 5px 0 18px;
+  color: var(--vf-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.importance-row + .importance-row[data-v-model-feature-state] {
+  margin-top: 13px;
+}
+.importance-meta[data-v-model-feature-state] {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+  color: var(--vf-dark);
+  font-size: 13px;
+}
+.importance-meta span[data-v-model-feature-state]:last-child {
+  color: var(--vf-muted);
+  font-variant-numeric: tabular-nums;
+}
+.importance-track[data-v-model-feature-state] {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f0f0f0;
+}
+.importance-fill[data-v-model-feature-state] {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--vf-gradient);
+}
+.empty-detail[data-v-model-feature-state] {
+  padding: 18px 0;
+  color: var(--vf-muted);
+  font-size: 13px;
+}
+@media (max-width: 820px) {
+.feature-layout[data-v-model-feature-state] {
+    grid-template-columns: 1fr;
+}
+.importance-panel[data-v-model-feature-state] {
+    border-left: 0;
+    border-top: 1px solid var(--vf-border-light);
+    padding: 20px 0 0;
+}
+}
+

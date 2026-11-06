@@ -1,0 +1,83 @@
+
+.metric-card[data-v-training-metric-info] {
+  min-width: 0;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 10px;
+}
+.metric-card.primary[data-v-training-metric-info] {
+  background: #fffaf6;
+  border-color: #fed7aa;
+}
+.metric-header[data-v-training-metric-info] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.metric-header > span[data-v-training-metric-info] {
+  color: var(--vf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.info-button[data-v-training-metric-info] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  color: var(--vf-muted);
+  background: #fafafa;
+  border: 1px solid var(--vf-border);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+.info-button[data-v-training-metric-info]:hover,
+.info-button[aria-expanded="true"][data-v-training-metric-info] {
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border-color: #fed7aa;
+}
+.metric-value[data-v-training-metric-info] {
+  display: block;
+  margin-top: 14px;
+  color: var(--vf-dark);
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.metric-question[data-v-training-metric-info] {
+  margin: 9px 0 0;
+  color: var(--vf-light-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.metric-help[data-v-training-metric-info] {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vf-border-light);
+  color: var(--vf-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.metric-help p[data-v-training-metric-info] {
+  margin: 0;
+}
+.metric-help span[data-v-training-metric-info] {
+  display: block;
+  margin-top: 5px;
+  color: var(--vf-orange-dark);
+}
+.metric-fade-enter-active[data-v-training-metric-info],
+.metric-fade-leave-active[data-v-training-metric-info] {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.metric-fade-enter-from[data-v-training-metric-info],
+.metric-fade-leave-to[data-v-training-metric-info] {
+  opacity: 0;
+  transform: translateY(-3px);
+}
+

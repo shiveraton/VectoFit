@@ -1,0 +1,95 @@
+
+.result-panel[data-v-feature-importance] {
+  min-width: 0;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 10px;
+}
+.result-panel-header[data-v-feature-importance] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+.result-panel-header h3[data-v-feature-importance] {
+  margin: 0;
+  color: var(--vf-text);
+  font-size: 12px;
+}
+.result-panel-header p[data-v-feature-importance] {
+  margin: 4px 0 0;
+  color: var(--vf-light-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.top-feature[data-v-feature-importance] {
+  flex-shrink: 0;
+  padding: 5px 8px;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.top-feature strong[data-v-feature-importance] {
+  color: var(--vf-text);
+}
+.importance-list[data-v-feature-importance] {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.importance-label[data-v-feature-importance] {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--vf-muted);
+  font-size: 11px;
+}
+.importance-label strong[data-v-feature-importance] {
+  color: var(--vf-text);
+}
+.importance-track[data-v-feature-importance] {
+  height: 7px;
+  overflow: hidden;
+  background: #f4f4f5;
+  border-radius: 999px;
+}
+.importance-fill[data-v-feature-importance] {
+  height: 100%;
+  min-width: 2px;
+  background: var(--vf-gradient);
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+.panel-empty[data-v-feature-importance] {
+  margin-top: 16px;
+  padding: 18px;
+  color: var(--vf-light-muted);
+  background: #fafafa;
+  border: 1px dashed var(--vf-border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+}
+.interpretation-box[data-v-feature-importance] {
+  margin-top: 16px;
+  padding: 11px;
+  background: #fffaf6;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+}
+.interpretation-box span[data-v-feature-importance] {
+  color: var(--vf-orange-dark);
+  font-size: 11px;
+  font-weight: 800;
+}
+.interpretation-box p[data-v-feature-importance] {
+  margin: 5px 0 0;
+  color: var(--vf-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
