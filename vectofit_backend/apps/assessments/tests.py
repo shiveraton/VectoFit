@@ -1,8 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from apps.exercises.models import ExerciseVariant
 
@@ -85,6 +89,102 @@ class AssessmentSessionAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("reps", response.data)
         self.assertEqual(len(response.data["reps"]), 1)
+
+    def test_rep_assessment_api_is_read_only_and_user_scoped(self):
+        own_session = AssessmentSession.objects.create(
+            user=self.user,
+            exercise_variant=self.variant,
+        )
+        other_session = AssessmentSession.objects.create(
+            user=self.other_user,
+            exercise_variant=self.variant,
+        )
+        own_rep = RepAssessment.objects.create(
+            session=own_session,
+            rep_number=1,
+            jaa_score=0.5,
+            landmark_series=[],
+        )
+        other_rep = RepAssessment.objects.create(
+            session=other_session,
+            rep_number=1,
+            jaa_score=0.25,
+            landmark_series=[],
+        )
+
+        response = self.client.patch(
+            reverse("rep-assessment-detail", args=[own_rep.pk]),
+            {"jaa_score": 1.0},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        own_rep.refresh_from_db()
+        self.assertEqual(own_rep.jaa_score, 0.5)
+
+        response = self.client.get(reverse("rep-assessment-detail", args=[other_rep.pk]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_assessment_processing_is_queued_after_commit(self):
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            with patch("apps.assessments.tasks.process_assessment_session.delay") as delay:
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.client.post(
+                        reverse("assessment-session-list"),
+                        {
+                            "exercise_variant": self.variant.pk,
+                            "view_angle": "frontal",
+                            "video_file": SimpleUploadedFile(
+                                "squat.mp4", b"video", content_type="video/mp4"
+                            ),
+                        },
+                        format="multipart",
+                    )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        delay.assert_called_once_with(response.data["id"])
+        session = AssessmentSession.objects.get(pk=response.data["id"])
+        self.assertEqual(session.status, AssessmentSession.Status.PENDING)
+
+    def test_task_failure_marks_session_failed_and_retryable(self):
+        session = AssessmentSession.objects.create(
+            user=self.user,
+            exercise_variant=self.variant,
+            status=AssessmentSession.Status.PENDING,
+        )
+        with patch(
+            "apps.assessments.tasks.run_assessment_processing",
+            side_effect=RuntimeError("worker error"),
+        ):
+            from .tasks import process_assessment_session
+
+            result = process_assessment_session.run(session.pk)
+
+        session.refresh_from_db()
+        self.assertEqual(result, AssessmentSession.Status.FAILED)
+        self.assertEqual(session.status, AssessmentSession.Status.FAILED)
+        self.assertIn("worker error", session.error_message)
+        self.assertIsNotNone(session.processed_at)
+
+    def test_failed_assessment_can_be_requeued_after_commit(self):
+        session = AssessmentSession.objects.create(
+            user=self.user,
+            exercise_variant=self.variant,
+            status=AssessmentSession.Status.FAILED,
+            error_message="previous failure",
+        )
+        with patch("apps.assessments.tasks.process_assessment_session.delay") as delay:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(
+                    reverse("assessment-session-retry", args=[session.pk]),
+                    {},
+                    format="json",
+                )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.data)
+        delay.assert_called_once_with(session.pk)
+        session.refresh_from_db()
+        self.assertEqual(session.status, AssessmentSession.Status.PENDING)
+        self.assertEqual(session.error_message, "")
 
 
 class RepAssessmentModelTests(APITestCase):

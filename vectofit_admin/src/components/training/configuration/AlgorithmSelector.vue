@@ -1,57 +1,27 @@
 <script setup lang="ts">
-import type { AlgorithmOption } from "../../../services/trainingService";
-
-const props = defineProps<{
-  algorithms: AlgorithmOption[];
-  selectedAlgorithm: AlgorithmOption | null;
-}>();
-
-const emit = defineEmits<{
-  (event: "select-algorithm", id: string): void;
-}>();
 </script>
 
 <template>
   <section class="configuration-section">
     <div class="configuration-label">
       <div>
-        <strong>Algorithm</strong>
-        <span>Select the model family used for this run.</span>
+        <strong>Current Model</strong>
+        <span>The FPPA M1 experiment uses a fixed XGBoost classifier.</span>
       </div>
     </div>
 
-    <div v-if="props.algorithms.length" class="algorithm-options">
-      <button
-        v-for="algorithm in props.algorithms"
-        :key="algorithm.id"
-        type="button"
-        :class="[
-          'algorithm-card',
-          { selected: props.selectedAlgorithm?.id === algorithm.id },
-        ]"
-        @click="emit('select-algorithm', algorithm.id)"
-      >
-        <span class="algorithm-icon">{{ algorithm.code }}</span>
-        <span class="algorithm-copy">
-          <strong>{{ algorithm.name }}</strong>
-          <span>{{ algorithm.description }}</span>
-        </span>
-        <span class="algorithm-status">
-          {{
-            props.selectedAlgorithm?.id === algorithm.id ? "Selected" : "Select"
-          }}
-        </span>
-      </button>
+    <div class="algorithm-card selected">
+      <span class="algorithm-icon">XGB</span>
+      <span class="algorithm-copy">
+        <strong>XGBoost · FPPA M1</strong>
+        <span>Predicts human-reviewed good/bad knee-alignment labels from the fixed FPPA v2 feature schema.</span>
+      </span>
     </div>
-
-    <div v-else class="inline-empty">
-      No supported training algorithms are currently available.
-    </div>
-
-    <div v-if="props.selectedAlgorithm" class="algorithm-note">
-      VectoFit currently uses the configured XGBoost training pipeline for
-      binary classification.
-    </div>
+    <p class="algorithm-note">
+      M0 uses four FPPA features; M1 adds bilateral asymmetry. Both are
+      XGBoost models. The fixed 10-degree threshold rule is evaluated separately
+      on the M0 / M1 Results page.
+    </p>
   </section>
 </template>
 
@@ -80,7 +50,7 @@ const emit = defineEmits<{
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -97,7 +67,7 @@ const emit = defineEmits<{
 .configuration-label div > span {
   margin-top: 4px;
   color: var(--vf-light-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .algorithm-options {
@@ -115,13 +85,7 @@ const emit = defineEmits<{
   background: #ffffff;
   border: 1px solid var(--vf-border);
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-
-.algorithm-card:hover {
-  background: #fffaf6;
-  border-color: #fdba74;
+  cursor: default;
 }
 
 .algorithm-card.selected {
@@ -139,7 +103,7 @@ const emit = defineEmits<{
   color: #ffffff;
   background: var(--vf-gradient);
   border-radius: 8px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -155,13 +119,13 @@ const emit = defineEmits<{
 
 .algorithm-copy strong {
   color: var(--vf-text);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .algorithm-copy span {
   margin-top: 3px;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.45;
 }
 
@@ -184,7 +148,7 @@ const emit = defineEmits<{
   background: #fcfcfc;
   border: 1px dashed var(--vf-border);
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 

@@ -32,11 +32,7 @@ const EXERCISE_LABELS = {
 const VIEW_ANGLE_OPTIONS: Array<{
   value: AssessmentViewAngle;
   label: string;
-}> = [
-  { value: "diagonal", label: "Diagonal" },
-  { value: "frontal", label: "Frontal" },
-  { value: "sagittal", label: "Side" },
-];
+}> = [{ value: "frontal", label: "Frontal" }];
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -46,7 +42,7 @@ function formatTime(seconds: number) {
 
 export default function CameraPoseScreen({ route }: Props) {
   const [viewAngle, setViewAngle] = useState<AssessmentViewAngle>(
-    route.params.viewAngle ?? "diagonal",
+    "frontal",
   );
   const camera = useCameraPoseScreen(route.params.exercise, viewAngle);
   const { height: windowHeight } = useWindowDimensions();
@@ -79,7 +75,6 @@ export default function CameraPoseScreen({ route }: Props) {
       <SafeAreaView style={styles.center} edges={["top", "bottom"]}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={CAMERA_COLORS.background}
         />
         <Text style={styles.permissionTitle}>
           Camera permission is required
@@ -103,7 +98,6 @@ export default function CameraPoseScreen({ route }: Props) {
       <SafeAreaView style={styles.center} edges={["top", "bottom"]}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={CAMERA_COLORS.background}
         />
         <ActivityIndicator size="large" color={CAMERA_COLORS.primary} />
         <Text style={styles.permissionText}>Initializing camera…</Text>
@@ -130,7 +124,6 @@ export default function CameraPoseScreen({ route }: Props) {
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={CAMERA_COLORS.background}
       />
 
       <View style={styles.cameraViewport} onLayout={handleViewportLayout}>

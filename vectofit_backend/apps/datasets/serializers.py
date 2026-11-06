@@ -8,6 +8,7 @@ upload_token = serializers.UUIDField(
 from typing import ClassVar
 
 from apps.assessments.serializers import RepAssessmentSerializer
+from .media_views import signed_dataset_media_url
 
 from .models import (
     Dataset,
@@ -18,7 +19,7 @@ from .models import (
     ViewAngle,
 )
 from .services.annotation import latest_annotation
-from .services.knee_label import knee_target
+from .services.knee_label import final_knee_target, knee_target
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
@@ -150,9 +151,11 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
 
         video = obj.dataset_video
         request = self.context.get("request")
-        video_url = video.video_file.url if video.video_file else None
-        if request is not None and video_url:
-            video_url = request.build_absolute_uri(video_url)
+        video_url = (
+            signed_dataset_media_url(request, "dataset-video", video.pk, video.dataset)
+            if video.video_file
+            else None
+        )
         return {
             "id": video.pk,
             "video_url": video_url,
@@ -291,11 +294,7 @@ class DatasetSerializer(serializers.ModelSerializer):
             return None
 
         request = self.context.get("request")
-
-        if request is not None:
-            return request.build_absolute_uri(obj.video_file.url)
-
-        return obj.video_file.url
+        return signed_dataset_media_url(request, "dataset", obj.pk, obj)
 
     def get_sample_count(self, obj):
         return obj.samples.count()
@@ -396,6 +395,18 @@ class DatasetSerializer(serializers.ModelSerializer):
                 if label and label != "correct_form":
                     error_labels[label] = error_labels.get(label, 0) + 1
 
+            knee_counts = {
+                "good": 0,
+                "bad": 0,
+                "borderline": 0,
+                "unassessable": 0,
+                "disputed": 0,
+                "missing": 0,
+            }
+            for sample in samples:
+                target = final_knee_target(sample)
+                knee_counts[target if target in knee_counts else "missing"] += 1
+
             stats[angle] = {
                 "sample_count": samples.count(),
                 "labelled_sample_count": labelled.count(),
@@ -404,6 +415,8 @@ class DatasetSerializer(serializers.ModelSerializer):
                 "error_type_sample_count": labelled.filter(is_correct=True).count()
                 + sum(error_labels.values()),
                 "error_label_counts": error_labels,
+                "knee_target_sample_count": knee_counts["good"] + knee_counts["bad"],
+                "knee_label_counts": knee_counts,
                 "participant_count": participant_count,
                 "video_count": videos.count(),
             }

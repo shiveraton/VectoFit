@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Dataset, ViewAngle } from "../../../services/datasetService";
-import type { PredictionTarget } from "../../../services/trainingService";
 
 type DatasetId = number;
 
@@ -11,7 +10,6 @@ const props = defineProps<{
   selectedDatasetIds: DatasetId[];
   selectedDatasets: Dataset[];
   selectedViewAngle: ViewAngle | null;
-  predictionTarget: PredictionTarget;
 }>();
 
 const emit = defineEmits<{
@@ -25,9 +23,22 @@ const statsFor = (dataset: Dataset) =>
     ? dataset.angle_training_stats?.[props.selectedViewAngle]
     : undefined;
 
-const errorLabelEntries = (dataset: Dataset) =>
-  Object.entries(statsFor(dataset)?.error_label_counts ?? {}).sort((a, b) =>
-    a[0].localeCompare(b[0]),
+const kneeExcludedLabels = [
+  "borderline",
+  "unassessable",
+  "disputed",
+  "missing",
+] as const;
+
+const kneeCount = (
+  dataset: Dataset,
+  label: "good" | "bad" | (typeof kneeExcludedLabels)[number],
+) => Number(statsFor(dataset)?.knee_label_counts?.[label] ?? 0);
+
+const kneeExcludedCount = (dataset: Dataset) =>
+  kneeExcludedLabels.reduce(
+    (total, label) => total + kneeCount(dataset, label),
+    0,
   );
 
 const selectedSamples = computed(() =>
@@ -40,11 +51,7 @@ const selectedSamples = computed(() =>
 const selectedLabelledSamples = computed(() =>
   props.selectedDatasets.reduce((total, dataset) => {
     const stats = statsFor(dataset);
-    const count =
-      props.predictionTarget === "binary_form"
-        ? stats?.labelled_sample_count
-        : stats?.error_type_sample_count;
-    return total + Number(count || 0);
+    return total + Number(stats?.knee_target_sample_count || 0);
   }, 0),
 );
 
@@ -71,6 +78,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
           'dataset-option',
           { selected: selectedDatasetIds.includes(dataset.id) },
         ]"
+        :aria-pressed="selectedDatasetIds.includes(dataset.id)"
         @click="emit('toggle-dataset', dataset.id)"
       >
         <span class="dataset-check" aria-hidden="true">
@@ -87,28 +95,21 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
             <span v-if="dataset.exercise_type">{{
               dataset.exercise_type
             }}</span>
-            <span v-if="predictionTarget === 'binary_form'"
-              >{{ statsFor(dataset)?.good_count ?? 0 }} GOOD ·
-              {{ statsFor(dataset)?.bad_count ?? 0 }} BAD</span
-            >
-            <span v-else
-              >{{ statsFor(dataset)?.good_count ?? 0 }} correct_form</span
+            <span
+              >{{ kneeCount(dataset, "good") }} good knee ·
+              {{ kneeCount(dataset, "bad") }} bad knee</span
             >
             <span
-              v-for="entry in predictionTarget === 'error_type'
-                ? errorLabelEntries(dataset)
-                : []"
-              :key="entry[0]"
+              v-if="kneeExcludedCount(dataset) > 0"
             >
-              {{ entry[0] }}: {{ entry[1] }}
+              {{ kneeExcludedCount(dataset) }} non-trainable knee label{{
+                kneeExcludedCount(dataset) === 1 ? "" : "s"
+              }}
+              excluded
             </span>
             <span>
-              {{
-                props.predictionTarget === "binary_form"
-                  ? (statsFor(dataset)?.labelled_sample_count ?? 0)
-                  : (statsFor(dataset)?.error_type_sample_count ?? 0)
-              }}
-              labelled
+              {{ statsFor(dataset)?.knee_target_sample_count ?? 0 }}
+              usable knee labels
             </span>
             <span
               >{{
@@ -147,6 +148,9 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
       Counts reflect stored labels. Repetitions with invalid or incomplete
       landmarks are excluded during feature extraction, so the final training
       sample count may be lower.
+      Only <strong>good</strong> and <strong>bad</strong> knee-alignment labels
+      are trainable; borderline, unassessable, disputed, and missing labels are
+      reported but excluded.
     </p>
   </section>
 </template>
@@ -179,7 +183,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -197,7 +201,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
 .configuration-label div > span {
   margin-top: 4px;
   color: var(--vf-light-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -246,7 +250,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   background: #ffffff;
   border: 1.5px solid #d4d4d8;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -271,7 +275,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   min-width: 0;
   overflow: hidden;
   color: var(--vf-text);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -279,7 +283,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
 
 .dataset-title-row small {
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -289,7 +293,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   gap: 5px 9px;
   margin-top: 7px;
   color: var(--vf-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .dataset-meta span + span::before {
@@ -309,12 +313,12 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   border: 1px dashed var(--vf-border);
   border-radius: 8px;
   text-align: center;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .inline-empty strong {
   color: var(--vf-text);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .selection-summary {
@@ -324,7 +328,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
   gap: 12px;
   margin-top: 11px;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .selection-summary strong {
@@ -334,7 +338,7 @@ const formatNumber = (value: number) => value.toLocaleString("en-US");
 .selection-note {
   margin: 8px 0 0;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 

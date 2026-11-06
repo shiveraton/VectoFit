@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useModels } from "../../hooks/useModels";
+import ModelCard from "../../components/models/ModelCard.vue";
 import ModelEvaluationState from "../../components/models/ModelEvaluationState.vue";
 import ModelFeatureState from "../../components/models/ModelFeatureState.vue";
 import ModelRegistryTable from "../../components/models/ModelRegistryTable.vue";
@@ -32,6 +33,10 @@ const canActivateModel = computed(() => {
 
   if (!model) return false;
 
+  if (model.model_card) {
+    return !model.is_active && model.model_card.activation.allowed;
+  }
+
   return (
     !model.is_active &&
     Boolean(model.view_angle) &&
@@ -40,23 +45,20 @@ const canActivateModel = computed(() => {
   );
 });
 
+const activationBlockers = computed(
+  () => modelState.value?.model_card?.activation.blockers ?? [],
+);
+
 const predictionTargetLabel = computed(() => {
-  switch (modelState.value?.prediction_target) {
-    case "binary_form":
-      return "Good / Bad Form";
-
-    case "error_type":
-      return "Error Type";
-
-    default:
-      return "Unspecified";
-  }
+  return modelState.value?.prediction_target === "knee_alignment"
+    ? "Frontal-plane knee alignment"
+    : "Unsupported model setup";
 });
 
 const cameraAngleLabel = computed(() => {
   const angle = modelState.value?.view_angle;
 
-  if (!angle) return "Legacy / unspecified";
+  if (!angle) return "Unspecified";
 
   return angle.charAt(0).toUpperCase() + angle.slice(1);
 });
@@ -115,8 +117,8 @@ const formatDate = (value: string | null | undefined): string => {
         <h1>Models</h1>
 
         <p>
-          Inspect model provenance and held-out performance, then activate a
-          validated version for its camera angle and prediction target.
+          Inspect FPPA M1 provenance and held-out performance, then activate a
+          validated version for frontal-plane knee-alignment inference.
         </p>
       </div>
     </header>
@@ -141,13 +143,12 @@ const formatDate = (value: string | null | undefined): string => {
       v-else-if="!isLoading && models.length === 0"
       class="content-card empty-state-card"
     >
-      <div class="empty-state-icon">M</div>
 
-      <h2>No registered models yet</h2>
+      <h2>No FPPA v2 models available</h2>
 
       <p>
-        Complete a successful training run that saves a model artifact and
-        creates its registry record. Registered model versions will appear here.
+        Complete a frontal knee-alignment M1 training run. FPPA v2 model versions
+        will appear here after training and registration.
       </p>
     </section>
 
@@ -180,6 +181,13 @@ const formatDate = (value: string | null | undefined): string => {
               {{ statusLabel }}
             </span>
 
+            <span
+              v-if="!modelState.is_active && activationBlockers.length"
+              class="activation-blocked-note"
+            >
+              Activation blocked
+            </span>
+
             <button
               v-if="canActivateModel"
               class="activate-button"
@@ -203,6 +211,8 @@ const formatDate = (value: string | null | undefined): string => {
             <small>{{ card.description }}</small>
           </div>
         </section>
+
+        <ModelCard v-if="modelState.model_card" :card="modelState.model_card" />
 
         <section class="content-card">
           <div class="section-header">
@@ -295,8 +305,7 @@ const formatDate = (value: string | null | undefined): string => {
               <div>
                 <h2>Feature Set</h2>
                 <p>
-                  Features recorded for this training run and used by the
-                  classifier.
+                  Fixed inputs recorded for this FPPA M1 training run.
                 </p>
               </div>
             </div>
@@ -317,8 +326,7 @@ const formatDate = (value: string | null | undefined): string => {
               <div>
                 <h2>Evaluation Results</h2>
                 <p>
-                  Performance measured using held-out test samples from this
-                  model's training run.
+                FPPA good-versus-bad performance on the held-out test samples.
                 </p>
               </div>
             </div>
@@ -455,73 +463,6 @@ const formatDate = (value: string | null | undefined): string => {
 </template>
 
 <style scoped>
-.models-page {
-  min-height: 100%;
-  padding: 32px;
-  background: var(--vf-background);
-  font-family: "Segoe UI", Arial, sans-serif;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 8px;
-  color: var(--vf-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--vf-orange);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
-}
-
-.page-header h1 {
-  margin: 0 0 5px;
-  color: var(--vf-dark);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.page-header p {
-  max-width: 720px;
-  margin: 0;
-  color: var(--vf-muted);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.error-banner,
-.activation-banner {
-  margin-bottom: 18px;
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.error-banner {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-.activation-banner {
-  border: 1px solid #a7f3d0;
-  background: #ecfdf3;
-  color: #047857;
-}
 
 .loading-card {
   padding: 26px;
@@ -536,7 +477,7 @@ const formatDate = (value: string | null | undefined): string => {
   border-radius: 8px;
   background: #fff;
   color: var(--vf-muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .empty-state-card {
@@ -570,14 +511,14 @@ const formatDate = (value: string | null | undefined): string => {
   max-width: 650px;
   margin: 0;
   color: var(--vf-muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 
 .empty-detail {
   padding: 22px;
   color: var(--vf-muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .empty-detail > strong {
@@ -585,22 +526,6 @@ const formatDate = (value: string | null | undefined): string => {
   margin-bottom: 7px;
   color: var(--vf-dark);
   font-size: 12px;
-}
-
-.secondary-button {
-  margin-top: 14px;
-  padding: 8px 12px;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--vf-dark);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.secondary-button:hover {
-  background: var(--vf-background);
 }
 
 .hero-card {
@@ -612,8 +537,8 @@ const formatDate = (value: string | null | undefined): string => {
   margin-bottom: 14px;
   border: 1px solid var(--vf-border-light);
   border-radius: 12px;
-  background: linear-gradient(135deg, #fff, #fffaf6);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  background: var(--vf-surface);
+  box-shadow: none;
 }
 
 .hero-information {
@@ -622,7 +547,7 @@ const formatDate = (value: string | null | undefined): string => {
 
 .model-kicker {
   color: var(--vf-orange);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -649,10 +574,10 @@ const formatDate = (value: string | null | undefined): string => {
   align-items: center;
   justify-content: center;
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(249, 115, 22, 0.08);
   color: var(--vf-orange);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -661,7 +586,7 @@ const formatDate = (value: string | null | undefined): string => {
 .model-caption {
   margin: 7px 0 0;
   color: var(--vf-muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
@@ -677,10 +602,10 @@ const formatDate = (value: string | null | undefined): string => {
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: #f4f4f5;
   color: #71717a;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -690,6 +615,18 @@ const formatDate = (value: string | null | undefined): string => {
   color: var(--vf-orange);
 }
 
+.activation-blocked-note {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .activate-button {
   padding: 8px 12px;
   border: 1px solid #fed7aa;
@@ -697,7 +634,7 @@ const formatDate = (value: string | null | undefined): string => {
   background: #fff7ed;
   color: #9a3412;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -712,93 +649,6 @@ const formatDate = (value: string | null | undefined): string => {
 .activate-button:disabled {
   opacity: 0.55;
   cursor: wait;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.summary-card {
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 10px;
-  background: #fff;
-}
-
-.summary-card span {
-  display: block;
-  color: var(--vf-muted);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.summary-card strong {
-  display: block;
-  margin-top: 8px;
-  color: var(--vf-dark);
-  font-size: 21px;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-
-.summary-card small {
-  display: block;
-  margin-top: 5px;
-  color: var(--vf-muted);
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.content-card {
-  margin-bottom: 18px;
-  overflow: hidden;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 17px 20px;
-  border-bottom: 1px solid var(--vf-border-light);
-}
-
-.section-title-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  min-width: 0;
-}
-
-.section-marker {
-  width: 3px;
-  min-width: 3px;
-  height: 17px;
-  margin-top: 1px;
-  border-radius: 4px;
-  background: var(--vf-gradient);
-}
-
-.section-header h2 {
-  margin: 0;
-  color: var(--vf-dark);
-  font-size: 14px;
-}
-
-.section-header p {
-  margin: 4px 0 0;
-  color: var(--vf-muted);
-  font-size: 10px;
-  line-height: 1.6;
 }
 
 .section-badge.ready {
@@ -831,13 +681,13 @@ const formatDate = (value: string | null | undefined): string => {
   display: block;
   margin-bottom: 5px;
   color: var(--vf-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .provenance-grid > div strong {
   display: block;
   color: var(--vf-dark);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -854,15 +704,15 @@ const formatDate = (value: string | null | undefined): string => {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-  padding: 13px;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 8px;
-  background: #fff;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .evaluation-context span {
   color: var(--vf-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .evaluation-context strong {
@@ -876,7 +726,7 @@ const formatDate = (value: string | null | undefined): string => {
   padding-top: 14px;
   border-top: 1px solid var(--vf-border-light);
   color: var(--vf-muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 
@@ -896,62 +746,54 @@ const formatDate = (value: string | null | undefined): string => {
   border-radius: 8px;
   background: #fff7ed;
   color: #9a3412;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 @media (max-width: 1100px) {
-  .summary-grid {
+.provenance-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .provenance-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .provenance-grid > div:nth-child(4n) {
+.provenance-grid > div:nth-child(4n) {
     border-right: 1px solid var(--vf-border-light);
   }
 
-  .provenance-grid > div:nth-child(2n) {
+.provenance-grid > div:nth-child(2n) {
     border-right: 0;
   }
 
-  .evaluation-context {
+.evaluation-context {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
 }
 
 @media (max-width: 700px) {
-  .models-page {
-    padding: 20px;
-  }
 
-  .hero-card {
+.hero-card {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .hero-actions {
+.hero-actions {
     justify-content: flex-start;
     width: 100%;
   }
 
-  .summary-grid,
+.summary-grid,
   .provenance-grid,
   .evaluation-context {
     grid-template-columns: 1fr;
   }
 
-  .provenance-grid > div,
+.provenance-grid > div,
   .provenance-grid > div:nth-child(4n),
   .provenance-grid > div:nth-child(2n) {
     border-right: 0;
   }
 
-  .section-header {
-    align-items: flex-start;
-  }
 }
+
 </style>

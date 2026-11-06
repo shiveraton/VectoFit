@@ -76,8 +76,6 @@ class RegisterAPIView(APIView):
                 status=status.HTTP_201_CREATED,
             )
 
-        print(f"DEBUG: {serializer.errors}")
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -86,14 +84,11 @@ class LoginAPIView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        print(f"DEBUG: Request data received: {request.data}")
         serializer = LoginSerializer(data=request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data["user"]
             token, created = Token.objects.get_or_create(user=user)
             return Response({"token": token.key}, status=status.HTTP_200_OK)
-
-        print(f"DEBUG: Serializer errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)

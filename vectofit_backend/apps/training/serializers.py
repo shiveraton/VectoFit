@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from rest_framework import serializers
 
+from apps.analytics.services.feature_schemas import schema_for_target
 from apps.analytics.services.features import AVAILABLE_FEATURES, FEATURE_ORDER
 
 from .models import ModelRegistry, TrainingJob
@@ -31,6 +32,7 @@ class TrainingJobSerializer(serializers.ModelSerializer):
             "feature_selection",
             "hyperparameters",
             "random_seed",
+            "test_size",
             "split_strategy",
             "status",
             "error_message",
@@ -181,6 +183,32 @@ class TrainingJobRequestSerializer(serializers.Serializer):
         dataset_ids = attrs["dataset_ids"]
         angle = attrs["view_angle"]
         target = attrs["prediction_target"]
+        schema = schema_for_target(target)
+        selected_features = attrs.get("feature_selection")
+        if target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT:
+            if angle != "frontal":
+                raise serializers.ValidationError(
+                    {"view_angle": "FPPA training requires the frontal view."}
+                )
+            if selected_features and set(selected_features) != set(
+                schema.feature_order
+            ):
+                raise serializers.ValidationError(
+                    {"feature_selection": "M1 training requires all six FPPA features."}
+                )
+            attrs["feature_selection"] = list(schema.feature_order)
+            selected_features = attrs["feature_selection"]
+        if not selected_features:
+            attrs["feature_selection"] = list(schema.feature_order)
+        elif set(selected_features) - set(schema.feature_order):
+            raise serializers.ValidationError(
+                {
+                    "feature_selection": (
+                        f"Features must belong to the {schema.version} schema: "
+                        f"{list(schema.feature_order)}"
+                    )
+                }
+            )
         datasets = list(
             Dataset.objects.select_related("view_angle")
             .prefetch_related("videos__view_angle")
@@ -307,10 +335,10 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                     )
                 }
             )
-        if (
-            target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT
-            and target_classes != {"good", "bad"}
-        ):
+        if target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT and target_classes != {
+            "good",
+            "bad",
+        }:
             raise serializers.ValidationError(
                 {
                     "prediction_target": (
@@ -322,17 +350,9 @@ class TrainingJobRequestSerializer(serializers.Serializer):
         return attrs
 
     def validate_feature_selection(self, value):
-        from apps.analytics.services.features import (
-            FeatureExtractionError,
-            validate_features,
-        )
-
-        if not value:
-            return list(FEATURE_ORDER)
-        try:
-            return validate_features(value)
-        except FeatureExtractionError as exc:
-            raise serializers.ValidationError(str(exc)) from exc
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Feature selection must be a list.")
+        return list(dict.fromkeys(value))
 
 
 class ModelPredictionRequestSerializer(serializers.Serializer):
@@ -402,6 +422,7 @@ class ModelStateSerializer(serializers.ModelSerializer):
     evaluation = serializers.SerializerMethodField()
     feature_warnings = serializers.SerializerMethodField()
     training_manifest = serializers.SerializerMethodField()
+    model_card = serializers.SerializerMethodField()
 
     class Meta:
         model = ModelRegistry
@@ -421,6 +442,7 @@ class ModelStateSerializer(serializers.ModelSerializer):
             "features",
             "evaluation",
             "feature_warnings",
+            "model_card",
         ]
         read_only_fields = fields
 
@@ -478,10 +500,79 @@ class ModelStateSerializer(serializers.ModelSerializer):
             },
         }
 
+    @staticmethod
+    def _class_metadata(obj, metrics):
+        manifest = obj.training_job.training_manifest or {}
+        raw_mapping = (
+            manifest.get("class_mapping") or metrics.get("class_mapping") or {}
+        )
+        raw_names = manifest.get("target_names") or metrics.get("target_names") or []
+
+        mapping = {}
+        if isinstance(raw_mapping, dict):
+            for key, value in raw_mapping.items():
+                try:
+                    mapping[int(key)] = str(value)
+                except (TypeError, ValueError):
+                    continue
+
+        target_names = (
+            [str(name) for name in raw_names] if isinstance(raw_names, list) else []
+        )
+        if not mapping and target_names:
+            mapping = {index: name for index, name in enumerate(target_names)}
+        if not target_names and mapping:
+            target_names = [mapping[index] for index in sorted(mapping)]
+
+        return mapping, target_names
+
+    @staticmethod
+    def _per_class_metrics(confusion_matrix, target_names):
+        if not isinstance(confusion_matrix, list) or not confusion_matrix:
+            return []
+        size = len(confusion_matrix)
+        if any(
+            not isinstance(row, list) or len(row) != size for row in confusion_matrix
+        ):
+            return []
+
+        per_class = []
+        for index in range(size):
+            true_positive = confusion_matrix[index][index]
+            predicted_count = sum(confusion_matrix[row][index] for row in range(size))
+            support = sum(confusion_matrix[index])
+            false_positive = predicted_count - true_positive
+            false_negative = support - true_positive
+
+            precision = true_positive / predicted_count if predicted_count else None
+            recall = true_positive / support if support else None
+            if precision is None or recall is None or precision + recall == 0:
+                f1 = 0.0 if (precision is not None and recall is not None) else None
+            else:
+                f1 = 2 * precision * recall / (precision + recall)
+
+            per_class.append(
+                {
+                    "index": index,
+                    "label": (
+                        target_names[index]
+                        if index < len(target_names)
+                        else f"Class {index}"
+                    ),
+                    "support": support,
+                    "predicted_count": predicted_count,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+            )
+        return per_class
+
     def get_evaluation(self, obj):
         metrics = obj.training_job.metrics or obj.metrics or {}
-
-        confusion_matrix = metrics.get("confusion_matrix") or [[], []]
+        manifest = obj.training_job.training_manifest or {}
+        confusion_matrix = metrics.get("confusion_matrix") or []
+        class_mapping, target_names = self._class_metadata(obj, metrics)
 
         return {
             "accuracy": self._metric(
@@ -505,12 +596,28 @@ class ModelStateSerializer(serializers.ModelSerializer):
                 "f1",
             ),
             "confusion_matrix": confusion_matrix,
+            "class_mapping": {
+                str(index): name for index, name in sorted(class_mapping.items())
+            },
+            "target_names": target_names,
+            "per_class": self._per_class_metrics(confusion_matrix, target_names),
             "overall_class_distribution": (
                 metrics.get("overall_class_distribution") or {}
             ),
             "train_class_distribution": (metrics.get("train_class_distribution") or {}),
             "test_class_distribution": (metrics.get("test_class_distribution") or {}),
+            "evaluation_scope": "held_out_test_set",
+            "test_count": (
+                len(manifest.get("test_sample_ids") or [])
+                if isinstance(manifest.get("test_sample_ids"), list)
+                else obj.training_job.test_count
+            ),
         }
 
     def get_feature_warnings(self, obj):
         return list(obj.training_job.feature_warnings or [])
+
+    def get_model_card(self, obj):
+        from .services.model_card import build_model_card
+
+        return build_model_card(obj)

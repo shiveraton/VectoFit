@@ -4,6 +4,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 FEATURE_SCHEMA_VERSION = "fppa_v2"
+FPPA_CUTOFF_DEG = 10.0
 SIDES = ("left", "right")
 M0_FEATURES = (
     "fppa_l_bottom",
@@ -28,7 +29,11 @@ def odd_filter_window(effective_fps: float, seconds: float = 0.27) -> int:
 def effective_fps(frames):
     times = []
     for frame in frames or []:
-        value = frame.get("timestamps_ms") if isinstance(frame, dict) else None
+        value = (
+            frame.get("timestamp_ms", frame.get("timestamps_ms"))
+            if isinstance(frame, dict)
+            else None
+        )
         try:
             value = float(value)
         except (TypeError, ValueError):
@@ -55,7 +60,12 @@ def _point(frame, landmark, width, height):
         normalized = item.get("normalized", False)
     else:
         x, y = map(float, item[:2])
-        visibility, normalized = 1.0, False
+        visibility = 1.0
+        normalized = False
+    if isinstance(frame, dict):
+        frame_visibility = frame.get("visibility", {})
+        if isinstance(frame_visibility, dict) and landmark in frame_visibility:
+            visibility = float(frame_visibility[landmark])
     if not (np.isfinite(x) and np.isfinite(y) and np.isfinite(visibility)):
         return None
     if x == 0.0 and y == 0.0:
@@ -179,3 +189,37 @@ def extract_fppa_features(
     features["asym_bottom"] = abs(features["fppa_l_bottom"] - features["fppa_r_bottom"])
     features["asym_peak"] = abs(features["fppa_l_peak"] - features["fppa_r_peak"])
     return features, {"valid": True, "bottom_offset": bottom_i, "filter_window": window}
+
+
+def evaluate_fppa(features, *, cutoff=FPPA_CUTOFF_DEG):
+    if not features:
+        return {
+            "status": "not_assessed",
+            "reason": "missing_features",
+            "cutoff_degrees": float(cutoff),
+        }
+
+    knees = {}
+    for side in SIDES:
+        value = float(features[f"fppa_{side[0]}_peak"])
+        if abs(value) > cutoff:
+            direction = "inward" if value > 0 else "outward"
+            state = "deviation"
+        else:
+            direction = None
+            state = "aligned"
+        knees[side] = {
+            "peak_degrees": value,
+            "direction": direction,
+            "state": state,
+        }
+    return {
+        "status": "assessed",
+        "cutoff_degrees": float(cutoff),
+        "knees": knees,
+        "features": {
+            key: float(value)
+            for key, value in features.items()
+            if not key.startswith("_")
+        },
+    }

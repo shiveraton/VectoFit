@@ -3,10 +3,12 @@ from math import isfinite
 import numpy as np
 from xgboost.core import XGBoostError
 
-from apps.analytics.services.features import FEATURE_SCHEMA_VERSION
+from apps.analytics.services.feature_schemas import schema_for_target
 
 from ..models import ModelRegistry, TrainingJob
 from .trainer import load_model
+
+_MODEL_CACHE = {}
 
 
 class ModelInferenceError(Exception):
@@ -22,12 +24,14 @@ def predict_with_active_model(
     view_angle: str,
     prediction_target: str = "binary_form",
     model_name: str = "vectofit-squat-classifier",
-    feature_schema_version: str = FEATURE_SCHEMA_VERSION,
+    feature_schema_version: str | None = None,
 ) -> dict:
-    if feature_schema_version != FEATURE_SCHEMA_VERSION:
+    expected_schema = schema_for_target(prediction_target).version
+    feature_schema_version = feature_schema_version or expected_schema
+    if feature_schema_version != expected_schema:
         raise ModelInferenceError(
             "Feature schema mismatch.",
-            expected=FEATURE_SCHEMA_VERSION,
+            expected=expected_schema,
             received=feature_schema_version,
         )
 
@@ -43,19 +47,20 @@ def predict_with_active_model(
         .order_by("-created_at")
     )
 
-    if not candidates.exists():
+    candidates = list(candidates[:2])
+    if not candidates:
         raise ModelInferenceError(
             "No active registered model matches this angle and prediction target.",
             status_code=404,
         )
 
-    if candidates.count() > 1:
+    if len(candidates) > 1:
         raise ModelInferenceError(
             "More than one active model matches this configuration. "
             "Deactivate duplicates in the registry."
         )
 
-    registry_entry = candidates.first()
+    registry_entry = candidates[0]
     job = registry_entry.training_job
 
     if job.feature_schema_version != feature_schema_version:
@@ -96,8 +101,16 @@ def predict_with_active_model(
         )
 
     try:
-        with registry_entry.artifact.open("rb") as model_file:
-            estimator = load_model(model_file.read())
+        cache_key = (
+            registry_entry.pk,
+            registry_entry.artifact.name,
+            registry_entry.artifact.size,
+        )
+        estimator = _MODEL_CACHE.get(cache_key)
+        if estimator is None:
+            with registry_entry.artifact.open("rb") as model_file:
+                estimator = load_model(model_file.read())
+            _MODEL_CACHE[cache_key] = estimator
 
         predictions = np.asarray(estimator.predict(np.asarray([vector], dtype=float)))
         probabilities_raw = np.asarray(

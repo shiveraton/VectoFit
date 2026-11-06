@@ -1,7 +1,7 @@
 import client from "../config/client";
 import type { ViewAngle } from "./datasetService";
 
-export type PredictionTarget = "binary_form" | "error_type";
+export type PredictionTarget = "binary_form" | "error_type" | "knee_alignment";
 
 export type TrainingJobStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
 
@@ -35,12 +35,12 @@ export interface TrainingJob {
 
 export interface FeatureOption {
   id:
-    | "hip_angle"
-    | "knee_angle"
-    | "rom"
-    | "asymmetry"
-    | "trunk_angle"
-    | "velocity";
+    | "fppa_l_bottom"
+    | "fppa_r_bottom"
+    | "fppa_l_peak"
+    | "fppa_r_peak"
+    | "asym_bottom"
+    | "asym_peak";
   name: string;
   selected: boolean;
 }
@@ -58,14 +58,15 @@ export interface SplitStrategyOption {
   description: string;
 }
 
-export type Hyperparameters = Record<string, unknown>;
-
 export interface WorkflowStep {
   number: string;
   title: string;
   subtitle: string;
   active?: boolean;
 }
+
+export type Hyperparameters = Record<string, unknown>;
+
 export const trainingService = {
   async getTrainingJobs(): Promise<TrainingJob[]> {
     const response = await client.get<TrainingJob[]>("/training/jobs/");
@@ -93,33 +94,33 @@ export const trainingService = {
   getAvailableFeatures(): FeatureOption[] {
     return [
       {
-        id: "rom",
-        name: "ROM",
+        id: "fppa_l_bottom",
+        name: "Left FPPA at squat bottom",
         selected: true,
       },
       {
-        id: "asymmetry",
-        name: "Asymmetry",
+        id: "fppa_r_bottom",
+        name: "Right FPPA at squat bottom",
         selected: true,
       },
       {
-        id: "trunk_angle",
-        name: "Trunk Angle",
+        id: "fppa_l_peak",
+        name: "Left peak FPPA",
         selected: true,
       },
       {
-        id: "knee_angle",
-        name: "Knee Angle",
+        id: "fppa_r_peak",
+        name: "Right peak FPPA",
         selected: true,
       },
       {
-        id: "hip_angle",
-        name: "Hip Angle",
+        id: "asym_bottom",
+        name: "Bottom bilateral asymmetry",
         selected: true,
       },
       {
-        id: "velocity",
-        name: "Velocity",
+        id: "asym_peak",
+        name: "Peak bilateral asymmetry",
         selected: true,
       },
     ];
@@ -130,9 +131,9 @@ export const trainingService = {
       {
         id: "xgboost",
         code: "xgb",
-        name: "XGBoost",
+        name: "XGBoost M1",
         description:
-          "Gradient-boosted decision trees for squat movement classification.",
+          "Predicts human-reviewed good/bad knee-alignment labels from FPPA v2 features.",
       },
     ];
   },
@@ -148,29 +149,4 @@ export const trainingService = {
     ];
   },
 
-  getWorkflowStep(): WorkflowStep[] {
-    return [
-      {
-        number: "01",
-        title: "Configure",
-        subtitle: "Dataset, task and features",
-        active: true,
-      },
-      {
-        number: "02",
-        title: "Train",
-        subtitle: "Fit the selected model",
-      },
-      {
-        number: "03",
-        title: "Evaluate",
-        subtitle: "Measure model performance",
-      },
-      {
-        number: "04",
-        title: "Register",
-        subtitle: "Save the trained model",
-      },
-    ];
-  },
 };

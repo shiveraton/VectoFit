@@ -7,9 +7,9 @@ export type AssessmentStatus =
   | "FAILED";
 
 export type FindingCode =
-  | "INSUFFICIENT_DEPTH"
-  | "EXCESSIVE_TRUNK_LEAN"
-  | "EXCESSIVE_ASYMMETRY";
+  | "VALGUS_LEFT"
+  | "VALGUS_RIGHT"
+  | "VARUS";
 
 export type FindingSeverity = "minor" | "major";
 
@@ -101,7 +101,24 @@ export interface RepAnalysisResult {
   classifications?: Record<string, unknown>;
   feedback?: Array<{ metric?: string; message?: string }>;
   model_prediction?: ModelPrediction;
+  fppa?: FppaAnalysis;
   [key: string]: unknown;
+}
+
+export interface FppaKneeResult {
+  peak_degrees: number;
+  direction: "inward" | "outward" | null;
+  state: "aligned" | "deviation";
+}
+
+export interface FppaAnalysis {
+  status: "assessed" | "not_assessed";
+  reason?: string;
+  cutoff_degrees?: number;
+  knees?: {
+    left: FppaKneeResult;
+    right: FppaKneeResult;
+  };
 }
 
 export type ModelPredictionStatus = "assessed" | "not_assessed";
@@ -114,7 +131,7 @@ export interface ModelPrediction {
   model_name?: string;
   model_version?: string;
   view_angle?: "diagonal" | "frontal" | "sagittal";
-  prediction_target?: "binary_form" | "error_type" | string;
+  prediction_target?: "knee_alignment" | "binary_form" | "error_type" | string;
   feature_schema_version?: string;
   predicted_class?: string;
   probability?: number | null;

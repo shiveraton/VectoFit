@@ -33,6 +33,11 @@ export interface AngleTrainingStats {
   bad_count: number;
   error_type_sample_count: number;
   error_label_counts: Record<string, number>;
+  knee_target_sample_count: number;
+  knee_label_counts: Record<
+    "good" | "bad" | "borderline" | "unassessable" | "disputed" | "missing",
+    number
+  >;
   participant_count: number;
   video_count: number;
 }

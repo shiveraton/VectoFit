@@ -8,7 +8,7 @@
         <span class="brand-label">Annotation</span>
       </div>
 
-      <button type="button" class="sign-out-button" @click="signOut">
+      <button type="button" class="secondary-button" @click="signOut">
         Sign Out
       </button>
     </header>
@@ -20,10 +20,21 @@
 </template>
 
 <script setup lang="ts">
-import router from "../router";
+import { useRouter } from "vue-router";
+import { publicLogout } from "../config/publicAuth";
+const router = useRouter();
 import logo from "../assets/images/vectofit-tm2.png";
 
-const signOut = () => {
+const signOut = async () => {
+  if (import.meta.env.MODE === "public") {
+    try {
+      await publicLogout();
+      await router.replace("/annotator/login");
+    } catch {
+      window.alert("Sign out failed. Please try again.");
+    }
+    return;
+  }
   localStorage.removeItem("token");
   router.push("/login");
 };
@@ -32,8 +43,8 @@ const signOut = () => {
 <style scoped>
 .annotator-layout {
   min-height: 100vh;
-  background: #f8f6f5;
-  color: #25201e;
+  background: var(--vf-background);
+  color: var(--vf-text);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -44,7 +55,7 @@ const signOut = () => {
   min-height: 76px;
   padding: 12px 32px;
   background: #fff;
-  border-bottom: 1px solid #eee6e2;
+  border-bottom: 1px solid var(--vf-border);
 }
 
 .header-brand {
@@ -74,24 +85,13 @@ const signOut = () => {
   letter-spacing: 0.04em;
 }
 
-.sign-out-button {
-  padding: 9px 16px;
-  border: 1px solid #fed7aa;
-  border-radius: 8px;
-  background: #fff7ed;
-  color: #ea580c;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
 
-.sign-out-button:hover {
-  background: #ffedd5;
-  border-color: #fdba74;
-}
+
+
 
 .annotator-main {
+  max-width: 1600px;
+  margin: 0 auto;
   padding: 32px;
 }
 

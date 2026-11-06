@@ -1,6 +1,8 @@
 from typing import ClassVar
+import logging
 
 import cv2
+from django.db import transaction
 from django.db.models import Case, IntegerField, Q, Value, When
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
@@ -29,6 +31,19 @@ from .services.bulk_import import create_archive_preview
 from .services.import_executor import execute_bulk_import
 from .services.tasks import process_dataset_video_task
 from .permissions import IsAnnotator
+
+logger = logging.getLogger(__name__)
+
+
+def _enqueue_dataset_processing(dataset_id: int, user_id: int) -> None:
+    try:
+        process_dataset_video_task.delay(dataset_id, user_id)
+    except Exception as exc:
+        logger.exception("Could not queue dataset processing for dataset=%s", dataset_id)
+        Dataset.objects.filter(pk=dataset_id, status="PENDING").update(
+            status="FAILED",
+            error_message=f"Could not queue dataset processing: {exc}",
+        )
 
 
 # Return review metadata for a knee annotation change.
@@ -80,10 +95,12 @@ class DatasetViewSet(viewsets.ModelViewSet):
         dataset.error_message = ""
         dataset.save(update_fields=["status", "error_message"])
 
-        process_dataset_video_task.delay(
-            dataset.id,
-            request.user.id,
+        transaction.on_commit(
+            lambda dataset_id=dataset.id, user_id=request.user.id: _enqueue_dataset_processing(
+                dataset_id, user_id
+            )
         )
+        dataset.refresh_from_db()
 
         return Response(
             self.get_serializer(dataset).data,
@@ -174,7 +191,12 @@ class DatasetViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         dataset = serializer.save(status="PENDING")
-        process_dataset_video_task.delay(dataset.id, self.request.user.id)
+        transaction.on_commit(
+            lambda dataset_id=dataset.id, user_id=self.request.user.id: _enqueue_dataset_processing(
+                dataset_id, user_id
+            )
+        )
+        dataset.refresh_from_db()
 
     def get_serializer_context(self):
         return {"request": self.request}
@@ -263,17 +285,18 @@ class AnnotationPoolView(APIView):
                 samples = samples.filter(dataset_video__requires_manual_review=True)
 
             sample_count = samples.count()
-            reviewed_samples = samples.filter(
-                Q(annotator__isnull=False) | Q(annotated_at__isnull=False)
-            )
-            reviewed_count = reviewed_samples.count()
-            pending_count = max(0, sample_count - reviewed_count)
 
             records = list(
                 KneeAnnotation.objects.filter(sample__in=samples)
                 .select_related("annotator", "sample")
                 .order_by("-created_at", "-id")
             )
+            latest_records = {}
+            for record in records:
+                latest_records.setdefault((record.sample_id, record.annotator_id), record)
+            reviewed_count = len({record.sample_id for record in latest_records.values()
+                                  if record.annotation is not None})
+            pending_count = max(0, sample_count - reviewed_count)
             annotator_activity = {}
             for record in records:
                 if record.annotator_id is None:
@@ -335,6 +358,8 @@ class AnnotationPoolView(APIView):
                             ),
                             "created_at": record.created_at,
                             "has_annotation": record.annotation is not None,
+                            "annotation": record.annotation,
+                            "rubric_version": record.rubric_version,
                         }
                         for record in records
                     ],

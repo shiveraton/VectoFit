@@ -1,0 +1,24 @@
+[Unit]
+Description=VectoFit web
+After=network.target postgresql.service redis-server.service
+Requires=postgresql.service redis-server.service
+
+[Service]
+User=vectofit
+Group=www-data
+WorkingDirectory=/srv/vectofit/app/vectofit_backend
+EnvironmentFile=/etc/vectofit/backend.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/srv/vectofit/venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --timeout 120 --access-logfile - --error-logfile -
+Restart=always
+RestartSec=5
+TimeoutStopSec=600
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/vectofit/data /srv/vectofit/app/vectofit_backend
+
+[Install]
+WantedBy=multi-user.target

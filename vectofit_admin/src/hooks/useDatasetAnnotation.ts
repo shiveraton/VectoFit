@@ -85,7 +85,7 @@ export function useDatasetAnnotation() {
     if (!sample) return null;
     if (isManuallyAnnotated(sample)) return "manual";
 
-    if (sample.is_correct !== null) return "inherited";
+    if (sample.is_correct != null) return "inherited";
 
     return "unlabeled";
   });
@@ -97,7 +97,7 @@ export function useDatasetAnnotation() {
   const inheritedLabelCount = computed(
     () =>
       samples.value.filter(
-        (sample) => !isManuallyAnnotated(sample) && sample.is_correct !== null,
+        (sample) => !isManuallyAnnotated(sample) && sample.is_correct != null,
       ).length,
   );
 
@@ -114,7 +114,7 @@ export function useDatasetAnnotation() {
 
     annotation.value =
       sample?.knee_annotation != null
-        ? structuredClone(sample.knee_annotation)
+        ? JSON.parse(JSON.stringify(sample.knee_annotation))
         : emptyKneeAnnotation();
   };
 
@@ -124,7 +124,7 @@ export function useDatasetAnnotation() {
 
     try {
       session.value = await datasetAnnotationService.getSession(datasetId);
-      currentIndex.value = 0;
+      currentIndex.value = Math.max(0, session.value.samples.findIndex(sample => sample.knee_annotation == null));
       loadCurrentSample();
     } catch (err) {
       console.error(err);
@@ -170,6 +170,7 @@ export function useDatasetAnnotation() {
   const save = async (): Promise<boolean> => {
     const sample = currentSample.value;
 
+    if (isSaving.value) return false;
     if (!sample || targetLabel.value === null) {
       error.value = "Assess both knees before saving.";
       return false;
@@ -179,7 +180,7 @@ export function useDatasetAnnotation() {
     error.value = null;
 
     try {
-      const payload: KneeAnnotation = structuredClone(annotation.value);
+      const payload: KneeAnnotation = JSON.parse(JSON.stringify(annotation.value));
       const saved = await datasetAnnotationService.save(sample.id, {
         knee_annotation: payload,
       });
@@ -234,7 +235,7 @@ export function useDatasetAnnotation() {
 
   const clear = async () => {
     const sample = currentSample.value;
-    if (!sample) return;
+    if (!sample || isSaving.value) return;
 
     isSaving.value = true;
     error.value = null;
@@ -260,13 +261,13 @@ export function useDatasetAnnotation() {
   };
 
   const previous = () => {
-    if (currentIndex.value <= 0) return;
+    if (isSaving.value || currentIndex.value <= 0) return;
     currentIndex.value -= 1;
     loadCurrentSample();
   };
 
   const next = () => {
-    if (currentIndex.value >= samples.value.length - 1) return;
+    if (isSaving.value || currentIndex.value >= samples.value.length - 1) return;
     currentIndex.value += 1;
     loadCurrentSample();
   };

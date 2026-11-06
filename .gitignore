@@ -19,6 +19,7 @@ db.sqlite3
 # Media & Static
 media/
 staticfiles/
+*.md
 
 # Local settings
 local_settings.py
@@ -74,7 +75,7 @@ Thumbs.db
 # ==========================================
 
 # Trained models
-models/
+/models/
 *.pt
 *.pth
 *.onnx
@@ -87,10 +88,10 @@ data/raw/
 data/processed/
 
 # Generated outputs
-outputs/
-results/
-temp/
-cache/
+/outputs/
+/results/
+/temp/
+/cache/
 
 # ==========================================
 # Node (Angular/Ionic Frontend, if separate)
@@ -102,3 +103,9 @@ npm-debug.log*
 repomix-output.*
 ./repomix
 repomix.config.json
+# Separate public and private production bundles
+vectofit_admin/dist-public/
+vectofit_admin/dist-private/
+
+# Rendered deployment configuration includes production secrets
+deploy/annotator/generated/

@@ -1,0 +1,173 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 1440,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 6
+    },
+    {
+      "width": 1440,
+      "route": "/training",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 7
+    },
+    {
+      "width": 1440,
+      "route": "/models",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 1
+    },
+    {
+      "width": 1440,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "overflow": false,
+      "title": "Welcome Back",
+      "buttons": 1
+    },
+    {
+      "width": 1440,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create Account",
+      "buttons": 1
+    },
+    {
+      "width": 1440,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 768,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 768,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 6
+    },
+    {
+      "width": 768,
+      "route": "/training",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 7
+    },
+    {
+      "width": 768,
+      "route": "/models",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 1
+    },
+    {
+      "width": 768,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 768,
+      "route": "/login",
+      "overflow": false,
+      "title": "Welcome Back",
+      "buttons": 1
+    },
+    {
+      "width": 768,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create Account",
+      "buttons": 1
+    },
+    {
+      "width": 768,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 360,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 360,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 6
+    },
+    {
+      "width": 360,
+      "route": "/training",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 7
+    },
+    {
+      "width": 360,
+      "route": "/models",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 1
+    },
+    {
+      "width": 360,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "Administrator",
+      "buttons": 2
+    },
+    {
+      "width": 360,
+      "route": "/login",
+      "overflow": true,
+      "title": "Welcome Back",
+      "buttons": 1
+    },
+    {
+      "width": 360,
+      "route": "/register",
+      "overflow": true,
+      "title": "Create Account",
+      "buttons": 1
+    },
+    {
+      "width": 360,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    }
+  ],
+  "errors": []
+}

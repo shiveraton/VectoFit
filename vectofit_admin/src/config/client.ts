@@ -1,10 +1,14 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "http://100.100.28.107:8000/api",
+  baseURL: ["public", "private"].includes(import.meta.env.MODE) ? "/api" : import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api",
 });
 
+client.defaults.baseURL =
+  import.meta.env.VITE_API_BASE_URL || client.defaults.baseURL;
+
 client.interceptors.request.use((config) => {
+  if (import.meta.env.MODE === "public") return config;
   const token = localStorage.getItem("token");
 
   if (token) {

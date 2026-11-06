@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { useDialogFocus } from "../../composables/useDialogFocus";
+import { computed, ref, watch, useTemplateRef } from "vue";
 import {
   datasetService,
   type DatasetImportPreview,
 } from "../../services/datasetService";
 
 const props = defineProps<{ isOpen: boolean }>();
+
+const dialogRef = useTemplateRef<HTMLElement>("datasetDialog");
+useDialogFocus(() => props.isOpen, dialogRef);
 
 const emit = defineEmits<{
   (event: "close"): void;
@@ -400,9 +404,11 @@ async function commitImport() {
 
 <template>
   <Teleport to="body">
-    <div v-if="isOpen" class="import-overlay" @click.self="close">
+    <div v-if="isOpen" class="import-overlay" @click.self="close" @keydown.esc="close">
       <section
         class="import-modal"
+        ref="datasetDialog"
+        tabindex="-1"
         role="dialog"
         aria-modal="true"
         aria-labelledby="import-title"
@@ -845,7 +851,7 @@ async function commitImport() {
 
 .eyebrow {
   color: var(--vf-orange, #f97316);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.1em;
 }
@@ -896,7 +902,7 @@ async function commitImport() {
   flex-direction: column;
   gap: 6px;
   color: var(--vf-text, #27272a);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -964,7 +970,7 @@ async function commitImport() {
 
 .file-picker small {
   color: var(--vf-muted, #71717a);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .file-picker input {
@@ -1014,7 +1020,7 @@ async function commitImport() {
 .policy-option small {
   margin-top: 4px;
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -1051,7 +1057,7 @@ async function commitImport() {
 .manifest-summary span,
 .review-summary span {
   color: var(--vf-muted, #71717a);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .manifest-summary strong,
@@ -1066,7 +1072,7 @@ async function commitImport() {
   gap: 8px;
   margin-top: 12px;
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .angle-summary span {
@@ -1079,7 +1085,7 @@ async function commitImport() {
   margin-top: 14px;
   padding: 12px;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
@@ -1110,7 +1116,7 @@ async function commitImport() {
 .manifest-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .manifest-table th,
@@ -1158,7 +1164,7 @@ async function commitImport() {
   flex: 1 1 220px;
   margin: 0;
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 

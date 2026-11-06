@@ -6,7 +6,7 @@ from .kinematic_velocity import calculate_velocity_series
 from .range_of_motion import calculate_rom
 from .trunk_angle_analysis import calculate_trunk_angle_series
 
-FEATURE_SCHEMA_VERSION = "python_rep_features_v1"
+FEATURE_SCHEMA_VERSION = "python_rep_features_v2"
 
 
 AVAILABLE_FEATURES = [
@@ -96,7 +96,7 @@ def _validate_series(landmark_series):
                 )
 
 
-def extract_rep_features(landmark_series, fps=30.0, scale_factor=None):
+def extract_rep_features(landmark_series, fps=None, scale_factor=None):
     _validate_series(landmark_series)
 
     if fps is None or fps <= 0:

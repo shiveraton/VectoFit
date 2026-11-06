@@ -105,9 +105,7 @@ def process_video_repetitions(
             assessment = RepAssessment.objects.create(
                 session=session,
                 rep_number=number,
-                landmark_series=[
-                    entry["landmarks"] for entry in rep_entries
-                ],
+                landmark_series=rep_entries,
                 start_frame=rep_entries[0]["frame_index"],
                 end_frame=rep_entries[-1]["frame_index"],
             )

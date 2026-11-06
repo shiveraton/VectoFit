@@ -1,0 +1,337 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Dashboard",
+      "buttons": 3
+    },
+    {
+      "width": 1440,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Datasets",
+      "buttons": 7
+    },
+    {
+      "width": 1440,
+      "route": "/training",
+      "overflow": false,
+      "title": "Training",
+      "buttons": 8
+    },
+    {
+      "width": 1440,
+      "route": "/models",
+      "overflow": false,
+      "title": "Models",
+      "buttons": 4
+    },
+    {
+      "width": 1440,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "M0 / M1 Results",
+      "buttons": 3
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "overflow": false,
+      "title": "Sign in to VectoFit",
+      "buttons": 1
+    },
+    {
+      "width": 1440,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create an account",
+      "buttons": 1
+    },
+    {
+      "width": 1440,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 1440,
+      "route": "/dataset/1/annotate",
+      "overflow": false,
+      "title": "Synthetic frontal cohort with a long descriptive name",
+      "buttons": 12
+    },
+    {
+      "width": 1280,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Dashboard",
+      "buttons": 3
+    },
+    {
+      "width": 1280,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Datasets",
+      "buttons": 7
+    },
+    {
+      "width": 1280,
+      "route": "/training",
+      "overflow": false,
+      "title": "Training",
+      "buttons": 8
+    },
+    {
+      "width": 1280,
+      "route": "/models",
+      "overflow": false,
+      "title": "Models",
+      "buttons": 4
+    },
+    {
+      "width": 1280,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "M0 / M1 Results",
+      "buttons": 3
+    },
+    {
+      "width": 1280,
+      "route": "/login",
+      "overflow": false,
+      "title": "Sign in to VectoFit",
+      "buttons": 1
+    },
+    {
+      "width": 1280,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create an account",
+      "buttons": 1
+    },
+    {
+      "width": 1280,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 1280,
+      "route": "/dataset/1/annotate",
+      "overflow": false,
+      "title": "Synthetic frontal cohort with a long descriptive name",
+      "buttons": 12
+    },
+    {
+      "width": 768,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Dashboard",
+      "buttons": 3
+    },
+    {
+      "width": 768,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Datasets",
+      "buttons": 7
+    },
+    {
+      "width": 768,
+      "route": "/training",
+      "overflow": false,
+      "title": "Training",
+      "buttons": 8
+    },
+    {
+      "width": 768,
+      "route": "/models",
+      "overflow": false,
+      "title": "Models",
+      "buttons": 4
+    },
+    {
+      "width": 768,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "M0 / M1 Results",
+      "buttons": 3
+    },
+    {
+      "width": 768,
+      "route": "/login",
+      "overflow": false,
+      "title": "Sign in to VectoFit",
+      "buttons": 1
+    },
+    {
+      "width": 768,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create an account",
+      "buttons": 1
+    },
+    {
+      "width": 768,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 768,
+      "route": "/dataset/1/annotate",
+      "overflow": false,
+      "title": "Synthetic frontal cohort with a long descriptive name",
+      "buttons": 12
+    },
+    {
+      "width": 360,
+      "route": "/dashboard",
+      "overflow": false,
+      "title": "Dashboard",
+      "buttons": 3
+    },
+    {
+      "width": 360,
+      "route": "/dataset",
+      "overflow": false,
+      "title": "Datasets",
+      "buttons": 7
+    },
+    {
+      "width": 360,
+      "route": "/training",
+      "overflow": false,
+      "title": "Training",
+      "buttons": 8
+    },
+    {
+      "width": 360,
+      "route": "/models",
+      "overflow": false,
+      "title": "Models",
+      "buttons": 4
+    },
+    {
+      "width": 360,
+      "route": "/pilot-results",
+      "overflow": false,
+      "title": "M0 / M1 Results",
+      "buttons": 3
+    },
+    {
+      "width": 360,
+      "route": "/login",
+      "overflow": false,
+      "title": "Sign in to VectoFit",
+      "buttons": 1
+    },
+    {
+      "width": 360,
+      "route": "/register",
+      "overflow": false,
+      "title": "Create an account",
+      "buttons": 1
+    },
+    {
+      "width": 360,
+      "route": "/annotator",
+      "overflow": false,
+      "title": "Choose a Dataset",
+      "buttons": 2
+    },
+    {
+      "width": 360,
+      "route": "/dataset/1/annotate",
+      "overflow": false,
+      "title": "Synthetic frontal cohort with a long descriptive name",
+      "buttons": 12
+    },
+    {
+      "test": "training RUNNING",
+      "value": {
+        "status": "RUNNING",
+        "text": false
+      }
+    },
+    {
+      "test": "training FAILED",
+      "value": {
+        "status": "FAILED",
+        "text": true
+      }
+    },
+    {
+      "test": "training COMPLETED",
+      "value": {
+        "status": "COMPLETED",
+        "text": false
+      }
+    },
+    {
+      "test": "model selection button",
+      "value": {
+        "selected": "v2.0",
+        "model": "Synthetic comparison version",
+        "blocked": true
+      }
+    },
+    {
+      "test": "Add Single Video dialog focus (DOM events)",
+      "value": {
+        "focused": true,
+        "trapped": true,
+        "closed": true,
+        "restored": true
+      }
+    },
+    {
+      "test": "Import Dataset dialog focus (DOM events)",
+      "value": {
+        "focused": true,
+        "trapped": true,
+        "closed": true,
+        "restored": true
+      }
+    },
+    {
+      "test": "dashboard failure honesty",
+      "value": {
+        "alert": true,
+        "summaryHidden": true
+      }
+    },
+    {
+      "test": "dashboard retry recovery",
+      "value": {
+        "errorCleared": true,
+        "summaryVisible": true
+      }
+    },
+    {
+      "test": "mobile navigation",
+      "value": {
+        "exists": true,
+        "expanded": "true",
+        "navVisible": true
+      }
+    },
+    {
+      "test": "login error recovery",
+      "value": {
+        "alert": "Unable to sign in. Check your credentials and connection, then try again.",
+        "enabled": true
+      }
+    }
+  ],
+  "errors": [],
+  "failures": [],
+  "skipped": [
+    "Native keyboard delivery is unavailable in this headless runtime (no keydown events reached the document). Dialog key handlers are checked with DOM events; manual keyboard and screen-reader checks remain required."
+  ]
+}

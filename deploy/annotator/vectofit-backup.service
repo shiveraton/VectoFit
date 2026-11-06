@@ -1,0 +1,5 @@
+[Unit]
+Description=Consistent VectoFit database and media backup
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/vectofit-backup

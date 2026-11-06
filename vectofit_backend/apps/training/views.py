@@ -1,24 +1,24 @@
 from typing import ClassVar
 
 import json
+import logging
 from django.db import transaction
 from django.conf import settings
 from pathlib import Path
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from xgboost.core import XGBoostError
 
-from apps.analytics.services.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
+from apps.analytics.services.feature_schemas import schema_for_target
 from apps.datasets.models import Dataset
+from apps.training.services.model_card import build_model_card
 from apps.training.services.model_inference import (
     ModelInferenceError,
     predict_with_active_model,
 )
-from apps.training.services.run_training_job import run_training_job
-from apps.training.services.trainer import load_model
 
 from .models import ModelRegistry, TrainingJob
 from .serializers import (
@@ -28,6 +28,22 @@ from .serializers import (
     TrainingJobRequestSerializer,
     TrainingJobSerializer,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _enqueue_training_job(job_id: int, task_kwargs: dict) -> None:
+    from .tasks import run_training_job_task
+
+    try:
+        run_training_job_task.delay(job_id, **task_kwargs)
+    except Exception as exc:
+        logger.exception("Could not queue training job=%s", job_id)
+        TrainingJob.objects.filter(pk=job_id, status=TrainingJob.Status.PENDING).update(
+            status=TrainingJob.Status.FAILED,
+            error_message=f"Could not queue training: {exc}",
+            completed_at=timezone.now(),
+        )
 
 
 class TrainingJobViewSet(viewsets.ReadOnlyModelViewSet):
@@ -50,9 +66,12 @@ class TrainingJobCreateView(APIView):
         serializer = TrainingJobRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        feature_selection = data.get("feature_selection") or list(FEATURE_ORDER)
+        feature_selection = data.get("feature_selection") or list(
+            schema_for_target(data["prediction_target"]).feature_order
+        )
 
         job = TrainingJob.objects.create(
+            feature_schema_version=schema_for_target(data["prediction_target"]).version,
             algorithm=data["algorithm"],
             view_angle=data["view_angle"],
             prediction_target=data["prediction_target"],
@@ -62,26 +81,24 @@ class TrainingJobCreateView(APIView):
             test_size=data["test_size"],
         )
         job.datasets.set(Dataset.objects.filter(pk__in=data["dataset_ids"]))
-        run_training_job(
-            job,
-            dataset_ids=data["dataset_ids"],
-            feature_selection=feature_selection,
-            hyperparameters=data["hyperparameters"],
-            test_size=data["test_size"],
-            seed=data["random_seed"],
-            view_angle=data["view_angle"],
-            prediction_target=data["prediction_target"],
+        task_kwargs = {
+            "dataset_ids": data["dataset_ids"],
+            "feature_selection": feature_selection,
+            "hyperparameters": data["hyperparameters"],
+            "test_size": data["test_size"],
+            "seed": data["random_seed"],
+            "view_angle": data["view_angle"],
+            "prediction_target": data["prediction_target"],
+        }
+        transaction.on_commit(
+            lambda job_id=job.pk, kwargs=task_kwargs: _enqueue_training_job(
+                job_id, kwargs
+            )
         )
         job.refresh_from_db()
-
-        if job.status == TrainingJob.Status.FAILED:
-            return Response(
-                TrainingJobSerializer(job, context={"request": request}).data,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         return Response(
             TrainingJobSerializer(job, context={"request": request}).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_202_ACCEPTED,
         )
 
 
@@ -94,53 +111,25 @@ class ModelRegistryViewSet(viewsets.ReadOnlyModelViewSet):
     def activate(self, request, pk=None):
         registry_entry = self.get_object()
         job = registry_entry.training_job
-        if job.view_angle not in {"diagonal", "frontal", "sagittal"}:
-            return Response(
-                {
-                    "detail": "This legacy model has no recorded camera angle. Retrain it with an explicit angle before activation."
-                },
-                status=409,
-            )
-        if job.feature_schema_version != FEATURE_SCHEMA_VERSION:
-            return Response(
-                {
-                    "detail": "This model was trained with an unsupported feature schema. Retrain it with the current schema before activation.",
-                    "expected": FEATURE_SCHEMA_VERSION,
-                    "received": job.feature_schema_version,
-                },
-                status=409,
-            )
-        if job.status != TrainingJob.Status.COMPLETED:
-            return Response(
-                {
-                    "detail": "Only models from completed training jobs can be activated."
-                },
-                status=409,
-            )
-        if not registry_entry.artifact:
-            return Response(
-                {"detail": "The registry model has no artifact file."}, status=409
-            )
-        try:
-            with registry_entry.artifact.open("rb") as model_file:
-                artifact_bytes = model_file.read()
-        except (OSError, ValueError) as exc:
-            return Response(
-                {"detail": f"The registered artifact cannot be read: {exc}"}, status=409
-            )
-        if not artifact_bytes:
-            return Response(
-                {"detail": "The registered model artifact is empty."}, status=409
-            )
-        try:
-            load_model(artifact_bytes)
-        except (OSError, ValueError, AttributeError, XGBoostError) as exc:
-            return Response(
-                {
-                    "detail": f"The registered artifact is not a valid XGBoost model: {exc}"
-                },
-                status=409,
-            )
+        model_card = build_model_card(registry_entry)
+        if not model_card["activation"]["allowed"]:
+            blockers = model_card["activation"]["blockers"]
+            payload = {
+                "detail": (
+                    blockers[0]["detail"]
+                    if blockers
+                    else "This model does not satisfy the activation readiness checks."
+                ),
+                "blockers": blockers,
+                "model_card": model_card,
+            }
+            failed_codes = {blocker["code"] for blocker in blockers}
+            if "feature_schema" in failed_codes:
+                from apps.analytics.services.feature_schemas import CURRENT
+
+                payload["expected"] = CURRENT.get(job.prediction_target)
+                payload["received"] = job.feature_schema_version
+            return Response(payload, status=409)
 
         with transaction.atomic():
             ModelRegistry.objects.select_for_update().filter(

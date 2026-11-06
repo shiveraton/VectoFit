@@ -5,11 +5,11 @@ import { useDatasets } from "./useDatasets";
 import { useTraining } from "./useTraining";
 
 export function useDashboard() {
-  const { models, fetchModels } = useModels();
+  const { models, fetchModels, error: modelError } = useModels();
 
-  const { datasets, fetchDatasets } = useDatasets();
+  const { datasets, fetchDatasets, errorMessage: datasetError } = useDatasets();
 
-  const { trainingJobs, fetchTrainingData } = useTraining();
+  const { trainingJobs, fetchTrainingData, error: trainingError } = useTraining();
 
   const currentModel = computed(
     () =>
@@ -57,11 +57,15 @@ export function useDashboard() {
     },
   ]);
 
-  const fetchAllDashboardData = async () => {
-    await Promise.all([fetchModels(), fetchDatasets(), fetchTrainingData()]);
+  const error = computed(() => [modelError.value, datasetError.value, trainingError.value].filter(Boolean).join(" "));
+
+  const fetchAllDashboardData = async (force = false) => {
+    datasetError.value = "";
+    await Promise.all([fetchModels(force), fetchDatasets(force), fetchTrainingData(force)]);
   };
 
   return {
+    error,
     dashboardCards,
     currentModel,
     fetchAllDashboardData,

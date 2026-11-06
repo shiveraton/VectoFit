@@ -253,7 +253,6 @@ export default function MorphologicalCalibrationScreen({
       <SafeAreaView style={styles.centerContent} edges={["top", "bottom"]}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={CALIBRATION_COLORS.background}
         />
         <Text style={styles.permissionTitle}>Camera permission needed</Text>
         <Text style={styles.emptyStateText}>
@@ -276,7 +275,6 @@ export default function MorphologicalCalibrationScreen({
       <SafeAreaView style={styles.centerContent} edges={["top", "bottom"]}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={CALIBRATION_COLORS.background}
         />
         <ActivityIndicator size="large" color={CALIBRATION_COLORS.primary} />
         <Text style={styles.emptyStateText}>Initializing camera…</Text>
@@ -290,7 +288,6 @@ export default function MorphologicalCalibrationScreen({
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor={CALIBRATION_COLORS.background}
       />
 
       <View style={styles.screen}>

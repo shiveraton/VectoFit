@@ -272,7 +272,7 @@ export default function InsightsScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bgDark} />
+      <StatusBar barStyle="light-content" />
       {loading ? (
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={COLORS.primaryOrange} />
@@ -288,7 +288,7 @@ export default function InsightsScreen({ navigation }: Props) {
           renderItem={renderSession}
           ListHeaderComponent={listHeader}
           ListEmptyComponent={
-            error ? null : (
+            error ? undefined : (
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
                   <Text style={styles.emptyIconText}>↗</Text>

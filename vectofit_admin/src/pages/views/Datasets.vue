@@ -63,20 +63,6 @@ const hasSamples = (dataset: Dataset) => dataset.sample_count > 0;
 const hasUnlabelledSamples = (dataset: Dataset) =>
   dataset.sample_count > dataset.labelled_sample_count;
 
-const pendingReviewCount = (dataset: Dataset) => {
-  const count = reviewMetrics(dataset).pending_review_sample_count;
-
-  if (typeof count === "number" && Number.isFinite(count)) {
-    return Math.max(0, count);
-  }
-
-  if (!isZipCollection(dataset)) {
-    return 0;
-  }
-
-  return Math.max(0, dataset.sample_count - dataset.labelled_sample_count);
-};
-
 const humanReviewedSummary = (dataset: Dataset) => {
   const metrics = reviewMetrics(dataset);
   const reviewed = metrics.human_reviewed_sample_count;
@@ -273,6 +259,7 @@ onMounted(async () => {
         type="button"
         class="page-tab"
         :class="{ active: activeTab === 'datasets' }"
+        :aria-pressed="activeTab === 'datasets'"
         @click="activeTab = 'datasets'"
       >
         Datasets
@@ -282,17 +269,18 @@ onMounted(async () => {
         type="button"
         class="page-tab"
         :class="{ active: activeTab === 'annotation-pool' }"
+        :aria-pressed="activeTab === 'annotation-pool'"
         @click="activeTab = 'annotation-pool'"
       >
         Annotation Pool
       </button>
     </nav>
 
-    <div v-if="successMessage" class="feedback-message success">
+    <div v-if="successMessage" class="feedback-message success" role="status">
       {{ successMessage }}
     </div>
 
-    <div v-if="errorMessage" class="feedback-message error">
+    <div v-if="errorMessage" class="feedback-message error" role="alert">
       {{ errorMessage }}
     </div>
 
@@ -728,6 +716,14 @@ onMounted(async () => {
                 <span>
                   {{ activity.annotator?.username ?? "Unassigned" }}
                 </span>
+                <span v-if="activity.annotation">
+                  Left: {{ activity.annotation.left.grade }} ({{ activity.annotation.left.direction }}) /
+                  Right: {{ activity.annotation.right.grade }} ({{ activity.annotation.right.direction }})
+                </span>
+                <span v-if="activity.annotation">Symmetry: {{ activity.annotation.symmetry_observation }} / {{ activity.annotation.notes }}</span>
+                <span v-else>Rating cleared</span>
+                <span>{{ activity.rubric_version }}
+                </span>
               </div>
               <time :datetime="activity.created_at">
                 {{ formatActivityDate(activity.created_at) }}
@@ -757,30 +753,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.dataset-page {
-  min-height: 100%;
-  padding: 32px;
-  background: var(--vf-background);
-  font-family: "Segoe UI", Arial, sans-serif;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-
-.page-heading {
-  display: flex;
-  flex-direction: column;
-}
-
-.page-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 .page-tabs {
   display: flex;
@@ -808,86 +780,6 @@ onMounted(async () => {
 
 .page-tab.active {
   border-bottom-color: var(--vf-orange, #f97316);
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 8px;
-  color: var(--vf-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--vf-orange);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
-}
-
-.page-header h1 {
-  margin: 0 0 5px;
-  color: var(--vf-dark);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.page-header p {
-  margin: 0;
-  color: var(--vf-muted);
-  font-size: 13px;
-}
-
-.primary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px 16px;
-  color: #ffffff;
-  background: var(--vf-gradient, linear-gradient(135deg, #f97316, #ef4444));
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.16);
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.primary-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 5px 12px rgba(239, 68, 68, 0.22);
-}
-
-.button-icon {
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.content-card {
-  margin-bottom: 20px;
-  overflow: hidden;
-  background: var(--vf-surface, #ffffff);
-  border: 1px solid var(--vf-border, #e4e4e7);
-  border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.025);
 }
 
 .annotation-pool-toolbar {
@@ -952,7 +844,7 @@ onMounted(async () => {
   display: inline-flex;
   padding: 5px 8px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -982,7 +874,7 @@ onMounted(async () => {
   display: block;
   margin-top: 3px;
   color: var(--vf-muted, #71717a);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .pool-details {
@@ -1042,13 +934,13 @@ onMounted(async () => {
 .pool-metrics span {
   margin-top: 3px;
   color: var(--vf-muted, #71717a);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .pool-details h4 {
   margin: 0 0 10px;
   color: var(--vf-dark, #18181b);
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -1073,7 +965,7 @@ onMounted(async () => {
 .activity-list span,
 .activity-list time {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .activity-list strong {
@@ -1089,40 +981,6 @@ onMounted(async () => {
 .activity-list time {
   flex-shrink: 0;
   text-align: right;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
-}
-
-.section-title-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.section-marker {
-  width: 3px;
-  height: 17px;
-  border-radius: 4px;
-  background: var(--vf-gradient, linear-gradient(135deg, #f97316, #ef4444));
-}
-
-.section-header h2 {
-  margin: 0;
-  color: var(--vf-dark, #18181b);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.section-header p {
-  margin: 5px 0 0 12px;
-  color: var(--vf-light-muted, #a1a1aa);
-  font-size: 11px;
 }
 
 .loading-state {
@@ -1150,7 +1008,7 @@ onMounted(async () => {
 .dataset-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .dataset-table th {
@@ -1158,7 +1016,7 @@ onMounted(async () => {
   color: var(--vf-light-muted, #a1a1aa);
   background: #fafafa;
   border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-align: left;
@@ -1200,7 +1058,7 @@ onMounted(async () => {
 
 .dataset-id {
   color: var(--vf-light-muted, #a1a1aa);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -1216,7 +1074,7 @@ onMounted(async () => {
 .exercise-value {
   color: var(--vf-muted, #71717a);
   font-family: "Segoe UI", Arial, sans-serif;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .sample-count {
@@ -1229,29 +1087,12 @@ onMounted(async () => {
   align-items: center;
   gap: 3px;
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .labelled-count strong {
   color: var(--vf-dark, #18181b);
   font-weight: 600;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 68px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.status-badge.ready {
-  color: #15803d;
-  background: #f0fdf4;
 }
 
 .status-badge.processing {
@@ -1262,11 +1103,6 @@ onMounted(async () => {
 .status-badge.pending {
   color: #a16207;
   background: #fefce8;
-}
-
-.status-badge.failed {
-  color: #dc2626;
-  background: #fef2f2;
 }
 
 .empty-state {
@@ -1292,7 +1128,7 @@ onMounted(async () => {
   border: 1px solid transparent;
   border-radius: 6px;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -1312,7 +1148,7 @@ onMounted(async () => {
 
 .action-complete {
   color: #15803d;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1321,7 +1157,7 @@ onMounted(async () => {
   align-items: center;
   gap: 7px;
   color: var(--vf-muted, #71717a);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1356,52 +1192,36 @@ onMounted(async () => {
 }
 
 @media (max-width: 1000px) {
-  .dataset-table {
+.dataset-table {
     min-width: 820px;
   }
-}
 
-@media (max-width: 1000px) {
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 700px) {
-  .dataset-page {
-    padding: 20px;
-  }
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 18px;
-  }
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
-  .page-actions {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .page-actions button {
+.page-actions button {
     width: 100%;
   }
 
-  .annotation-pool-toolbar {
+.annotation-pool-toolbar {
     flex-direction: column;
   }
 
-  .annotation-pool-layout {
+.annotation-pool-layout {
     display: block;
   }
 
-  .pool-details {
+.pool-details {
     border-top: 1px solid var(--vf-border-light, #f1f1f2);
     border-left: none;
   }
+
 }
+
+.dataset-table { min-width: 1440px; }
+.dataset-table th { white-space: nowrap; }
+.dataset-table td { white-space: nowrap; }
+.dataset-table td:first-child { min-width: 220px; max-width: 300px; white-space: normal; overflow-wrap: anywhere; }
+.dataset-name { min-width: 0; }
+.pool-row:focus-visible { outline: 2px solid var(--vf-orange); outline-offset: -2px; }
 </style>

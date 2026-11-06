@@ -18,9 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+from apps.core.views import health_check
 
 urlpatterns = [
+    path("api/annotator/", include("apps.annotator.urls")),
     path('admin/', admin.site.urls),
+    path("health", health_check, name="health-check"),
 
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/administration/', include('apps.administration.urls')),

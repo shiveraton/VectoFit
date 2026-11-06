@@ -2,6 +2,63 @@ import client from "../config/client";
 
 export type DeploymentStatus = "active" | "building" | "failed" | "inactive";
 
+export type PredictionTarget = "binary_form" | "error_type" | "knee_alignment";
+
+export type ModelCardCheckStatus = "pass" | "warn" | "fail";
+
+export interface ModelCardCheck {
+  code: string;
+  label: string;
+  status: ModelCardCheckStatus;
+  detail: string;
+  remediation: string | null;
+}
+
+export interface ModelCard {
+  schema_version: string;
+  status: "ready" | "warning" | "blocked";
+  generated_from: {
+    job_id: number;
+    registry_entry_id: number;
+    manifest_version: number | null;
+    manifest_sha256: string | null;
+  };
+  activation: {
+    allowed: boolean;
+    blockers: ModelCardCheck[];
+    warnings: ModelCardCheck[];
+  };
+  checks: ModelCardCheck[];
+  summary: {
+    total_checks: number;
+    passed_checks: number;
+    warning_checks: number;
+    failed_checks: number;
+  };
+  class_mapping: Record<string, string>;
+  target_names: string[];
+  prediction_target: PredictionTarget;
+  view_angle: "diagonal" | "frontal" | "sagittal" | "";
+  feature_schema_version: string;
+  evaluation_scope: string;
+  held_out_test_count: number;
+  data_provenance: {
+    participant_count: number;
+    label_origin_counts: Record<string, number>;
+    split_counts: Record<string, number>;
+  };
+}
+
+export interface PerClassMetric {
+  index: number;
+  label: string;
+  support: number;
+  predicted_count: number;
+  precision: number | null;
+  recall: number | null;
+  f1: number | null;
+}
+
 export interface ModelRegistryRecord {
   id: number;
   name: string;
@@ -9,7 +66,7 @@ export interface ModelRegistryRecord {
   training_job: number;
   algorithm: string;
   view_angle: "diagonal" | "frontal" | "sagittal" | "";
-  prediction_target: "binary_form" | "error_type";
+  prediction_target: PredictionTarget;
   feature_schema_version: string;
   metrics: Record<string, unknown>;
   is_active: boolean;
@@ -22,7 +79,7 @@ export interface ModelState {
   version: string;
   algorithm: string;
   view_angle: "diagonal" | "frontal" | "sagittal" | "";
-  prediction_target: "binary_form" | "error_type";
+  prediction_target: PredictionTarget;
   feature_schema_version: string;
   is_active: boolean;
   created_at: string;
@@ -32,7 +89,7 @@ export interface ModelState {
     job_id: number;
     status: string;
     view_angle: "diagonal" | "frontal" | "sagittal" | "";
-    prediction_target: "binary_form" | "error_type";
+    prediction_target: PredictionTarget;
     feature_schema_version: string;
     test_size: number;
     dataset_names: string[];
@@ -58,13 +115,19 @@ export interface ModelState {
     recall: number | null;
     f1: number | null;
     confusion_matrix: number[][];
+    class_mapping: Record<string, string>;
+    target_names: string[];
+    per_class: PerClassMetric[];
     overall_class_distribution: Record<string, number>;
     train_class_distribution: Record<string, number>;
     test_class_distribution: Record<string, number>;
+    evaluation_scope: string;
+    test_count: number;
   };
 
   feature_warnings: string[];
   training_manifest: Record<string, unknown>;
+  model_card: ModelCard;
 }
 
 export const modelService = {

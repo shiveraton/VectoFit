@@ -91,6 +91,37 @@ def draw_skeleton(
     return drawn
 
 
+def draw_fppa_overlay(frame: np.ndarray, landmarks: Any, fppa: Any) -> bool:
+    height, width = frame.shape[:2]
+    points = normalize_landmarks(landmarks, width, height)
+    if not isinstance(fppa, dict) or fppa.get("status") != "assessed":
+        return False
+    features = fppa.get("features") or {}
+    drawn = False
+    for side in ("left", "right"):
+        hip = points.get(f"{side}_hip")
+        ankle = points.get(f"{side}_ankle")
+        knee = points.get(f"{side}_knee")
+        if not hip or not ankle or not knee:
+            continue
+        cv2.line(frame, hip, ankle, (255, 180, 0), 3, cv2.LINE_AA)
+        cv2.circle(frame, knee, 8, (255, 180, 0), -1, cv2.LINE_AA)
+        value = features.get(f"fppa_{side[0]}_bottom")
+        if isinstance(value, (int, float)):
+            cv2.putText(
+                frame,
+                f"{value:.1f} deg",
+                (knee[0] + 8, knee[1] - 8),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.55,
+                (255, 180, 0),
+                2,
+                cv2.LINE_AA,
+            )
+        drawn = True
+    return drawn
+
+
 def reference_landmarks(rep: Any) -> Any:
     analysis_result = rep.analysis_result
     if not isinstance(analysis_result, dict):

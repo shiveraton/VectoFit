@@ -130,7 +130,11 @@ export function useEvaluation() {
     error.value = null;
 
     try {
-      models.value = await modelService.getModels();
+      models.value = (await modelService.getModels()).filter(
+        (model) =>
+          model.prediction_target === "knee_alignment" &&
+          model.feature_schema_version === "fppa_v2",
+      );
 
       if (!models.value.length) {
         selectedModelId.value = null;
@@ -172,9 +176,9 @@ export function useEvaluation() {
   };
 
   const formatTarget = (value: string | null | undefined) => {
-    if (value === "binary_form") return "Good / Bad Form";
-    if (value === "error_type") return "Error Type";
-    return value || "Not specified";
+    return value === "knee_alignment"
+      ? "Frontal-plane knee alignment"
+      : "Unsupported model setup";
   };
 
   onMounted(fetchModels);

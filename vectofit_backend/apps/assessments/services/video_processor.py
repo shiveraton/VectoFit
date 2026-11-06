@@ -181,12 +181,21 @@ class VideoProcessor:
                     if landmark_positions
                     else None
                 )
+                visibility = (
+                    pose_estimator.get_named_visibility(results)
+                    if landmark_positions
+                    else {}
+                )
 
                 extracted_landmark_frames.append(
                     {
                         "frame_index": current_frame_index,
                         "timestamp_ms": timestamp_ms,
                         "landmarks": named_landmarks,
+                        "visibility": visibility,
+                        "source_width": source_width,
+                        "source_height": source_height,
+                        "native_fps": native_fps,
                     }
                 )
 

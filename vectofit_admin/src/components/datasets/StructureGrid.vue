@@ -49,9 +49,7 @@ withDefaults(
 <template>
   <div class="structure-grid">
     <div v-for="item in items" :key="item.id" class="structure-item">
-      <div :class="['structure-icon', `${item.iconVariant}-icon`]">
-        {{ item.icon }}
-      </div>
+
 
       <div class="structure-content">
         <span class="structure-title">{{ item.title }}</span>
@@ -126,7 +124,7 @@ withDefaults(
 
 .structure-title {
   color: var(--vf-muted, #71717a);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -134,8 +132,8 @@ withDefaults(
 
 .structure-value {
   color: var(--vf-text, #27272a);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 @media (max-width: 700px) {

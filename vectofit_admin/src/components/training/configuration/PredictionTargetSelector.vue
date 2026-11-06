@@ -13,6 +13,9 @@ const emit = defineEmits<{ (event: "update:modelValue", value: PredictionTarget)
       <button type="button" class="target-option" :class="{ selected: props.modelValue === 'error_type' }" @click="emit('update:modelValue', 'error_type')">
         <strong>Error type</strong><span>Correct form vs specific error_label categories. Incorrect repetitions without an error label are excluded.</span><small>Requires specific error labels</small>
       </button>
+      <button type="button" class="target-option" :class="{ selected: props.modelValue === 'knee_alignment' }" @click="emit('update:modelValue', 'knee_alignment')">
+        <strong>Frontal-plane knee alignment</strong><span>Good vs bad final knee-annotation targets. Requires completed human knee annotations with agreement across annotators.</span><small>Frontal / diagonal pilot target</small>
+      </button>
     </div>
   </section>
 </template>

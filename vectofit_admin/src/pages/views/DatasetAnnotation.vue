@@ -10,10 +10,12 @@ import type {
 
 const route = useRoute();
 const router = useRouter();
+const datasetHome = import.meta.env.MODE === "public" ? "/annotator" : "/dataset";
 
 const videoRef = ref<HTMLVideoElement | null>(null);
 const playbackRate = ref(1);
 const videoError = ref("");
+const reviewingCompleted = ref(false);
 const kneeSides = ["left", "right"] as const;
 const kneeGrades: KneeAlignmentGrade[] = [
   "aligned", "borderline", "deviated", "unassessable",
@@ -80,6 +82,10 @@ const activeVideoLabel = computed(() => {
     return "Dataset-level video";
   }
 
+  if (import.meta.env.MODE === "public") {
+    return [video.participant_code, video.view_angle_name].filter(Boolean).join(" / ");
+  }
+
   const sourceLabel =
     video.source_label === true
       ? "GOOD FORM"
@@ -94,24 +100,6 @@ const activeVideoLabel = computed(() => {
   ]
     .filter(Boolean)
     .join(" · ");
-});
-
-const sourceLabelText = computed(() => {
-  const label = activeVideo.value?.source_label;
-
-  if (label === true) return "GOOD FORM";
-  if (label === false) return "BAD FORM";
-
-  return "UNKNOWN";
-});
-
-const sourceLabelClass = computed(() => {
-  const label = activeVideo.value?.source_label;
-
-  if (label === true) return "good";
-  if (label === false) return "bad";
-
-  return "unknown";
 });
 
 const currentFps = computed(() => {
@@ -231,7 +219,7 @@ onMounted(async () => {
   const datasetId = Number(route.params.id);
 
   if (!Number.isInteger(datasetId) || datasetId <= 0) {
-    await router.push("/dataset");
+    await router.push(datasetHome);
     return;
   }
 
@@ -245,7 +233,7 @@ onMounted(async () => {
 
 <template>
   <div class="annotation-page">
-    <header class="annotation-header">
+    <header class="page-header">
       <div>
     <div class="eyebrow">DATASET ANNOTATION</div>
 
@@ -261,20 +249,21 @@ onMounted(async () => {
       <button
         type="button"
         class="secondary-button"
-        @click="router.push('/dataset')"
+        :disabled="isSaving"
+        @click="router.push(datasetHome)"
       >
         Back to Datasets
       </button>
     </header>
 
-    <div v-if="isLoading" class="loading">Loading annotation workspace...</div>
+    <div v-if="isLoading" class="loading" role="status">Loading annotation workspace...</div>
 
-    <div v-else-if="error" class="error">
+    <div v-if="error" class="error" role="alert">
       {{ error }}
     </div>
 
     <section
-      v-else-if="session && isReviewComplete"
+      v-if="!isLoading && session && isReviewComplete && !reviewingCompleted"
       class="annotation-card annotation-complete"
     >
       <h2>Manual Review Complete</h2>
@@ -287,19 +276,22 @@ onMounted(async () => {
       </div>
 
       <p class="completion-note">
-        Your annotations have been saved automatically.
+        All of your ratings have been saved and confirmed.
       </p>
 
       <button
         type="button"
         class="primary-button"
-        @click="router.push('/dataset')"
+        @click="router.push(datasetHome)"
       >
         Return to Datasets
       </button>
+      <button type="button" class="secondary-button" @click="reviewingCompleted = true">
+        Review saved ratings
+      </button>
     </section>
 
-    <template v-else-if="session && currentSample">
+    <template v-else-if="!isLoading && session && currentSample">
       <section class="annotation-card annotation-meta">
         <div>
           <span>Progress</span>
@@ -317,7 +309,7 @@ onMounted(async () => {
         </div>
       </section>
 
-      <main class="annotation-workspace">
+      <div class="annotation-workspace">
         <section class="annotation-card video-panel">
           <div class="video-source-meta">
             <span>Current video: </span>
@@ -351,7 +343,7 @@ onMounted(async () => {
           <div class="video-controls">
             <button
               type="button"
-              :disabled="currentIndex === 0"
+              :disabled="isSaving || currentIndex === 0"
               @click="previous"
             >
               Previous
@@ -363,13 +355,13 @@ onMounted(async () => {
 
             <button
               type="button"
-              :disabled="currentIndex >= samples.length - 1"
+              :disabled="isSaving || currentIndex >= samples.length - 1"
               @click="next"
             >
               Next
             </button>
 
-            <select v-model.number="playbackRate">
+            <select v-model.number="playbackRate" aria-label="Playback speed">
               <option :value="0.5">0.5×</option>
               <option :value="0.75">0.75×</option>
               <option :value="1">1×</option>
@@ -380,6 +372,7 @@ onMounted(async () => {
         </section>
 
         <section class="annotation-card criteria-panel">
+          <fieldset :disabled="isSaving" class="annotation-fields" aria-label="Knee assessment">
           <div class="panel-heading">
             <div>
               <span>Rep {{ currentSample.rep_assessment.rep_number }}</span>
@@ -410,9 +403,10 @@ onMounted(async () => {
               <div class="criterion-actions">
                 <button v-for="grade in kneeGrades" :key="grade"
                   type="button" :class="{ active: annotation[side].grade === grade }"
+                  :aria-pressed="annotation[side].grade === grade" :aria-label="`${side} knee: ${grade}`"
                   @click="setKneeGrade(side, grade)">{{ grade }}</button>
               </div>
-              <select :value="annotation[side].direction ?? ''" :disabled="annotation[side].grade === null || annotation[side].grade === 'unassessable' || annotation[side].grade === 'aligned'"
+              <select :aria-label="`${side} knee deviation direction`" :value="annotation[side].direction ?? ''" :disabled="annotation[side].grade === null || annotation[side].grade === 'unassessable' || annotation[side].grade === 'aligned'"
                 @change="handleDirectionChange(side, $event)">
                 <option value="uncertain">Direction uncertain</option>
                 <option value="valgus">Valgus</option>
@@ -450,647 +444,72 @@ onMounted(async () => {
               {{ isSaving ? "Saving..." : "Save & Next" }}
             </button>
           </div>
+          </fieldset>
         </section>
-      </main>
+      </div>
     </template>
   </div>
 </template>
 
 <style scoped>
-.annotation-page {
-  width: 100%;
-  min-height: 100%;
-  padding: 28px 32px 40px;
-  box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.annotation-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.annotation-header > div {
-  min-width: 0;
-}
-
-.annotation-meta {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.annotation-state {
-  margin: 8px 0 0;
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.annotation-complete {
-  max-width: 640px;
-  margin: 40px auto;
-  padding: 32px;
-  text-align: center;
-}
-
-.annotation-complete h2 {
-  margin-bottom: 12px;
-}
-
-.annotation-complete p {
-  color: #667085;
-  line-height: 1.6;
-}
-
-.completion-count {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 24px 0;
-}
-
-.completion-count strong {
-  font-size: 28px;
-  color: #15803d;
-}
-
-.completion-count span {
-  color: #667085;
-  font-size: 13px;
-}
-
-.completion-note {
-  margin-bottom: 24px;
-}
-
-.state-manual {
-  color: #047857;
-}
-
-.state-inherited {
-  color: #b45309;
-}
-
-.state-unlabeled {
-  color: #64748b;
-}
-
-@media (max-width: 700px) {
-  .annotation-meta {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 7px;
-  color: #f97316;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.annotation-header h1 {
-  margin: 0;
-  color: #172033;
-  font-size: 27px;
-  line-height: 1.2;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.annotation-header p {
-  max-width: 720px;
-  margin: 7px 0 0;
-  color: #718096;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.annotation-card {
-  background: #ffffff;
-  border: 1px solid #e8edf3;
-  border-radius: 14px;
-  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.045);
-}
-
-.annotation-meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-
-.annotation-meta > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 16px 20px;
-}
-
-.annotation-meta > div + div {
-  border-left: 1px solid #edf1f5;
-}
-
-.annotation-meta span {
-  color: #8a96a8;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.annotation-meta strong {
-  color: #172033;
-  font-size: 17px;
-  font-weight: 750;
-}
-
-.annotation-workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(350px, 0.8fr);
-  align-items: start;
-  gap: 20px;
-}
-
-.video-panel {
-  overflow: hidden;
-}
-
-.video-panel video {
-  display: block;
-  width: 100%;
-  max-height: 620px;
-  min-height: 420px;
-  object-fit: contain;
-  background: #10151f;
-}
-
-.video-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 14px;
-  border-top: 1px solid #e8edf3;
-  background: #ffffff;
-}
-
-.video-controls button,
-.video-controls select {
-  height: 36px;
-  border: 1px solid #dce3eb;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #344054;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 650;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.video-controls button {
-  padding: 0 13px;
-}
-
-.video-controls button:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.video-controls select {
-  margin-left: auto;
-  padding: 0 30px 0 10px;
-  cursor: pointer;
-}
-
-.criteria-panel {
-  padding: 22px;
-}
-
-.panel-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.panel-heading > div > span {
-  display: block;
-  margin-bottom: 4px;
-  color: #8a96a8;
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.panel-heading h2 {
-  margin: 0;
-  color: #172033;
-  font-size: 18px;
-  font-weight: 750;
-}
-
-.verdict {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 72px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-}
-
-.verdict.pass {
-  background: #ecfdf3;
-  color: #047857;
-}
-
-.verdict.fail {
-  background: #fff1f2;
-  color: #be123c;
-}
-
-.verdict.pending {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.criteria-list {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid #edf1f5;
-}
-
-.criterion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  min-height: 58px;
-  border-bottom: 1px solid #edf1f5;
-}
-
-.criterion > div:first-child {
-  min-width: 0;
-}
-
-.criterion strong {
-  color: #344054;
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.criterion-actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.criterion-actions button {
-  min-width: 58px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #dce3eb;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #667085;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease,
-    transform 0.1s ease;
-}
-
-.criterion-actions button:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.criterion-actions button:active {
-  transform: translateY(1px);
-}
-
-.criterion-actions button.active:first-child {
-  border-color: #10b981;
-  background: #ecfdf3;
-  color: #047857;
-}
-
-.criterion-actions button.active:last-child {
-  border-color: #f43f5e;
-  background: #fff1f2;
-  color: #be123c;
-}
-
-.error-label-field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin-top: 18px;
-}
-
-.error-label-field span {
-  color: #475467;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.error-label-field input {
-  width: 100%;
-  height: 38px;
-  padding: 0 11px;
-  box-sizing: border-box;
-  border: 1px solid #dce3eb;
-  border-radius: 8px;
-  outline: none;
-  background: #ffffff;
-  color: #344054;
-  font-family: inherit;
-  font-size: 12px;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.error-label-field input::placeholder {
-  color: #a0a9b7;
-}
-
-.error-label-field input:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-}
-
-.annotation-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid #edf1f5;
-}
-
-.primary-button,
-.secondary-button {
-  height: 38px;
-  padding: 0 15px;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.1s ease;
-}
-
-.primary-button {
-  border: 1px solid #f97316;
-  background: #f97316;
-  color: #ffffff;
-}
-
-.primary-button:hover:not(:disabled) {
-  background: #ea580c;
-  border-color: #ea580c;
-}
-
-.secondary-button {
-  border: 1px solid #dce3eb;
-  background: #ffffff;
-  color: #475467;
-}
-
-.secondary-button:hover:not(:disabled) {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.primary-button:active:not(:disabled),
-.secondary-button:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.primary-button:disabled,
-.secondary-button:disabled,
-.criterion-actions button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.loading,
-.error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 260px;
-  border: 1px solid #e8edf3;
-  border-radius: 14px;
-  background: #ffffff;
-  color: #667085;
-  font-size: 13px;
-}
-
-.error {
-  color: #be123c;
-  background: #fff8f8;
-  border-color: #fecdd3;
-}
-
-@media (max-width: 1100px) {
-  .annotation-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .video-panel video {
-    max-height: 560px;
-  }
-
-  .criteria-panel {
-    width: 100%;
-    box-sizing: border-box;
-  }
-}
-
-@media (max-width: 700px) {
-  .annotation-page {
-    padding: 20px 16px 30px;
-  }
-
-  .annotation-header {
-    flex-direction: column;
-  }
-
-  .annotation-header .secondary-button {
-    width: 100%;
-  }
-
-  .annotation-meta {
-    grid-template-columns: 1fr;
-  }
-
-  .annotation-meta > div + div {
-    border-top: 1px solid #edf1f5;
-    border-left: none;
-  }
-
-  .video-panel video {
-    min-height: 260px;
-  }
-
-  .video-controls {
-    flex-wrap: wrap;
-  }
-
-  .video-controls select {
-    margin-left: 0;
-  }
-
-  .video-source-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 38px 40px;
-    border-bottom: 1px solid #e8edf3;
-    background: #ffffff;
-  }
-
-  .video-source-meta > span {
-    margin-bottom: 2px;
-    color: #8a96a8;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .video-source-meta > strong {
-    color: #344054;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.7;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
-  .source-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 3px;
-  }
-
-  .source-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 9px;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 750;
-  }
-
-  .source-chip.angle {
-    background: #eff6ff;
-    color: #1d4ed8;
-  }
-
-  .source-chip.good {
-    background: #ecfdf3;
-    border-color: #a7f3d0;
-    color: #047857;
-  }
-
-  .source-chip.bad {
-    background: #fff1f2;
-    border-color: #fecdd3;
-    color: #be123c;
-  }
-
-  .source-chip.unknown {
-    background: #f1f5f9;
-    color: #475569;
-  }
-
-  .source-chip.review {
-    background: #fffbeb;
-    color: #92400e;
-  }
-
-  .source-label-note {
-    margin: 0;
-    color: #667085;
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  .video-unavailable {
-    display: flex;
-    min-height: 260px;
-    padding: 24px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: #10151f;
-    color: #ffffff;
-    text-align: center;
-  }
-
-  .video-unavailable p {
-    max-width: 360px;
-    margin: 0;
-    color: #cbd5e1;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-  .video-error {
-    margin: 0;
-    padding: 10px 14px;
-    background: #fff1f2;
-    color: #be123c;
-    font-size: 12px;
-  }
-
-  .criterion {
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-    padding: 12px 0;
-  }
-
-  .criterion-actions {
-    width: 100%;
-  }
-
-  .criterion-actions button {
-    flex: 1;
-  }
-
-  .annotation-actions {
-    flex-direction: column-reverse;
-  }
-
-  .annotation-actions button {
-    width: 100%;
-  }
+.annotation-fields { margin: 0; padding: 0; border: 0; min-width: 0; }
+.annotation-card { min-width: 0; background: var(--vf-surface); border: 1px solid var(--vf-border); border-radius: 8px; }
+.annotation-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 24px; overflow: hidden; }
+.annotation-meta > div { display: flex; flex-direction: column; gap: 8px; padding: 20px 24px; }
+.annotation-meta > div + div { border-left: 1px solid var(--vf-border); }
+.annotation-meta span { color: var(--vf-muted); font-size: 12px; }
+.annotation-meta strong { color: var(--vf-dark); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.annotation-workspace { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.video-panel { overflow: hidden; }
+.video-source-meta { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; }
+.video-source-meta span { color: var(--vf-muted); font-size: 12px; }
+.video-source-meta strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.video-panel video { display: block; width: 100%; max-height: 620px; min-height: 320px; object-fit: contain; background: #10151f; }
+.video-unavailable { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; min-height: 320px; padding: 24px; background: #10151f; color: white; text-align: center; }
+.video-unavailable p { max-width: 360px; margin: 0; font-size: 13px; color: #cbd5e1; line-height: 1.6; overflow-wrap: anywhere; }
+.video-error { margin: 0; padding: 12px 16px; color: var(--vf-red); background: var(--vf-red-soft); }
+.video-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--vf-border); }
+.video-controls button, .video-controls select { min-height: 40px; padding: 8px 12px; border: 1px solid var(--vf-control-border); border-radius: 8px; background: white; color: var(--vf-text); font-size: 12px; }
+.video-controls button { cursor: pointer; }
+.video-controls button:hover:not(:disabled) { background: #f4f4f5; }
+.video-controls select { margin-left: auto; }
+.criteria-panel { padding: 24px; }
+.panel-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.panel-heading > div { min-width: 0; }
+.panel-heading > div > span { color: var(--vf-muted); font-size: 12px; }
+.panel-heading h2 { margin: 4px 0; font-size: 18px; font-weight: 600; }
+.annotation-state { margin: 8px 0 0; font-size: 12px; color: var(--vf-muted); }
+.state-manual { color: var(--vf-success); }
+.state-inherited { color: var(--vf-warning); }
+.verdict { padding: 4px 8px; border-radius: 4px; background: #f4f4f5; color: var(--vf-muted); font-size: 11px; font-weight: 600; }
+.verdict.good { background: var(--vf-success-soft); color: var(--vf-success); }
+.verdict.bad { background: var(--vf-red-soft); color: var(--vf-red); }
+.verdict.borderline, .verdict.unassessable { background: var(--vf-warning-soft); color: var(--vf-warning); }
+.criterion { display: flex; flex-direction: column; gap: 12px; padding: 20px 0; border-top: 1px solid var(--vf-border); }
+.criterion strong { font-size: 14px; font-weight: 600; }
+.criterion-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.criterion-actions button { min-width: 0; min-height: 40px; padding: 8px; border: 1px solid var(--vf-control-border); border-radius: 6px; background: #fff; color: var(--vf-text); font-size: 12px; cursor: pointer; }
+.criterion-actions button:hover { background: #f4f4f5; }
+.criterion-actions button.active { background: var(--vf-orange-soft); color: var(--vf-orange-dark); border-color: var(--vf-orange); font-weight: 600; }
+.criterion select, .error-label-field select, .error-label-field textarea { width: 100%; padding: 8px 12px; color: var(--vf-text); border: 1px solid var(--vf-control-border); background: #fff; border-radius: 8px; }
+.error-label-field { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; font-size: 13px; }
+.error-label-field textarea { resize: vertical; }
+.annotation-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--vf-border); }
+.annotation-complete { max-width: 640px; margin: 40px auto; padding: 32px; }
+.annotation-complete h2 { margin: 0 0 12px; font-size: 20px; }
+.annotation-complete p { color: var(--vf-muted); }
+.completion-count { display: flex; flex-direction: column; gap: 4px; margin: 24px 0; }
+.completion-count strong { font-size: 28px; color: var(--vf-success); }
+.completion-count span { color: var(--vf-muted); font-size: 12px; }
+.loading, .error { padding: 24px; border: 1px solid var(--vf-border); border-radius: 8px; background: #fff; color: var(--vf-muted); }
+.error { color: var(--vf-red); background: var(--vf-red-soft); border-color: #fecaca; }
+@media (max-width: 1200px) { .annotation-workspace { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .annotation-meta > div { padding: 16px 12px; }
+  .annotation-meta strong { font-size: 18px; }
+  .criteria-panel { padding: 20px 16px; }
+  .video-controls select { margin-left: 0; }
+  .video-panel video, .video-unavailable { min-height: 260px; }
+  .annotation-actions > button { flex: 1; }
 }
 </style>

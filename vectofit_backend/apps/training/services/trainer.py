@@ -1,4 +1,6 @@
 import os
+import platform
+from importlib.metadata import version
 import tempfile
 
 import numpy as np
@@ -26,6 +28,13 @@ BASELINE_HYPERPARAMETERS = {
     "objective": "binary:logistic",
     "eval_metric": "logloss",
 }
+
+
+def training_environment():
+    return {
+        "python": platform.python_version(),
+        **{package: version(package) for package in ("xgboost", "scikit-learn", "numpy", "scipy")},
+    }
 
 
 class InsufficientDataError(Exception):
@@ -156,6 +165,10 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
     class_indices = list(range(len(target_names)))
     averaging = "binary" if sample_set.prediction_target == "binary_form" else "macro"
     metrics = {
+        "evaluation_method": "participant_holdout",
+        "averaging": averaging,
+        "train_participant_count": len({sample_set.groups[i] for i in train_idx}),
+        "test_participant_count": len({sample_set.groups[i] for i in test_idx}),
         "accuracy": float(accuracy_score(y[test_idx], y_pred)),
         "balanced_accuracy": float(balanced_accuracy_score(y[test_idx], y_pred)),
         "f1": float(f1_score(y[test_idx], y_pred, average=averaging, zero_division=0)),
@@ -224,7 +237,15 @@ def lopo_evaluate(sample_set, hyperparameters=None, seed=42):
         model = XGBClassifier(**params, random_state=seed)
         model.fit(X[train_idx], labels[train_idx])
         predictions[test_idx] = model.predict(X[test_idx]).astype(int)
-    return _lopo_metrics(labels, predictions, groups)
+    metrics = _lopo_metrics(labels, predictions, groups)
+    metrics.update({
+        "evaluation_method": "leave_one_participant_out",
+        "hyperparameters": params,
+        "random_seed": seed,
+    })
+    for row, sample_id in zip(metrics["oof_predictions"], sample_set.sample_ids):
+        row["sample_id"] = sample_id
+    return metrics
 
 
 def _lopo_metrics(labels, predictions, groups):
@@ -252,6 +273,14 @@ def _lopo_metrics(labels, predictions, groups):
         ),
         "confusion_matrix": confusion_matrix(labels, predictions, labels=[0, 1]).tolist(),
         "per_participant": per_participant,
+        "oof_predictions": [
+            {
+                "participant": str(group),
+                "label": int(label),
+                "prediction": int(prediction),
+            }
+            for group, label, prediction in zip(groups, labels, predictions)
+        ],
     }
 
 

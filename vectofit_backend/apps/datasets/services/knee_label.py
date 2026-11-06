@@ -11,18 +11,35 @@ def knee_target(annotation: Mapping[str, Mapping[str, str | None]]) -> str:
     return "good"
 
 
-def final_knee_target(sample):
-    latest_by_annotator = _latest_by_annotator(sample)
+def knee_label_evidence(sample):
+    records = list(_latest_by_annotator(sample).values())
     targets = {
         knee_target(record.annotation)
-        for record in latest_by_annotator.values()
+        for record in records
         if record.annotation is not None
     }
-    if not targets:
-        return None
+    target = None
     if len(targets) > 1:
-        return "disputed"
-    return targets.pop()
+        target = "disputed"
+    elif targets:
+        target = targets.pop()
+    return {
+        "target": target,
+        "annotations": [
+            {
+                "id": record.pk,
+                "annotator_id": record.annotator_id,
+                "created_at": record.created_at.isoformat(),
+                "annotation": record.annotation,
+                "rubric_version": record.rubric_version,
+            }
+            for record in records
+        ],
+    }
+
+
+def final_knee_target(sample):
+    return knee_label_evidence(sample)["target"]
 
 
 def _latest_by_annotator(sample):

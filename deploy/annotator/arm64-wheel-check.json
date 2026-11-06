@@ -1,0 +1,401 @@
+{
+  "target": "CPython 3.11 / Linux aarch64 glibc <= 2.35",
+  "method": "PyPI release metadata and packaging wheel tags; not a Linux installation or dependency-resolution check",
+  "results": [
+    {
+      "package": "absl-py==2.5.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "amqp==5.1.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "asgiref==3.11.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "attrs==26.1.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "billiard==3.6.4.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "celery==5.2.7",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "certifi==2026.6.17",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "cffi==2.1.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "click==8.5.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "click-didyoumean==0.3.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "click-plugins==1.1.1.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "click-repl==0.4.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "colorama==0.4.6",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "contourpy==1.3.3",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "cycler==0.12.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "dj-database-url==3.1.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "Django==5.2.19",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "django-cors-headers==4.4.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "django-environ==0.11.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "djangorestframework==3.16.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "djangorestframework-simplejwt==5.3.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "filterpy==1.4.5",
+      "wheel": false,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "flatbuffers==25.12.19",
+      "wheel": true,
+      "python311": true,
+      "source": false
+    },
+    {
+      "package": "fonttools==4.63.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "iniconfig==2.3.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "jax==0.10.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "jaxlib==0.10.2",
+      "wheel": true,
+      "python311": true,
+      "source": false
+    },
+    {
+      "package": "joblib==1.4.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "kiwisolver==1.5.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "kombu==5.2.4",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "matplotlib==3.9.4",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "mediapipe==0.10.14",
+      "wheel": true,
+      "python311": true,
+      "source": false
+    },
+    {
+      "package": "ml_dtypes==0.6.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "numpy==2.4.6",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "opencv-contrib-python==4.11.0.86",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "opt_einsum==3.4.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "packaging==26.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pandas==2.2.3",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pillow==10.4.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pluggy==1.6.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "prompt_toolkit==3.0.53",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "protobuf==4.25.9",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "psycopg2-binary==2.9.12",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pycparser==3.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "PyJWT==2.13.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pyparsing==3.3.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pytest==8.3.5",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pytest-django==4.9.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "python-dateutil==2.9.0.post0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "python-dotenv==1.2.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "pytz==2026.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "redis==4.6.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "ruff==0.17.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "scikit-learn==1.5.2",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "scipy==1.17.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "six==1.17.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "sounddevice==0.5.5",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "sqlparse==0.5.5",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "threadpoolctl==3.6.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "typing_extensions==4.16.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "tzdata==2026.4",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "tzlocal==5.4.4",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "vine==5.1.0",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "wcwidth==0.9.1",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    },
+    {
+      "package": "xgboost==2.1.4",
+      "wheel": true,
+      "python311": true,
+      "source": true
+    }
+  ],
+  "resolver_check": {
+    "status": "passed for 64 wheel-backed pinned packages plus gunicorn==23.0.0",
+    "excluded": "filterpy==1.4.5 (source-only, must install on target)",
+    "native_runtime": "not checked; run native_check.py on actual host"
+  }
+}

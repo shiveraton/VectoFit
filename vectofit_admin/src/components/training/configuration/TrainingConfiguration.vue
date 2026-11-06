@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import type { Dataset } from "../../../services/datasetService";
-import type {
-  AlgorithmOption,
-  FeatureOption,
-} from "../../../services/trainingService";
+import type { FeatureOption } from "../../../services/trainingService";
 
 import AlgorithmSelector from "./AlgorithmSelector.vue";
 import DatasetSelector from "./DatasetSelector.vue";
 import FeatureSelector from "./FeatureSelector.vue";
 import HyperparameterPanel from "./HyperparameterPanel.vue";
 import ViewAngleSelector from "./ViewAngleSelector.vue";
-import PredictionTargetSelector from "./PredictionTargetSelector.vue";
-import type { PredictionTarget } from "../../../services/trainingService";
 
 type ViewAngle = "diagonal" | "frontal" | "sagittal";
 type DatasetId = number;
@@ -22,10 +17,7 @@ interface Props {
   selectedDatasetIds: DatasetId[];
   selectedDatasets: Dataset[];
   selectedViewAngle: ViewAngle | null;
-  predictionTarget: PredictionTarget;
   features: FeatureOption[];
-  algorithms: AlgorithmOption[];
-  selectedAlgorithm: AlgorithmOption | null;
   hyperparameters: Record<string, unknown>;
   testSize: number;
   randomSeed: number;
@@ -38,10 +30,6 @@ defineProps<Props>();
 
 const emit = defineEmits<{
   (event: "toggle-dataset", id: DatasetId): void;
-  (event: "select-view-angle", angle: ViewAngle): void;
-  (event: "set-prediction-target", target: PredictionTarget): void;
-  (event: "toggle-feature", id: string): void;
-  (event: "select-algorithm", id: string): void;
   (event: "set-hyperparameter", key: string, value: number): void;
   (event: "set-test-size", value: number): void;
   (event: "set-random-seed", value: number): void;
@@ -51,15 +39,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="configuration-grid">
-    <ViewAngleSelector
-      :selected-view-angle="selectedViewAngle"
-      @select-view-angle="emit('select-view-angle', $event)"
-    />
-
-    <PredictionTargetSelector
-      :model-value="predictionTarget"
-      @update:model-value="emit('set-prediction-target', $event)"
-    />
+    <ViewAngleSelector />
 
     <DatasetSelector
       :available-datasets="availableDatasets"
@@ -67,26 +47,19 @@ const emit = defineEmits<{
       :selected-dataset-ids="selectedDatasetIds"
       :selected-datasets="selectedDatasets"
       :selected-view-angle="selectedViewAngle"
-      :prediction-target="predictionTarget"
       @toggle-dataset="emit('toggle-dataset', $event)"
     />
 
     <FeatureSelector
       :features="features"
-      @toggle-feature="emit('toggle-feature', $event)"
     />
 
-    <AlgorithmSelector
-      :algorithms="algorithms"
-      :selected-algorithm="selectedAlgorithm"
-      @select-algorithm="emit('select-algorithm', $event)"
-    />
+    <AlgorithmSelector />
 
     <HyperparameterPanel
       :hyperparameters="hyperparameters"
       :test-size="testSize"
       :random-seed="randomSeed"
-      :prediction-target="predictionTarget"
       @set-hyperparameter="emit('set-hyperparameter', $event.key, $event.value)"
       @set-test-size="emit('set-test-size', $event)"
       @set-random-seed="emit('set-random-seed', $event)"
@@ -135,7 +108,7 @@ const emit = defineEmits<{
   display: block;
   margin-bottom: 4px;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -144,7 +117,7 @@ const emit = defineEmits<{
 .summary-copy strong {
   display: block;
   color: var(--vf-text);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
 }

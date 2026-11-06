@@ -1,0 +1,91 @@
+{
+  "results": [
+    {
+      "test": "keyboard model selection",
+      "value": {
+        "keys": [],
+        "focused": "<button data-v-57583098=\"\" type=\"button\" class=\"version-select\" aria-pressed=\"false\" aria-label=\"Inspect Synthetic comparison version, version 2.0\">v2.0</button>",
+        "hasFocus": true,
+        "selected": "v1.0",
+        "model": "Synthetic FPPA research model",
+        "blocked": true
+      }
+    },
+    {
+      "test": "Add Single Video dialog focus",
+      "value": {
+        "focused": "<button data-v-c9c25ef5=\"\" type=\"button\" class=\"secondary-button\"> Cancel </button>",
+        "trapped": true,
+        "keys": [],
+        "closed": false,
+        "restored": false
+      }
+    },
+    {
+      "test": "Import Dataset dialog focus",
+      "value": {
+        "focused": "<button data-v-a42237f8=\"\" type=\"button\" class=\"secondary-button\">Cancel</button>",
+        "trapped": true,
+        "keys": [],
+        "closed": false,
+        "restored": false
+      }
+    },
+    {
+      "test": "dashboard failure honesty",
+      "value": {
+        "alert": true,
+        "summaryHidden": true
+      }
+    },
+    {
+      "test": "mobile navigation",
+      "value": {
+        "exists": true,
+        "expanded": "true",
+        "navVisible": true
+      }
+    },
+    {
+      "test": "login error recovery",
+      "value": {
+        "alert": "Unable to sign in. Check your credentials and connection, then try again.",
+        "enabled": true
+      }
+    }
+  ],
+  "errors": [],
+  "failures": [
+    {
+      "test": "keyboard model selection",
+      "value": {
+        "keys": [],
+        "focused": "<button data-v-57583098=\"\" type=\"button\" class=\"version-select\" aria-pressed=\"false\" aria-label=\"Inspect Synthetic comparison version, version 2.0\">v2.0</button>",
+        "hasFocus": true,
+        "selected": "v1.0",
+        "model": "Synthetic FPPA research model",
+        "blocked": true
+      }
+    },
+    {
+      "test": "Add Single Video dialog focus",
+      "value": {
+        "focused": "<button data-v-c9c25ef5=\"\" type=\"button\" class=\"secondary-button\"> Cancel </button>",
+        "trapped": true,
+        "keys": [],
+        "closed": false,
+        "restored": false
+      }
+    },
+    {
+      "test": "Import Dataset dialog focus",
+      "value": {
+        "focused": "<button data-v-a42237f8=\"\" type=\"button\" class=\"secondary-button\">Cancel</button>",
+        "trapped": true,
+        "keys": [],
+        "closed": false,
+        "restored": false
+      }
+    }
+  ]
+}

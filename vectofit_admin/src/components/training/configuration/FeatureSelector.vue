@@ -5,17 +5,13 @@ const props = defineProps<{
   features: FeatureOption[];
 }>();
 
-const emit = defineEmits<{
-  (event: "toggle-feature", id: string): void;
-}>();
-
 const featureDescriptions: Record<string, string> = {
-  rom: "Range of motion measurements.",
-  asymmetry: "Left-right movement difference.",
-  trunk: "Trunk inclination during the repetition.",
-  knee: "Knee joint-angle measurement.",
-  hip: "Hip joint-angle measurement.",
-  velocity: "Kinematic movement velocity.",
+  fppa_l_bottom: "Signed left knee angle at squat bottom.",
+  fppa_r_bottom: "Signed right knee angle at squat bottom.",
+  fppa_l_peak: "Largest absolute filtered left FPPA in the repetition.",
+  fppa_r_peak: "Largest absolute filtered right FPPA in the repetition.",
+  asym_bottom: "Absolute left-right FPPA difference at squat bottom.",
+  asym_peak: "Absolute left-right difference between peak FPPA values.",
 };
 </script>
 
@@ -23,18 +19,16 @@ const featureDescriptions: Record<string, string> = {
   <section class="configuration-section">
     <div class="configuration-label">
       <div>
-        <strong>Features</strong>
-        <span>Measurements supplied to the classifier.</span>
+        <strong>FPPA v2 Feature Schema</strong>
+        <span>Six fixed inputs used by the current M1 model.</span>
       </div>
     </div>
 
     <div class="feature-selection">
-      <button
+      <div
         v-for="feature in props.features"
         :key="feature.id"
-        type="button"
         :class="['feature-option', { selected: feature.selected }]"
-        @click="emit('toggle-feature', feature.id)"
       >
         <span class="check-box" aria-hidden="true">
           {{ feature.selected ? "✓" : "" }}
@@ -45,12 +39,11 @@ const featureDescriptions: Record<string, string> = {
             featureDescriptions[feature.id] || "Selected model feature."
           }}</small>
         </span>
-      </button>
+      </div>
     </div>
 
     <p class="feature-note">
-      Selected measurements are passed to the configured classifier for this
-      experiment.
+      The fixed schema keeps training inputs aligned with frontal-plane FPPA assessment and model provenance.
     </p>
   </section>
 </template>
@@ -84,7 +77,7 @@ const featureDescriptions: Record<string, string> = {
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -101,7 +94,7 @@ const featureDescriptions: Record<string, string> = {
 .configuration-label div > span {
   margin-top: 4px;
   color: var(--vf-light-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .feature-selection {
@@ -119,13 +112,7 @@ const featureDescriptions: Record<string, string> = {
   background: #ffffff;
   border: 1px solid var(--vf-border);
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-
-.feature-option:hover {
-  background: #fffaf6;
-  border-color: #fdba74;
+  cursor: default;
 }
 
 .feature-option.selected {
@@ -144,7 +131,7 @@ const featureDescriptions: Record<string, string> = {
   background: #ffffff;
   border: 1.5px solid #d4d4d8;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -164,7 +151,7 @@ const featureDescriptions: Record<string, string> = {
 
 .feature-copy strong {
   color: var(--vf-text);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -178,7 +165,7 @@ const featureDescriptions: Record<string, string> = {
 .feature-note {
   margin: 11px 0 0;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 

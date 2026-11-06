@@ -10,6 +10,11 @@ export interface PilotMetricResult {
   macro_f1: number;
   confusion_matrix: number[][];
   per_participant: PilotParticipantResult[];
+  oof_predictions?: Array<{
+    participant: string;
+    label: number;
+    prediction: number;
+  }>;
 }
 
 export interface PilotResults {

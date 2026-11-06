@@ -31,14 +31,14 @@ onMounted(loadResults);
 </script>
 
 <template>
-  <main class="pilot-page">
+  <div class="pilot-page">
     <header class="page-header">
       <div>
         <div class="eyebrow">VECTOFIT EXPLORATORY PILOT</div>
         <h1>M0 / M1 Results</h1>
-        <p>Read-only results from the fixed LOPO evaluation and baseline.</p>
+        <p>LOPO comparison of four-feature XGBoost M0 and six-feature XGBoost M1. The threshold rule is reported separately.</p>
       </div>
-      <button class="refresh-button" type="button" :disabled="isLoading" @click="loadResults">
+      <button class="secondary-button" type="button" :disabled="isLoading" @click="loadResults">
         {{ isLoading ? "Loading…" : "Refresh" }}
       </button>
     </header>
@@ -49,6 +49,9 @@ onMounted(loadResults);
       <section class="panel metadata">
         <strong>{{ results.label }}</strong>
         <span>Feature schema: {{ results.feature_schema_version }}</span>
+        <span>Participants: {{ results.M0.per_participant.length }}</span>
+        <span>Samples: {{ results.M0.oof_predictions?.length ?? "n/a" }}</span>
+        <span>Exploratory pilot; LOPO estimates are not a validated clinical model.</span>
         <span>Delta M1 − M0: {{ formatPercent(results.delta_macro_f1) }}</span>
         <span>
           Bootstrap 95% interval:
@@ -105,22 +108,32 @@ onMounted(loadResults);
         </table>
       </section>
     </template>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-.pilot-page { max-width: 1200px; margin: 0 auto; color: #25201e; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.eyebrow { color: #e94b23; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; }
+
+
 h1 { margin: 8px 0; }
+
 h2 { margin-top: 0; font-size: 1rem; }
-p { color: #766d69; }
-.panel { margin-bottom: 18px; padding: 20px; background: #fff; border: 1px solid #eee6e2; border-radius: 10px; overflow-x: auto; }
+
+p { color: var(--vf-muted); }
+
+.panel { margin-bottom: 18px; padding: 20px; background: #fff; border: 1px solid var(--vf-border); border-radius: 10px; overflow-x: auto; }
+
 .metadata { display: flex; flex-wrap: wrap; gap: 20px; }
+
 .message { color: #b42318; }
-button { padding: 9px 14px; border: 1px solid #e94b23; border-radius: 7px; background: #fff; color: #e94b23; cursor: pointer; }
-button:disabled { opacity: 0.6; cursor: wait; }
+
+
+
+
+
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-th, td { padding: 10px; border-bottom: 1px solid #eee6e2; vertical-align: top; }
-th { color: #766d69; font-size: 0.72rem; text-transform: uppercase; }
+
+th, td { padding: 10px; border-bottom: 1px solid var(--vf-border); vertical-align: top; }
+
+th { color: var(--vf-muted); font-size: 0.72rem; text-transform: uppercase; }
+
 </style>

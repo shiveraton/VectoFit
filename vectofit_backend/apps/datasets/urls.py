@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .media_views import DatasetMediaView
 from .views import (
     DatasetBulkImportView,
     DatasetImportPreviewView,
@@ -22,6 +23,11 @@ router.register(r"view-angle", ViewAngleViewSet, basename="view-angle")
 router.register(r"retry", DatasetViewSet, basename="retry")
 
 urlpatterns = [
+    path(
+        "media/<str:kind>/<int:object_id>/",
+        DatasetMediaView.as_view(),
+        name="dataset-media",
+    ),
     path("", include(router.urls)),
     path(
         "import/preview/",

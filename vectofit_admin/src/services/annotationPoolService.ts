@@ -1,3 +1,4 @@
+import type { KneeAnnotation } from "./datasetAnnotationService";
 import client from "../config/client";
 
 export type AnnotationJobStatus =
@@ -23,6 +24,8 @@ export interface AnnotationPoolActivity {
   annotator: AnnotationPoolAnnotator | null;
   created_at: string;
   has_annotation: boolean;
+  annotation: KneeAnnotation | null;
+  rubric_version: string;
 }
 
 export interface AnnotationPoolJob {

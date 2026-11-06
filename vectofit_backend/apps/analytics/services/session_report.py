@@ -6,40 +6,50 @@ FINDINGS_REGISTRY: dict[tuple[str, str], dict[str, str]] = {
     ("knee_angle", "insufficient_depth"): {
         "code": "INSUFFICIENT_DEPTH",
         "title": "Insufficient squat depth",
-        "summary": (
-            "The measured minimum knee angle exceeded the configured "
-            "depth threshold in these repetitions."
-        ),
-        "cue": ("Aim to reach the configured depth target while maintaining control."),
+        "summary": "The measured minimum knee angle exceeded the configured depth threshold.",
+        "cue": "Aim to reach the configured depth target while maintaining control.",
         "threshold_key": "knee_depth",
         "metric_key": "depth_deg",
     },
     ("trunk_angle", "excessive_trunk_lean"): {
         "code": "EXCESSIVE_TRUNK_LEAN",
         "title": "Excessive trunk lean",
-        "summary": (
-            "Peak trunk lean exceeded the configured limit in these repetitions."
-        ),
-        "cue": (
-            "Brace your trunk and maintain a controlled torso angle "
-            "during descent and ascent."
-        ),
+        "summary": "Peak trunk lean exceeded the configured limit.",
+        "cue": "Brace your trunk and maintain a controlled torso angle.",
         "threshold_key": "trunk_lean",
         "metric_key": "trunk_lean_deg",
     },
     ("asymmetry", "excessive"): {
         "code": "EXCESSIVE_ASYMMETRY",
         "title": "Excessive bilateral asymmetry",
-        "summary": (
-            "Left-right knee-angle asymmetry exceeded the configured "
-            "limit in these repetitions."
-        ),
-        "cue": (
-            "Use a stable camera position and repeat the movement with both knees "
-            "clearly visible; compare their knee-angle path across the repetition."
-        ),
+        "summary": "Left-right knee-angle asymmetry exceeded the configured limit.",
+        "cue": "Use a stable camera position and repeat with both knees visible.",
         "threshold_key": "asymmetry",
         "metric_key": "asymmetry_pct",
+    },
+    ("valgus_left", "present"): {
+        "code": "VALGUS_LEFT",
+        "title": "Left knee moves inward",
+        "summary": "The left knee exceeded the predeclared inward FPPA cutoff.",
+        "cue": "Keep the left knee tracking over the left foot.",
+        "threshold_key": "fppa_cutoff",
+        "metric_key": "fppa_left_peak",
+    },
+    ("valgus_right", "present"): {
+        "code": "VALGUS_RIGHT",
+        "title": "Right knee moves inward",
+        "summary": "The right knee exceeded the predeclared inward FPPA cutoff.",
+        "cue": "Keep the right knee tracking over the right foot.",
+        "threshold_key": "fppa_cutoff",
+        "metric_key": "fppa_right_peak",
+    },
+    ("varus", "present"): {
+        "code": "VARUS",
+        "title": "Knees move outward",
+        "summary": "A knee exceeded the predeclared outward FPPA cutoff.",
+        "cue": "Keep both knees tracking over the feet throughout the movement.",
+        "threshold_key": "fppa_cutoff",
+        "metric_key": "fppa_left_peak",
     },
 }
 

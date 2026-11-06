@@ -1,0 +1,4 @@
+interface:
+  display_name: "VectoFit UI/UX"
+  short_description: "Audit and refine VectoFit assessment interfaces"
+  default_prompt: "Use $vectofit-ui-ux to audit this VectoFit screen and propose a focused refactor using the shared design system."

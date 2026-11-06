@@ -1,4 +1,6 @@
 import client from "../config/client";
+import { initializeCsrf, publicClient } from "../config/publicAuth";
+const isPublic = import.meta.env.MODE === "public";
 
 export type KneeAlignmentGrade =
   | "aligned"
@@ -99,7 +101,7 @@ export const emptyKneeAnnotation = (): KneeAnnotation => ({
 export const datasetAnnotationService = {
   async getSession(datasetId: number): Promise<AnnotationSession> {
     const response = await client.get<AnnotationSession>(
-      `/datasets/${datasetId}/annotation/`,
+      isPublic ? `/annotator/datasets/${datasetId}/session/` : `/datasets/${datasetId}/annotation/`,
     );
     return response.data;
   },
@@ -108,6 +110,11 @@ export const datasetAnnotationService = {
     sampleId: number,
     payload: SaveAnnotationPayload,
   ): Promise<DatasetSample> {
+    if (isPublic) {
+      await initializeCsrf();
+      const { data } = await publicClient.patch<DatasetSample>(`samples/${sampleId}/rating/`, payload);
+      return data;
+    }
     const response = await client.patch<DatasetSample>(
       `/datasets/dataset-samples/${sampleId}/`,
       payload,
@@ -116,6 +123,11 @@ export const datasetAnnotationService = {
   },
 
   async clear(sampleId: number): Promise<DatasetSample> {
+    if (isPublic) {
+      await initializeCsrf();
+      const { data } = await publicClient.patch<DatasetSample>(`samples/${sampleId}/rating/`, { knee_annotation: null });
+      return data;
+    }
     const response = await client.patch<DatasetSample>(
       `/datasets/dataset-samples/${sampleId}/`,
       { knee_annotation: null },

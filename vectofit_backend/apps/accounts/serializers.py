@@ -128,8 +128,6 @@ class LoginSerializer(serializers.Serializer):
         identifier = attrs.get("identifier")
         password = attrs.get("password")
 
-        print(f"DEBUG: Validating identifier: {identifier}")
-
         user = User.objects.filter(username=identifier).first()
         if not user:
             user = User.objects.filter(email=identifier).first()
@@ -140,7 +138,6 @@ class LoginSerializer(serializers.Serializer):
         authenticated_user = authenticate(username=user.username, password=password)
 
         if not authenticated_user:
-            print(f"DEBUG: Password incorrect for user: {user.username}")
             raise serializers.ValidationError("Invalid username or password.")
 
         attrs["user"] = authenticated_user

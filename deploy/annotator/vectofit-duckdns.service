@@ -1,0 +1,14 @@
+[Unit]
+Description=Update VectoFit DuckDNS address
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/vectofit/duckdns.env
+ExecStart=/usr/bin/python3 /usr/local/libexec/vectofit-duckdns.py
+User=root
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true

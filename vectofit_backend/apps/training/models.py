@@ -57,7 +57,7 @@ class TrainingJob(models.Model):
 
     feature_schema_version = models.CharField(
         max_length=48,
-        default="python_rep_features_v1",
+        default="python_rep_features_v2",
         help_text="Version of the numerical feature definitions used by this run.",
     )
 

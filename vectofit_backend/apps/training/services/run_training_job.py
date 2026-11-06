@@ -6,11 +6,11 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from apps.analytics.services.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
+from apps.analytics.services.feature_schemas import schema_for_target
 
 from ..models import ModelRegistry, TrainingJob
 from .data_loader import build_samples, resolve_datasets
-from .trainer import serialize_model, train_and_evaluate
+from .trainer import serialize_model, train_and_evaluate, training_environment
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,7 @@ def _build_manifest(
 
     manifest = {
         "manifest_version": 1,
+        "environment": training_environment(),
         "job_id": job.pk,
         "created_at": timezone.now().isoformat(),
         "dataset_ids": [dataset.pk for dataset in datasets],
@@ -92,7 +93,7 @@ def _build_manifest(
         ],
         "view_angle": view_angle,
         "prediction_target": prediction_target,
-        "feature_schema_version": FEATURE_SCHEMA_VERSION,
+        "feature_schema_version": job.feature_schema_version,
         "selected_features": list(sample_set.feature_names),
         "algorithm": job.algorithm,
         "hyperparameters": result["hyperparameters"],
@@ -113,7 +114,16 @@ def _build_manifest(
         "feature_warnings": list(sample_set.warnings),
         "data_warnings": list(sample_set.errors[:250]),
         "data_warning_count": len(sample_set.errors),
-        "fps_assumption": 30.0,
+        "timing_source_counts": {
+            source: sum(
+                1 for sample in sample_set.sample_metadata
+                if sample.get("timing_source") == source
+            )
+            for source in sorted(
+                {sample.get("timing_source") for sample in sample_set.sample_metadata}
+                - {None}
+            )
+        },
     }
     canonical_manifest = json.dumps(
         manifest,
@@ -145,12 +155,17 @@ def run_training_job(
     try:
         target_ids = dataset_ids or list(job.datasets.values_list("id", flat=True))
         datasets = resolve_datasets(target_ids)
-        selected_features = feature_selection or list(FEATURE_ORDER)
         prediction_target = (
             prediction_target
             or job.prediction_target
             or TrainingJob.PredictionTarget.BINARY_FORM
         )
+        schema = schema_for_target(prediction_target)
+        selected_features = feature_selection or list(schema.feature_order)
+        if prediction_target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT:
+            if set(selected_features) != set(schema.feature_order):
+                raise ValueError("Registered M1 training requires all six FPPA features.")
+            selected_features = list(schema.feature_order)
 
         sample_set = build_samples(
             datasets=datasets,
@@ -167,6 +182,7 @@ def run_training_job(
             seed=seed,
         )
         serialized_model = serialize_model(result["model"])
+        job.feature_schema_version = schema.version
         manifest = _build_manifest(
             job,
             datasets,
@@ -181,7 +197,6 @@ def run_training_job(
         job.datasets.set(datasets)
         job.view_angle = view_angle
         job.prediction_target = prediction_target
-        job.feature_schema_version = FEATURE_SCHEMA_VERSION
         job.test_size = test_size
         job.random_seed = seed
         job.split_strategy = "group_by_participant"

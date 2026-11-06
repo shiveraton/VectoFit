@@ -2,7 +2,6 @@
 import { computed } from "vue";
 
 import HyperparameterCard from "./HyperparameterCard.vue";
-import type { PredictionTarget } from "../../../services/trainingService";
 import {
   FIXED_TRAINING_SETTINGS,
   TRAINING_PARAMETER_DEFINITIONS,
@@ -12,7 +11,6 @@ const props = defineProps<{
   hyperparameters: Record<string, unknown>;
   testSize: number;
   randomSeed: number;
-  predictionTarget: PredictionTarget;
 }>();
 
 const emit = defineEmits<{
@@ -39,23 +37,15 @@ const parameterValues = computed(() =>
   ),
 );
 
+const parameterGroups = [
+  { title: "XGBoost Hyperparameters", definitions: TRAINING_PARAMETER_DEFINITIONS.filter((item) => item.target === "hyperparameter") },
+  { title: "Experiment Settings", definitions: TRAINING_PARAMETER_DEFINITIONS.filter((item) => item.target !== "hyperparameter") },
+];
+
 const baselineDescription = computed(
   () =>
     "Use the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.",
 );
-
-const effectiveFixedSettings = computed(() => {
-  if (props.predictionTarget === "error_type") {
-    return [
-      { label: "Objective", value: "multi:softprob" },
-      { label: "Evaluation Metric", value: "mlogloss" },
-      { label: "Split Strategy", value: "group_by_participant" },
-      { label: "Class Count", value: "Inferred from labels" },
-    ];
-  }
-
-  return FIXED_TRAINING_SETTINGS;
-});
 
 const emitUpdate = (definitionKey: string, value: number) => {
   const definition = TRAINING_PARAMETER_DEFINITIONS.find(
@@ -95,18 +85,21 @@ const emitUpdate = (definitionKey: string, value: number) => {
       </span>
     </div>
 
-    <div class="parameter-grid">
-      <HyperparameterCard
-        v-for="definition in TRAINING_PARAMETER_DEFINITIONS"
-        :key="definition.key"
-        :definition="definition"
-        :model-value="Number(parameterValues[definition.key])"
-        @update="emitUpdate(definition.key, $event)"
-      />
-    </div>
+    <section v-for="group in parameterGroups" :key="group.title">
+      <h3>{{ group.title }}</h3>
+      <div class="parameter-grid">
+        <HyperparameterCard
+          v-for="definition in group.definitions"
+          :key="definition.key"
+          :definition="definition"
+          :model-value="Number(parameterValues[definition.key])"
+          @update="emitUpdate(definition.key, $event)"
+        />
+      </div>
+    </section>
 
     <div class="fixed-parameters">
-      <span v-for="setting in effectiveFixedSettings" :key="setting.label">
+      <span v-for="setting in FIXED_TRAINING_SETTINGS" :key="setting.label">
         <strong>{{ setting.label }}</strong>
         <code>{{ setting.value }}</code>
       </span>
@@ -139,7 +132,7 @@ const emitUpdate = (definitionKey: string, value: number) => {
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -156,7 +149,7 @@ const emitUpdate = (definitionKey: string, value: number) => {
 .configuration-label div > span {
   margin-top: 4px;
   color: var(--vf-light-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parameter-intro {
@@ -173,13 +166,13 @@ const emitUpdate = (definitionKey: string, value: number) => {
 
 .parameter-intro strong {
   color: var(--vf-text);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parameter-intro p {
   margin: 4px 0 0;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
@@ -190,7 +183,7 @@ const emitUpdate = (definitionKey: string, value: number) => {
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 999px;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -218,7 +211,7 @@ const emitUpdate = (definitionKey: string, value: number) => {
   background: #fafafa;
   border: 1px solid var(--vf-border-light);
   border-radius: 7px;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .fixed-parameters strong {
@@ -229,9 +222,9 @@ const emitUpdate = (definitionKey: string, value: number) => {
   overflow: hidden;
   color: var(--vf-text);
   font-family: Consolas, "Courier New", monospace;
-  font-size: 8px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 @media (max-width: 1050px) {

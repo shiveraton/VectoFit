@@ -1,0 +1,18 @@
+ .gitignore                                         |  10 [32m+[m[31m-[m
+ .../training/configuration/DatasetSelector.vue     |  56 [32m++++++++[m[31m--[m
+ .../configuration/PredictionTargetSelector.vue     |   3 [32m+[m
+ vectofit_admin/src/hooks/useDatasets.ts            |   2 [32m+[m[31m-[m
+ vectofit_admin/src/hooks/useEvaluation.ts          |   1 [32m+[m
+ vectofit_admin/src/hooks/useModels.ts              |   6 [32m+[m[31m-[m
+ vectofit_admin/src/hooks/useTraining.ts            |  15 [32m++[m[31m-[m
+ .../src/pages/views/DatasetAnnotation.vue          |  18 [31m----[m
+ vectofit_admin/src/pages/views/Datasets.vue        |  14 [31m---[m
+ vectofit_admin/src/pages/views/Models.vue          |  33 [32m++++++[m
+ vectofit_admin/src/services/datasetService.ts      |   5 [32m+[m
+ vectofit_admin/src/services/modelService.ts        |  69 [32m+++++++++++[m[31m-[m
+ vectofit_admin/src/services/trainingService.ts     |   2 [32m+[m[31m-[m
+ vectofit_backend/apps/datasets/serializers.py      |  16 [32m++[m[31m-[m
+ vectofit_backend/apps/training/serializers.py      |  92 [32m+++++++++++++++[m[31m-[m
+ vectofit_backend/apps/training/tests.py            | 119 [32m+++++++++++++++++++++[m
+ vectofit_backend/apps/training/views.py            |  71 [32m++++[m[31m--------[m
+ 17 files changed, 424 insertions(+), 108 deletions(-)

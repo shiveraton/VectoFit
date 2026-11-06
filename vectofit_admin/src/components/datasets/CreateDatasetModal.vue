@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { useDialogFocus } from "../../composables/useDialogFocus";
+import { computed, ref, watch, useTemplateRef } from "vue";
 import type { CreateDatasetPayload } from "../../services/datasetService";
 import type { Participant } from "../../services/participantService";
 
@@ -9,6 +10,9 @@ const props = defineProps<{
   form: CreateDatasetPayload;
   participants: Participant[];
 }>();
+
+const dialogRef = useTemplateRef<HTMLElement>("datasetDialog");
+useDialogFocus(() => props.isOpen, dialogRef);
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -122,6 +126,8 @@ function handleSubmit() {
     >
       <section
         class="modal-card"
+        ref="datasetDialog"
+        tabindex="-1"
         role="dialog"
         aria-modal="true"
         aria-labelledby="dataset-modal-title"
@@ -332,7 +338,7 @@ function handleSubmit() {
 .eyebrow {
   margin: 0 0 7px;
   color: var(--vf-orange, #f97316);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.1px;
 }
@@ -480,13 +486,13 @@ function handleSubmit() {
 
 .file-copy > span {
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .browse-label {
   flex: 0 0 auto;
   color: #c2410c;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -535,7 +541,7 @@ function handleSubmit() {
 .field-hint {
   margin: 0;
   color: var(--vf-muted, #71717a);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 

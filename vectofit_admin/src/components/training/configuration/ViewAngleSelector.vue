@@ -1,39 +1,4 @@
 <script setup lang="ts">
-type ViewAngle = "diagonal" | "frontal" | "sagittal";
-
-const props = defineProps<{
-  selectedViewAngle: ViewAngle | null;
-}>();
-
-const emit = defineEmits<{
-  (event: "select-view-angle", angle: ViewAngle): void;
-}>();
-
-const viewAngles: Array<{
-  id: ViewAngle;
-  label: string;
-  subtitle: string;
-  description: string;
-}> = [
-  {
-    id: "diagonal",
-    label: "Diagonal",
-    subtitle: "45° view",
-    description: "Useful for combined posture and movement assessment.",
-  },
-  {
-    id: "frontal",
-    label: "Frontal",
-    subtitle: "Front-facing view",
-    description: "Useful for bilateral alignment and symmetry analysis.",
-  },
-  {
-    id: "sagittal",
-    label: "Sagittal",
-    subtitle: "Side view",
-    description: "Useful for depth, trunk position, and forward-back motion.",
-  },
-];
 </script>
 
 <template>
@@ -41,35 +6,20 @@ const viewAngles: Array<{
     <div class="configuration-label">
       <div>
         <strong>View Angle</strong>
-        <span>Train one view-specific model at a time.</span>
+        <span>FPPA measures bilateral knee alignment from a front-facing camera view.</span>
       </div>
     </div>
 
     <div class="view-options">
-      <button
-        v-for="view in viewAngles"
-        :key="view.id"
-        type="button"
-        :class="[
-          'view-option',
-          { selected: props.selectedViewAngle === view.id },
-        ]"
-        @click="emit('select-view-angle', view.id)"
-      >
-        <span class="view-icon" aria-hidden="true">
-          {{
-            view.id === "diagonal" ? "45" : view.id === "frontal" ? "F" : "S"
-          }}
-        </span>
-
+      <div class="view-option selected" aria-current="true">
+        <span class="view-icon" aria-hidden="true">F</span>
         <span class="view-copy">
-          <strong>{{ view.label }}</strong>
-          <small>{{ view.subtitle }}</small>
-          <span>{{ view.description }}</span>
+          <strong>Frontal</strong>
+          <small>Required FPPA view</small>
+          <span>Training and assessment use the same frontal-plane measurement schema.</span>
         </span>
-
         <span class="view-indicator" aria-hidden="true"></span>
-      </button>
+      </div>
     </div>
   </section>
 </template>
@@ -102,7 +52,7 @@ const viewAngles: Array<{
   background: var(--vf-orange-soft);
   border: 1px solid #fed7aa;
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -119,7 +69,7 @@ const viewAngles: Array<{
 .configuration-label div > span {
   margin-top: 4px;
   color: var(--vf-light-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .view-options {
@@ -138,13 +88,7 @@ const viewAngles: Array<{
   background: #ffffff;
   border: 1px solid var(--vf-border);
   border-radius: 9px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-
-.view-option:hover {
-  background: #fffaf6;
-  border-color: #fdba74;
+  cursor: default;
 }
 
 .view-option.selected {
@@ -163,7 +107,7 @@ const viewAngles: Array<{
   color: var(--vf-orange-dark);
   background: var(--vf-orange-soft);
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -180,21 +124,21 @@ const viewAngles: Array<{
 
 .view-copy strong {
   color: var(--vf-text);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .view-copy small {
   margin-top: 2px;
   color: var(--vf-orange-dark);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .view-copy > span {
   margin-top: 6px;
   color: var(--vf-light-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.45;
 }
 

@@ -1,7 +1,8 @@
 <template>
     <section class="register-card">
         <div class="register-header">
-            <h2>Create Account</h2>
+            <h1>Create an account</h1>
+            <p>Join the VectoFit research workspace.</p>
         </div>
 
         <form @submit.prevent="handleRegister">
@@ -74,9 +75,10 @@
 
             <button
                 type="submit"
-                class="register-button"
+                class="primary-button auth-submit"
+                :disabled="isSubmitting"
             >
-                Create Account
+                {{ isSubmitting ? "Creating account..." : "Create account" }}
             </button>
         </form>
 
@@ -104,8 +106,11 @@ const form = reactive({
 })
 
 const error = ref<string | null>(null);
+const isSubmitting = ref(false);
 
 const handleRegister = async () => {
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
     error.value = null;
     try {
         await accountService.register({
@@ -118,93 +123,8 @@ const handleRegister = async () => {
         await router.push("/login");
     } catch {
         error.value = "Registration failed. Check the form and try again.";
+    } finally {
+        isSubmitting.value = false;
     }
 }
 </script>
-
-<style scoped>
-.register-card {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    width: 100%;
-    padding: 32px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    background: white;
-}
-
-.register-header {
-   margin-bottom: 24px;
-}
-
-.register-header h2 {
-   margin: 0 0 8px;
-}
-
-.register-header p {
-    margin-bottom: 16px;
-    color: #666;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    color: #403936;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-top: 15px;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
-}
-
-.form-group input:focus {
-    border-color: #333;
-}
-
-.register-button {
-    width: 100%;
-    margin-top: 30px;
-    padding: 13px 16px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #e63946 0%, #ff4d00 100%);
-    color: #ffffff;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        opacity 0.2s ease;
-}
-
-.login-link {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 24px;
-    color: #766d69;
-    font-size: 0.88rem;
-}
-
-.login-link a {
-    margin-left: 5px;
-    color: #e94b23;
-    font-weight: 700;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.login-link a:hover {
-    color: #c9362c;
-}
-</style>

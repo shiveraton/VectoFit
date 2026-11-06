@@ -96,6 +96,16 @@ class PoseEstimator:
             ]
         return extracted_coords
 
+    def get_named_visibility(self, results, joint_dict=None):
+        if not results.pose_landmarks:
+            return {}
+        if joint_dict is None:
+            joint_dict = self.SQUAT_JOINTS
+        return {
+            name: float(results.pose_landmarks.landmark[idx].visibility)
+            for name, idx in joint_dict.items()
+        }
+
     def close(self):
         pose = getattr(self, "pose", None)
 

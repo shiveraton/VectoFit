@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useDashboard } from "../../hooks/useDashboard";
 import SummaryCard from "../../components/datasets/SummaryCard.vue";
 
@@ -13,13 +13,17 @@ withDefaults(defineProps<Props>(), {
   eyebrowText: "VECTOFIT SYSTEM OVERVIEW",
   pageTitle: "Dashboard",
   pageDescription:
-    "Real-time overview of biomechanical datasets, registered models, live active endpoints, and running training jobs.",
+    "Datasets, model versions, and training activity in one research workspace.",
 });
 
-const { dashboardCards, currentModel, fetchAllDashboardData } = useDashboard();
+const { dashboardCards, currentModel, error, fetchAllDashboardData } = useDashboard();
 
-const handleRefresh = async () => {
-  await fetchAllDashboardData();
+const isRefreshing = ref(false);
+const handleRefresh = async (force = true) => {
+  if (isRefreshing.value) return;
+  isRefreshing.value = true;
+  try { await fetchAllDashboardData(force); }
+  finally { isRefreshing.value = false; }
 };
 
 const formatMetric = (
@@ -53,7 +57,7 @@ const modelAccuracy = computed(() =>
 );
 
 onMounted(() => {
-  fetchAllDashboardData();
+  handleRefresh(false);
 });
 </script>
 
@@ -69,12 +73,15 @@ onMounted(() => {
         <p>{{ pageDescription }}</p>
       </div>
 
-      <button class="secondary-button" @click="handleRefresh">
-        <span class="button-icon">↻</span> Refresh Metrics
+      <button class="secondary-button" :disabled="isRefreshing" @click="handleRefresh(true)">
+        <span class="button-icon" aria-hidden="true">&#8635;</span> {{ isRefreshing ? "Refreshing..." : "Refresh overview" }}
       </button>
     </header>
 
-    <section class="summary-grid">
+    <p v-if="isRefreshing" class="refresh-status" role="status">Updating workspace overview...</p>
+
+    <div v-if="error" class="error-banner" role="alert"><strong>Workspace data could not be fully loaded.</strong> {{ error }} Refresh to try again.</div>
+    <section v-else class="summary-grid" :aria-busy="isRefreshing">
       <SummaryCard
         v-for="card in dashboardCards"
         :key="card.label"
@@ -82,7 +89,7 @@ onMounted(() => {
       />
     </section>
 
-    <section class="content-card">
+    <section v-if="!error" class="content-card">
       <div class="section-header">
         <div class="section-title-row">
           <div class="section-marker"></div>
@@ -135,147 +142,28 @@ onMounted(() => {
 
         <template v-else>
           <div class="empty-endpoint">
-            <p>No registered model is available.</p>
+            <h3>No registered model yet</h3>
+            <p>Complete a training run, then inspect its evidence in the model registry.</p>
+            <RouterLink to="/training" class="secondary-button">Go to training</RouterLink>
           </div>
         </template>
       </div>
+    </section>
+
+    <section class="workspace-tasks" aria-labelledby="workspace-tasks-title">
+      <div class="tasks-heading"><h2 id="workspace-tasks-title">Research workflow</h2><p>Move from source data to reviewed model evidence.</p></div>
+      <RouterLink to="/dataset" class="task-link"><span class="task-number">01</span><div><strong>Prepare your datasets</strong><p>Import recordings, review labels, and check training readiness.</p></div><span aria-hidden="true">&rarr;</span></RouterLink>
+      <RouterLink to="/training" class="task-link"><span class="task-number">02</span><div><strong>Configure a training run</strong><p>Choose eligible datasets and inspect the FPPA v2 configuration.</p></div><span aria-hidden="true">&rarr;</span></RouterLink>
+      <RouterLink to="/models" class="task-link"><span class="task-number">03</span><div><strong>Review model evidence</strong><p>Compare saved versions, evaluation results, and activation checks.</p></div><span aria-hidden="true">&rarr;</span></RouterLink>
     </section>
   </div>
 </template>
 
 <style scoped>
-.dashboard-page {
-  min-height: 100%;
-  padding: 32px;
-  background: var(--vf-background);
-  font-family: "Segoe UI", Arial, sans-serif;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 8px;
-  color: var(--vf-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--vf-orange);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
-}
-
-.page-header h1 {
-  margin: 0 0 5px;
-  color: var(--vf-dark);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.page-header p {
-  margin: 0;
-  color: var(--vf-muted);
-  font-size: 13px;
-}
-
-.secondary-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 6px;
-  background: #ffffff;
-  color: var(--vf-dark);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.content-card {
-  background: #ffffff;
-  border: 1px solid var(--vf-border-light);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--vf-border-light);
-}
-
-.section-title-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-}
-
-.section-marker {
-  width: 3px;
-  height: 17px;
-  margin-top: 1px;
-  border-radius: 4px;
-  background: var(--vf-gradient);
-}
-
-.section-header h2 {
-  margin: 0;
-  color: var(--vf-dark);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.section-header p {
-  margin: 3px 0 0;
-  color: var(--vf-light-muted);
-  font-size: 11px;
-}
-
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.status-badge.is-active {
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
-}
-
-.card-body {
-  padding: 22px;
-}
 
 .active-endpoint-details {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
@@ -286,33 +174,43 @@ onMounted(() => {
 }
 
 .detail-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--vf-muted);
 }
 
 .detail-value {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
+  overflow-wrap: anywhere;
   color: var(--vf-dark);
-}
-
-.font-mono {
-  font-family: ui-monospace, SFMono-Regular, monospace;
 }
 
 .empty-endpoint {
   color: var(--vf-muted);
   font-size: 13px;
-  text-align: center;
-  padding: 12px 0;
+  text-align: left;
+  padding: 8px 0;
 }
 
 @media (max-width: 1000px) {
-  .summary-grid {
+.active-endpoint-details {
     grid-template-columns: repeat(2, 1fr);
   }
-  .active-endpoint-details {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
 }
+
+.refresh-status { margin: -12px 0 16px; color: var(--vf-muted); font-size: 12px; }
+.empty-endpoint h3 { margin: 0 0 8px; color: var(--vf-dark); font-size: 16px; font-weight: 600; }
+.empty-endpoint p { margin: 0 0 20px; }
+.workspace-tasks { margin-top: 32px; }
+.tasks-heading { margin-bottom: 12px; }
+.tasks-heading h2 { margin: 0 0 4px; color: var(--vf-dark); font-size: 16px; font-weight: 600; }
+.tasks-heading p { margin: 0; color: var(--vf-muted); font-size: 13px; }
+.task-link { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--vf-border); color: var(--vf-text); text-decoration: none; }
+.task-link > div { flex: 1; }
+.task-link strong { font-size: 14px; font-weight: 600; }
+.task-link p { margin: 4px 0 0; color: var(--vf-muted); font-size: 13px; }
+.task-number { color: var(--vf-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.task-link:hover strong { color: var(--vf-orange); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 600px) { .active-endpoint-details { grid-template-columns: 1fr; } .task-link { gap: 12px; } }
 </style>

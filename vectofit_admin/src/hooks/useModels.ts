@@ -58,7 +58,11 @@ export function useModels() {
     error.value = null;
 
     try {
-      models.value = await modelService.getModels();
+      models.value = (await modelService.getModels()).filter(
+        (model) =>
+          model.prediction_target === "knee_alignment" &&
+          model.feature_schema_version === "fppa_v2",
+      );
 
       const active = models.value.find((model) => model.is_active);
       const nextId = active?.id ?? models.value[0]?.id ?? null;
@@ -113,15 +117,6 @@ export function useModels() {
       models.value.find((model) => model.id === selectedModelId.value) ?? null,
   );
 
-  const latestModel = computed(() => models.value[0] ?? null);
-
-  /*
-  const activeDeploymentsCount = computed(() => {
-    return models.value.reduce((acc, m) => {
-      return acc + m.versions.filter((v) => v.status === "active").length;
-    }, 0);
-  }); */
-
   const summaryCards = computed(() => {
     const state = modelState.value;
     const metrics = state?.evaluation;
@@ -144,9 +139,7 @@ export function useModels() {
         label: "F1 SCORE",
         value: metrics?.f1 != null ? `${(metrics.f1 * 100).toFixed(1)}%` : "—",
         description: metrics
-          ? state?.prediction_target === "error_type"
-            ? "Macro-averaged F1 across error classes"
-            : "Binary classification F1"
+          ? "Macro-averaged F1 across good and bad FPPA labels"
           : "No evaluation available",
       },
       {
@@ -159,88 +152,10 @@ export function useModels() {
 
   onMounted(() => fetchModels(true));
 
-  const workflowSteps = computed(() => [
-    {
-      step: "01",
-      title: "Model Registration",
-      description:
-        "Upload weight artifacts, define input schemas, and register metadata tags.",
-    },
-    {
-      step: "02",
-      title: "Biomechanical Benchmark",
-      description:
-        "Run accuracy and posture movement validation against reference datasets.",
-    },
-    {
-      step: "03",
-      title: "Endpoint Provisioning",
-      description:
-        "Configure environment, memory allocation, and auto-scaling constraints.",
-    },
-    {
-      step: "04",
-      title: "Active Inference Monitoring",
-      description:
-        "Serve real-time API requests and monitor latency, throughput, and memory metrics.",
-    },
-  ]);
-
-  /*
-  const openDeployModal = (modelId: string, version: ModelVersion) => {
-    selectedTarget.value = { modelId, version };
-    isDeployModalOpen.value = true;
-  };
-
-  const closeDeployModal = () => {
-    selectedTarget.value = null;
-    isDeployModalOpen.value = false;
-  };
-
-  const handleDeploy = async (config: {
-    environment: "staging" | "production";
-    minReplicas: number;
-    maxReplicas: number;
-  }) => {
-    if (!selectedTarget.value) return;
-    const { modelId, version } = selectedTarget.value;
-
-    version.status = "building";
-
-    try {
-      const payload: DeployPayload = {
-        modelId,
-        versionId: version.id,
-        ...config,
-      };
-      await modelService.deployVersion(payload);
-      version.status = "active";
-      version.environment = config.environment;
-      closeDeployModal();
-    } catch (err) {
-      version.status = "failed";
-    }
-  };
-
-  const handleUndeploy = async (modelId: string, version: ModelVersion) => {
-    const previousStatus = version.status;
-    version.status = "building";
-
-    try {
-      await modelService.undeployVersion(modelId, version.id);
-      version.status = "inactive";
-      version.environment = undefined;
-      version.endpointUrl = undefined;
-    } catch (err) {
-      version.status = previousStatus;
-    }
-  }; */
-
   return {
     models,
     modelState,
     selectedModel,
-    latestModel,
     selectedModelId,
     isLoading,
     isStateLoading,
@@ -249,7 +164,6 @@ export function useModels() {
     isInitialized,
     error,
     summaryCards,
-    workflowSteps,
     fetchModels,
     fetchModelState,
     selectModel,

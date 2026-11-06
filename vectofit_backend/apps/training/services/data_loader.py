@@ -1,8 +1,13 @@
 import random
 import re
-from collections import defaultdict
+import math
+import statistics
+from collections import Counter, defaultdict
 from itertools import combinations
 
+import cv2
+from apps.analytics.services import fppa
+from apps.analytics.services.feature_schemas import schema_for_target
 from apps.analytics.services.features import (
     FeatureExtractionError,
     extract_rep_features,
@@ -10,8 +15,7 @@ from apps.analytics.services.features import (
 )
 from apps.datasets.models import Dataset, DatasetSample, DatasetVideo
 from apps.datasets.services.knee_label import (
-    final_knee_target,
-    latest_annotator_ids,
+    knee_label_evidence,
 )
 
 
@@ -78,10 +82,92 @@ def _frames_from_landmark_series(raw):
     return frames
 
 
+def _fppa_frames_from_landmark_series(raw):
+    frames = []
+    for entry in raw or []:
+        if not isinstance(entry, dict):
+            continue
+        if isinstance(entry.get("landmarks"), dict):
+            frames.append(entry)
+        else:
+            frames.append({"landmarks": entry})
+    return frames
+
+
 def _scale_factor_for_session(session):
     if session is None or session.body_profile_id is None:
         return None
     return session.body_profile.scale_factor or None
+
+
+def _training_frame_rate(sample, dataset):
+    raw = sample.rep_assessment.landmark_series or []
+    entries = [entry for entry in raw if isinstance(entry, dict)]
+
+    timestamps = [entry.get("timestamp_ms") for entry in entries]
+    if any(value is not None for value in timestamps):
+        try:
+            values = [float(value) for value in timestamps]
+        except (TypeError, ValueError) as exc:
+            raise FeatureExtractionError("Frame timestamps are invalid.") from exc
+        if len(values) < 2 or not all(math.isfinite(value) for value in values):
+            raise FeatureExtractionError(
+                "At least two finite frame timestamps are required."
+            )
+        intervals = [right - left for left, right in zip(values, values[1:])]
+        if any(interval <= 0 for interval in intervals):
+            raise FeatureExtractionError(
+                "Frame timestamps must be strictly increasing."
+            )
+        return 1000.0 / statistics.median(intervals), "frame_timestamps"
+
+    frame_indices = [entry.get("frame_index") for entry in entries]
+    source_rates = [entry.get("native_fps") for entry in entries]
+    if all(value is not None for value in frame_indices) and any(
+        value is not None for value in source_rates
+    ):
+        try:
+            indices = [int(value) for value in frame_indices]
+            source_fps = float(
+                next(value for value in source_rates if value is not None)
+            )
+        except (TypeError, ValueError, StopIteration) as exc:
+            raise FeatureExtractionError("Frame timing metadata is invalid.") from exc
+        intervals = [right - left for left, right in zip(indices, indices[1:])]
+        if (
+            len(intervals) == 0
+            or any(interval <= 0 for interval in intervals)
+            or not math.isfinite(source_fps)
+            or source_fps <= 0
+        ):
+            raise FeatureExtractionError("Frame timing metadata is invalid.")
+        return source_fps / statistics.median(intervals), "frame_indices_and_source_fps"
+
+    video_candidates = []
+    if sample.dataset_video_id and sample.dataset_video.video_file:
+        video_candidates.append(sample.dataset_video.video_file)
+    if sample.rep_assessment.session.video_file:
+        video_candidates.append(sample.rep_assessment.session.video_file)
+    if dataset.video_file:
+        video_candidates.append(dataset.video_file)
+
+    for video_file in video_candidates:
+        capture = None
+        try:
+            capture = cv2.VideoCapture(video_file.path)
+            source_fps = float(capture.get(cv2.CAP_PROP_FPS) or 0.0)
+        except (OSError, ValueError, NotImplementedError, cv2.error):
+            continue
+        finally:
+            if capture is not None:
+                capture.release()
+        if math.isfinite(source_fps) and source_fps > 0:
+            sample_step = max(1, round(source_fps / 30.0))
+            return source_fps / sample_step, "source_video_fps_sampled_at_30fps"
+
+    raise FeatureExtractionError(
+        "No usable frame timestamps or source video FPS are available for velocity features."
+    )
 
 
 def _available_angles(dataset):
@@ -174,8 +260,65 @@ def _normalise_error_label(value):
     return re.sub(r"\s+", "_", value)
 
 
+def _extract_sample_features(
+    sample,
+    frames,
+    session,
+    dataset,
+    schema_version,
+    fallback_frame_width,
+    fallback_frame_height,
+):
+    if schema_version == fppa.FEATURE_SCHEMA_VERSION:
+        fppa_frames = _fppa_frames_from_landmark_series(
+            sample.rep_assessment.landmark_series
+        )
+        frame_width = next(
+            (
+                int(frame["source_width"])
+                for frame in fppa_frames
+                if frame.get("source_width")
+            ),
+            fallback_frame_width,
+        )
+        frame_height = next(
+            (
+                int(frame["source_height"])
+                for frame in fppa_frames
+                if frame.get("source_height")
+            ),
+            fallback_frame_height,
+        )
+        effective_fps, timing_source = _training_frame_rate(sample, dataset)
+        extracted, fppa_metadata = fppa.extract_fppa_features(
+            fppa_frames,
+            frame_width=frame_width,
+            frame_height=frame_height,
+            native_fps=effective_fps,
+        )
+        if not fppa_metadata.get("valid") or extracted is None:
+            raise FeatureExtractionError(
+                f"FPPA extraction was invalid: {fppa_metadata.get('reason')}"
+            )
+    else:
+        effective_fps, timing_source = _training_frame_rate(sample, dataset)
+        extracted = extract_rep_features(
+            frames,
+            fps=effective_fps,
+            scale_factor=_scale_factor_for_session(session),
+        )
+        fppa_metadata = None
+    return extracted, fppa_metadata, timing_source
+
+
 def build_samples(
-    datasets, selected_features, view_angle=None, prediction_target="binary_form"
+    datasets,
+    selected_features,
+    view_angle=None,
+    prediction_target="binary_form",
+    *,
+    fallback_frame_width=1280,
+    fallback_frame_height=720,
 ):
     if prediction_target not in {"binary_form", "error_type", "knee_alignment"}:
         raise TrainingConfigurationError(
@@ -184,7 +327,19 @@ def build_samples(
         )
 
     view_angle = _resolve_view_angle(datasets, view_angle)
+    if prediction_target == "knee_alignment" and view_angle != "frontal":
+        raise TrainingConfigurationError(
+            "FPPA knee-alignment training requires the frontal view."
+        )
     _validate_training_datasets(datasets, view_angle)
+    schema = schema_for_target(prediction_target)
+    if not selected_features:
+        selected_features = list(schema.feature_order)
+    unknown_features = sorted(set(selected_features) - set(schema.feature_order))
+    if unknown_features:
+        raise TrainingConfigurationError(
+            f"Features {unknown_features} are not available in {schema.version}."
+        )
 
     rows, labels, groups, sample_ids, sample_metadata = [], [], [], [], []
     warnings, warning_set, errors = [], set(), []
@@ -203,11 +358,29 @@ def build_samples(
                 )
                 continue
 
-            annotator_ids = latest_annotator_ids(sample)
+            evidence = (
+                knee_label_evidence(sample)
+                if prediction_target == "knee_alignment"
+                else None
+            )
+            annotations = evidence["annotations"] if evidence else []
+            annotator_ids = [
+                record["annotator_id"]
+                for record in annotations
+                if record["annotator_id"] is not None
+            ]
+            if evidence is None:
+                human_label = (
+                    sample.annotator_id is not None or sample.annotated_at is not None
+                )
+            else:
+                human_label = bool(annotations) and all(
+                    record["annotator_id"] is not None for record in annotations
+                )
             if prediction_target == "binary_form":
                 target = 1 if sample.is_correct else 0
             elif prediction_target == "knee_alignment":
-                target = final_knee_target(sample)
+                target = evidence["target"]
                 if target not in {"good", "bad"}:
                     errors.append(
                         f"Dataset {dataset.pk}, sample {sample.pk}: knee target "
@@ -232,13 +405,17 @@ def build_samples(
                     continue
 
             try:
-                extracted = extract_rep_features(
+                extracted, fppa_metadata, timing_source = _extract_sample_features(
+                    sample,
                     frames,
-                    fps=30.0,
-                    scale_factor=_scale_factor_for_session(session),
+                    session,
+                    dataset,
+                    schema.version,
+                    fallback_frame_width,
+                    fallback_frame_height,
                 )
                 row = to_feature_row(extracted, selected_features)
-            except FeatureExtractionError as exc:
+            except (FeatureExtractionError, ValueError, TypeError) as exc:
                 errors.append(f"Dataset {dataset.pk}, sample {sample.pk}: {exc}")
                 continue
 
@@ -259,22 +436,21 @@ def build_samples(
                     "participant_id": participant_id,
                     "participant_group": group,
                     "view_angle": view_angle,
+                    "timing_source": timing_source,
                     "is_correct": sample.is_correct,
                     "error_label": sample.error_label or "",
                     "annotator_id": sample.annotator_id,
                     "annotator_ids": annotator_ids,
+                    "knee_annotations": annotations,
                     "annotated_at": sample.annotated_at.isoformat()
                     if sample.annotated_at
                     else None,
                     "target": target,
-                    "label_origin": (
-                        "human"
-                        if sample.annotator_id is not None
-                        or sample.annotated_at is not None
-                        else "source_or_inherited"
-                    ),
+                    "label_origin": "human" if human_label else "source_or_inherited",
                 }
             )
+            if fppa_metadata is not None:
+                sample_metadata[-1]["fppa_metadata"] = fppa_metadata
 
             for warning in extracted.get("_warnings", []):
                 if warning not in warning_set:
@@ -378,86 +554,70 @@ def group_split(groups, test_size=0.3, seed=42, labels=None, attempts=512):
                 for label in sorted(target_classes, key=str)
             }
             raise InsufficientGroupsError(
-                "Cannot create a participant-level split: target class coverage is "
-                f"insufficient across participants ({coverage}). Dataset has "
+                "Cannot create a participant-level split: target class participant coverage "
+                f"is insufficient ({coverage}). Dataset has "
                 f"{len(group_ids)} participants and {total_samples} usable samples; "
                 f"class sample counts are {sample_counts}. Collect samples for the "
                 "underrepresented class from at least two participants."
             )
 
-    best = None
-
-    if len(group_ids) <= 20:
-        for size in range(1, len(group_ids)):
-            for selected in combinations(group_ids, size):
-                test_group_set = set(selected)
-                test_indices = sorted(i for g in test_group_set for i in by_group[g])
-                train_indices = sorted(
-                    i for g in group_ids if g not in test_group_set for i in by_group[g]
-                )
-                if labels is not None:
-                    if {labels[i] for i in test_indices} != target_classes or {
-                        labels[i] for i in train_indices
-                    } != target_classes:
-                        continue
-                test_distribution = defaultdict(int)
-                if labels is not None:
-                    for i in test_indices:
-                        test_distribution[labels[i]] += 1
-                    class_penalty = sum(
-                        abs(
-                            test_distribution[label] / len(test_indices)
-                            - sum(1 for y in labels if y == label) / len(labels)
-                        )
-                        for label in target_classes
-                    )
-                else:
-                    class_penalty = 0.0
-                score = (
-                    abs(len(test_indices) / total_samples - test_size) + class_penalty
-                )
-                if best is None or score < best[0]:
-                    best = (score, train_indices, test_indices)
+    exact_search = len(group_ids) <= 12
+    if exact_search:
+        candidates = (
+            selected
+            for size in range(1, len(group_ids))
+            for selected in combinations(group_ids, size)
+        )
     else:
-        rng = random.Random(seed)
-        for _ in range(max(1, attempts)):
-            shuffled = group_ids[:]
-            rng.shuffle(shuffled)
-            for cutoff in range(1, len(shuffled)):
-                selected = set(shuffled[:cutoff])
-                test_indices = sorted(i for g in selected for i in by_group[g])
-                train_indices = sorted(
-                    i for g in group_ids if g not in selected for i in by_group[g]
-                )
-                if labels is not None and (
-                    {labels[i] for i in test_indices} != target_classes
-                    or {labels[i] for i in train_indices} != target_classes
-                ):
-                    continue
-                score = abs(len(test_indices) / total_samples - test_size)
-                if best is None or score < best[0]:
-                    best = (score, train_indices, test_indices)
+
+        def random_candidates():
+            rng = random.Random(seed)
+            for _ in range(max(1, attempts)):
+                shuffled = group_ids[:]
+                rng.shuffle(shuffled)
+                for cutoff in range(1, len(shuffled)):
+                    yield shuffled[:cutoff]
+
+        candidates = random_candidates()
+
+    overall_counts = Counter(labels) if labels is not None else Counter()
+    best = None
+    for selected in candidates:
+        test_counts = Counter()
+        test_count = 0
+        for group in selected:
+            test_count += len(by_group[group])
+            test_counts.update(group_class_counts.get(group, {}))
+        if labels is not None and any(
+            test_counts[label] == 0 or test_counts[label] == overall_counts[label]
+            for label in target_classes
+        ):
+            continue
+        class_penalty = sum(
+            abs(test_counts[label] / test_count - overall_counts[label] / total_samples)
+            for label in target_classes
+        )
+        score = abs(test_count / total_samples - test_size) + class_penalty
+        if best is None or score < best[0]:
+            best = (score, set(selected))
 
     if best is None:
-        class_detail = (
-            f" Target classes have participant coverage {class_group_counts}; "
-            "every class must appear in both partitions."
-            if labels is not None
-            else ""
+        search = (
+            "all participant subsets"
+            if exact_search
+            else f"{max(1, attempts)} bounded randomized attempts"
         )
         raise InsufficientGroupsError(
-            "Could not create a non-empty participant-level train/test split after "
-            f"searching {('all participant subsets' if len(group_ids) <= 20 else f'{max(1, attempts)} bounded randomized attempts')}. "
-            f"Dataset has {len(group_ids)} participants and {total_samples} samples."
-            + class_detail
-            + (
-                " Increase attempts or reduce the participant count if this is a computationally bounded search."
-                if len(group_ids) > 20
-                else ""
-            )
+            f"Could not create a non-empty participant-level train/test split after searching {search}. "
+            f"Dataset has {len(group_ids)} participants and {total_samples} samples. "
+            f"Target classes have participant coverage {class_group_counts}; "
+            "every class must appear in both partitions."
         )
 
-    return best[1], best[2]
+    test_groups = best[1]
+    train_indices = [i for i, group in enumerate(groups) if group not in test_groups]
+    test_indices = [i for i, group in enumerate(groups) if group in test_groups]
+    return train_indices, test_indices
 
 
 def resolve_datasets(dataset_ids: list[int]) -> list[Dataset]:

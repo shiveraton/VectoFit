@@ -21,7 +21,7 @@ const fetchDatasets = async () => {
 
   try {
     const response = await client.get<AnnotationDataset[]>(
-      "/datasets/annotation-datasets/",
+      import.meta.env.MODE === "public" ? "/annotator/datasets/" : "/datasets/annotation-datasets/",
     );
 
     datasets.value = response.data;
@@ -90,7 +90,7 @@ onMounted(fetchDatasets);
         </div>
 
         <div v-else-if="error" class="empty-state error-state">
-          <div class="empty-icon">!</div>
+
           <h3>Unable to Load Datasets</h3>
           <p>{{ error }}</p>
 
@@ -100,7 +100,7 @@ onMounted(fetchDatasets);
         </div>
 
         <div v-else-if="datasets.length === 0" class="empty-state">
-          <div class="empty-icon">▤</div>
+
           <h3>No Annotation Datasets</h3>
           <p>
             There are currently no shared datasets available for annotation.
@@ -116,9 +116,6 @@ onMounted(fetchDatasets);
             class="dataset-card"
             @click="openDataset(dataset.id)"
           >
-            <div class="dataset-icon">
-              <span>▤</span>
-            </div>
 
             <div class="dataset-info">
               <span class="dataset-label">
@@ -146,20 +143,6 @@ onMounted(fetchDatasets);
 </template>
 
 <style scoped>
-.annotator-page {
-  width: 100%;
-  color: var(--vf-text);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 28px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
 .page-heading h1 {
   margin: 10px 0 7px;
@@ -176,23 +159,6 @@ onMounted(fetchDatasets);
   line-height: 1.6;
 }
 
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--vf-orange-dark);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.eyebrow-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--vf-orange);
-}
-
 /* Content Card */
 .content-card {
   margin-bottom: 20px;
@@ -201,29 +167,6 @@ onMounted(fetchDatasets);
   border: 1px solid var(--vf-border);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(24, 24, 27, 0.025);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 20px;
-  border-bottom: 1px solid var(--vf-border-light);
-}
-
-.section-title-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.section-marker {
-  width: 4px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  background: var(--vf-gradient);
 }
 
 .section-title-row h2 {
@@ -237,18 +180,6 @@ onMounted(fetchDatasets);
   margin: 0;
   color: var(--vf-muted);
   font-size: 11px;
-}
-
-.status-badge {
-  padding: 5px 9px;
-  color: var(--vf-orange-dark);
-  background: var(--vf-orange-soft);
-  border: 1px solid #fed7aa;
-  border-radius: 5px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  white-space: nowrap;
 }
 
 .dataset-list {
@@ -403,57 +334,16 @@ onMounted(fetchDatasets);
   font-size: 10px;
 }
 
-.secondary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 9px 14px;
-  color: var(--vf-orange-dark);
-  background: var(--vf-orange-soft);
-  border: 1px solid #fed7aa;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
-
 .secondary-button:hover:not(:disabled) {
   background: #ffedd5;
   border-color: #fdba74;
 }
 
-.secondary-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.button-icon {
-  font-size: 16px;
-  line-height: 1;
-}
-
 @media (max-width: 900px) {
-  .dataset-grid {
+.dataset-grid {
     grid-template-columns: 1fr;
   }
+
 }
 
-@media (max-width: 700px) {
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .section-header {
-    align-items: flex-start;
-  }
-
-  .annotator-page {
-    min-width: 0;
-  }
-}
 </style>

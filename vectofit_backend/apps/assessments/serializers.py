@@ -4,7 +4,6 @@ import cv2
 from rest_framework import serializers
 
 from .models import AssessmentSession, BodyProfile, RepAssessment
-from .services.snapshot_overlay import reference_landmarks
 
 
 class LandmarkInputSerializer(serializers.Serializer):
@@ -16,8 +15,8 @@ class LandmarkInputSerializer(serializers.Serializer):
 
 
 class BodyProfileDataInputSerializer(serializers.Serializer):
-    height = serializers.FloatField(required=False, default=170.0)
-    height_cm = serializers.FloatField(required=False, default=170.0)
+    height = serializers.FloatField(required=False)
+    height_cm = serializers.FloatField(required=False)
     age = serializers.IntegerField(required=False)
     weight = serializers.FloatField(required=False)
 
@@ -25,6 +24,15 @@ class BodyProfileDataInputSerializer(serializers.Serializer):
 class MorphologicalCalibrationRequestSerializer(serializers.Serializer):
     body_profile_data = BodyProfileDataInputSerializer(required=False)
     landmarks = LandmarkInputSerializer(many=True)
+
+    def validate(self, attrs):
+        body_data = attrs.get("body_profile_data") or {}
+        height = body_data.get("height_cm", body_data.get("height"))
+        if height is None or height <= 0:
+            raise serializers.ValidationError(
+                {"body_profile_data": "A positive height in centimetres is required."}
+            )
+        return attrs
 
 
 class BodyProfileSerializer(serializers.ModelSerializer):
@@ -44,6 +52,8 @@ class BodyProfileSerializer(serializers.ModelSerializer):
 
 
 class RepAssessmentSerializer(serializers.ModelSerializer):
+    """Expose computed assessment records without allowing client edits."""
+
     snapshot_landmarks = serializers.SerializerMethodField()
     snapshot_frame_width = serializers.SerializerMethodField()
     snapshot_frame_height = serializers.SerializerMethodField()
@@ -81,7 +91,7 @@ class RepAssessmentSerializer(serializers.ModelSerializer):
         return self._snapshot_size(obj)[1] or None
 
     def get_snapshot_reference_available(self, obj):
-        return reference_landmarks(obj) is not None
+        return False
 
     class Meta:
         model = RepAssessment
@@ -103,7 +113,7 @@ class RepAssessmentSerializer(serializers.ModelSerializer):
             "snapshot_frame_height",
             "snapshot_reference_available",
         ]
-        read_only_fields: ClassVar[list] = ["analysis_result"]
+        read_only_fields: ClassVar[list] = fields
 
 
 class AssessmentSessionSerializer(serializers.ModelSerializer):
@@ -115,6 +125,13 @@ class AssessmentSessionSerializer(serializers.ModelSerializer):
     def get_rep_count(self, obj):
         annotated_count = getattr(obj, "rep_count", None)
         return annotated_count if annotated_count is not None else obj.reps.count()
+
+    def validate_view_angle(self, value):
+        if value != AssessmentSession.ViewAngle.FRONTAL:
+            raise serializers.ValidationError(
+                "Only frontal camera sessions are supported for FPPA assessment."
+            )
+        return value
 
     class Meta:
         model = AssessmentSession

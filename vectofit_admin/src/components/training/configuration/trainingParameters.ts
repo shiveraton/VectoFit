@@ -106,7 +106,7 @@ export const TRAINING_PARAMETER_DEFINITIONS: TrainingParameterDefinition[] = [
     technicalName: "test_size",
     question: "How much labelled data should be held out for testing?",
     description:
-      "Controls the portion of labelled repetitions reserved for the held-out test set.",
+      "Requests a test fraction of labelled repetitions while keeping participants separate. The achieved fraction depends on participant sizes.",
     min: 0.1,
     max: 0.5,
     step: 0.05,

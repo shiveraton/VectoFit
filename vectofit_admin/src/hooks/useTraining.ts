@@ -1,12 +1,10 @@
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { invalidateModels } from "./useModels";
 import {
   type AlgorithmOption,
   type FeatureOption,
   trainingService,
   type TrainingJob,
-  type WorkflowStep,
-  type PredictionTarget,
 } from "../services/trainingService";
 import { datasetService, type Dataset } from "../services/datasetService";
 
@@ -23,11 +21,9 @@ const selectJob = (jobId: number) => {
 const datasets = ref<Dataset[]>([]);
 const features = ref<FeatureOption[]>([]);
 const algorithms = ref<AlgorithmOption[]>([]);
-const workflowSteps = ref<WorkflowStep[]>(trainingService.getWorkflowStep());
 
 const selectedDatasetIds = ref<number[]>([]);
-const selectedViewAngle = ref<ViewAngle | null>(null);
-const predictionTarget = ref<PredictionTarget>("binary_form");
+const selectedViewAngle = ref<ViewAngle | null>("frontal");
 const selectedAlgorithmId = ref<string>("xgboost");
 
 const hyperparameters = ref<Record<string, unknown>>({});
@@ -35,17 +31,19 @@ const testSize = ref<number>(0.3);
 const randomSeed = ref<number>(42);
 
 const isLoading = ref(false);
-const isTraining = ref(false);
+const isSubmitting = ref(false);
 const isInitialized = ref(false);
 const error = ref<string | null>(null);
 
 export type ViewAngle = "diagonal" | "frontal" | "sagittal";
 
+const responseDataFor = (err: unknown): unknown =>
+  typeof err === "object" && err !== null && "response" in err
+    ? (err as { response?: { data?: unknown } }).response?.data
+    : undefined;
+
 const setErrorState = (err: unknown) => {
-  const responseData =
-    typeof err === "object" && err !== null && "response" in err
-      ? (err as { response?: { data?: unknown } }).response?.data
-      : undefined;
+  const responseData = responseDataFor(err);
 
   if (typeof responseData === "object" && responseData !== null) {
     const data = responseData as Record<string, unknown>;
@@ -88,6 +86,34 @@ const setErrorState = (err: unknown) => {
   error.value = "An unexpected error occurred during training.";
 };
 
+const updateTrainingJobs = (jobs: TrainingJob[]) => {
+  const previous = new Map(trainingJobs.value.map((job) => [job.id, job.status]));
+  trainingJobs.value = jobs.filter(
+    (job) =>
+      job.prediction_target === "knee_alignment" &&
+      job.feature_schema_version === "fppa_v2",
+  );
+  const newlyCompleted = trainingJobs.value.some(
+    (job) => job.status === "COMPLETED" && previous.get(job.id) !== "COMPLETED",
+  );
+  if (newlyCompleted) {
+    invalidateModels();
+  }
+  selectedJob.value =
+    trainingJobs.value.find((job) => job.id === selectedJob.value?.id) ??
+    trainingJobs.value[0] ??
+    null;
+};
+
+const refreshTrainingJobs = async () => {
+  try {
+    updateTrainingJobs(await trainingService.getTrainingJobs());
+    error.value = null;
+  } catch (err: unknown) {
+    setErrorState(err);
+  }
+};
+
 const fetchTrainingData = async (force = false) => {
   if (isInitialized.value && !force) {
     return;
@@ -102,24 +128,17 @@ const fetchTrainingData = async (force = false) => {
       datasetsResponse,
       featureOptions,
       algorithmOptions,
-      workflow,
     ] = await Promise.all([
       trainingService.getTrainingJobs(),
       datasetService.getDatasets(),
       Promise.resolve(trainingService.getAvailableFeatures()),
       Promise.resolve(trainingService.getAvailableAlgorithms()),
-      Promise.resolve(trainingService.getWorkflowStep()),
     ]);
 
-    trainingJobs.value = trainingJobsResponse;
-    selectedJob.value =
-      trainingJobs.value.find((job) => job.id === selectedJob.value?.id) ??
-      trainingJobs.value[0] ??
-      null;
+    updateTrainingJobs(trainingJobsResponse);
     datasets.value = datasetsResponse;
     features.value = featureOptions;
     algorithms.value = algorithmOptions;
-    workflowSteps.value = workflow;
 
     if (
       !algorithmOptions.some(
@@ -158,15 +177,7 @@ const filteredDatasets = computed(() => {
     const stats = dataset.angle_training_stats?.[angle];
     if (!(dataset.view_angles ?? []).includes(angle)) return false;
 
-    if (predictionTarget.value === "binary_form") {
-      return (stats?.labelled_sample_count ?? 0) > 0;
-    }
-
-    const errorCount = Object.values(stats?.error_label_counts ?? {}).reduce(
-      (sum, count) => sum + count,
-      0,
-    );
-    return (stats?.good_count ?? 0) > 0 && errorCount > 0;
+    return (stats?.knee_target_sample_count ?? 0) > 0;
   });
 });
 
@@ -194,6 +205,8 @@ const activeJobs = computed(() =>
     (job) => job.status === "PENDING" || job.status === "RUNNING",
   ),
 );
+
+const isTraining = computed(() => isSubmitting.value || activeJobs.value.length > 0);
 
 const completedJobs = computed(() =>
   trainingJobs.value.filter((job) => job.status === "COMPLETED"),
@@ -227,14 +240,14 @@ const summaryCards = computed(() => [
   {
     label: "Total Runs",
     value: trainingJobs.value.length,
-    description: "All recorded model experiments",
+    description: "FPPA v2 knee-alignment experiments",
     icon: "R",
     variant: "samples" as const,
   },
   {
     label: "Completed Runs",
     value: completedJobs.value.length,
-    description: "Successfully finished experiments",
+    description: "Completed FPPA M1 runs",
     icon: "C",
     variant: "correct" as const,
   },
@@ -259,31 +272,8 @@ const configSummaryText = computed(() => {
     ? `${selectedDatasetIds.value.length} dataset(s)`
     : "No datasets";
 
-  const viewPart = selectedViewAngle.value
-    ? selectedViewAngle.value
-    : "No view";
-
-  const featurePart = `${selectedFeaturesCount.value} feature(s)`;
-  const targetPart =
-    predictionTarget.value === "binary_form"
-      ? "Correct vs incorrect"
-      : "Error type";
-  const algorithmPart = selectedAlgorithm.value?.name ?? "No algorithm";
-
-  return `${datasetPart} · ${viewPart} · ${targetPart} · ${featurePart} · ${algorithmPart}`;
+  return `${datasetPart} · frontal view · FPPA knee alignment · six fixed FPPA features · XGBoost M1`;
 });
-
-const selectViewAngle = (angle: ViewAngle) => {
-  selectedViewAngle.value = angle;
-
-  const allowedIds = new Set(
-    filteredDatasets.value.map((dataset) => dataset.id),
-  );
-
-  selectedDatasetIds.value = selectedDatasetIds.value.filter((id) =>
-    allowedIds.has(id),
-  );
-};
 
 const toggleDataset = (datasetId: number) => {
   const index = selectedDatasetIds.value.indexOf(datasetId);
@@ -294,28 +284,6 @@ const toggleDataset = (datasetId: number) => {
   }
 
   selectedDatasetIds.value.push(datasetId);
-};
-
-const setPredictionTarget = (target: PredictionTarget) => {
-  predictionTarget.value = target;
-  const allowedIds = new Set(
-    filteredDatasets.value.map((dataset) => dataset.id),
-  );
-  selectedDatasetIds.value = selectedDatasetIds.value.filter((id) =>
-    allowedIds.has(id),
-  );
-};
-
-const selectAlgorithm = (algorithmId: string) => {
-  selectedAlgorithmId.value = algorithmId;
-};
-
-const toggleFeature = (featureId: string) => {
-  const feature = features.value.find((item) => item.id === featureId);
-
-  if (feature) {
-    feature.selected = !feature.selected;
-  }
 };
 
 const setHyperparameter = (name: string, value: unknown) => {
@@ -335,7 +303,7 @@ const startTraining = async () => {
     return null;
   }
 
-  isTraining.value = true;
+  isSubmitting.value = true;
   error.value = null;
 
   try {
@@ -343,7 +311,7 @@ const startTraining = async () => {
       dataset_ids: selectedDatasetIds.value,
       algorithm: selectedAlgorithm.value.id,
       view_angle: selectedViewAngle.value!,
-      prediction_target: predictionTarget.value,
+      prediction_target: "knee_alignment",
       feature_selection: selectedFeatures.value.map((feature) => feature.id),
       hyperparameters: hyperparameters.value,
       test_size: testSize.value,
@@ -361,10 +329,7 @@ const startTraining = async () => {
   } catch (err: unknown) {
     console.error("Training start error:", err);
 
-    const responseData =
-      typeof err === "object" && err !== null && "response" in err
-        ? (err as { response?: { data?: unknown } }).response?.data
-        : undefined;
+    const responseData = responseDataFor(err);
     if (
       typeof responseData === "object" &&
       responseData !== null &&
@@ -383,13 +348,26 @@ const startTraining = async () => {
     setErrorState(err);
     return null;
   } finally {
-    isTraining.value = false;
+    isSubmitting.value = false;
   }
 };
 
 export function useTraining() {
-  onMounted(() => {
-    fetchTrainingData();
+  let pollTimer: ReturnType<typeof setTimeout> | undefined;
+  let mounted = false;
+  const poll = async () => {
+    if (!mounted) return;
+    if (activeJobs.value.length) await refreshTrainingJobs();
+    if (mounted) pollTimer = setTimeout(poll, 3000);
+  };
+  onMounted(async () => {
+    mounted = true;
+    await fetchTrainingData(true);
+    if (mounted) pollTimer = setTimeout(poll, 3000);
+  });
+  onUnmounted(() => {
+    mounted = false;
+    clearTimeout(pollTimer);
   });
 
   return {
@@ -397,11 +375,9 @@ export function useTraining() {
     datasets,
     features,
     algorithms,
-    workflowSteps,
     selectedDatasetIds,
     selectedDatasets,
     selectedViewAngle,
-    predictionTarget,
     selectedAlgorithm,
     selectedAlgorithmId,
     selectedFeatures,
@@ -424,11 +400,8 @@ export function useTraining() {
     selectJob,
     canStartTraining,
     fetchTrainingData,
-    selectViewAngle,
-    setPredictionTarget,
+    refreshTrainingJobs,
     toggleDataset,
-    selectAlgorithm,
-    toggleFeature,
     setHyperparameter,
     setTestSize,
     setRandomSeed,

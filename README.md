@@ -1,139 +1,40 @@
-
 # VectoFit
 
-VectoFit is a computer vision–based squat exercise movement quality assessment system developed as an undergraduate Computer Science thesis. The system analyzes squat movements from a single camera using pose estimation and biomechanical feature extraction to provide objective feedback on exercise quality.
+VectoFit is a thesis system for squat movement assessment. It contains a Django REST API and video/ML processing backend, a React Native mobile app, and a Vue 3 administrative console.
 
-## Features
+## Repository layout
 
-* Real-time human pose estimation
-* Joint angle analysis
-* Range of motion (ROM) assessment
-* Kinematic velocity tracking
-* Bilateral asymmetry detection
-* Repetition counting
-* Movement quality assessment
-* Web-based dashboard for monitoring assessment results
+- `vectofit_backend/` — Django API, assessment and dataset processing, analytics, and model training.
+- `vectofit_frontend/` — React Native mobile app with camera based assessment.
+- `vectofit_admin/` — Vue 3 and TypeScript admin console.
 
-## Tech Stack
+## Local development
 
 ### Backend
 
-* Python
-* Django
-* Django REST Framework
+1. Create and activate a Python virtual environment, then install `vectofit_backend/requirements.txt`.
+2. Copy `vectofit_backend/.env.example` to `vectofit_backend/.env`. Replace `SECRET_KEY`; set `DEBUG=True` for local work. The example uses SQLite and a local Redis broker.
+3. Start Redis, then from `vectofit_backend/` run `python manage.py migrate` and `python manage.py runserver`.
+4. In a second backend terminal, run `celery -A config worker --pool=solo --loglevel=info` (the solo pool is suitable for local Windows development).
 
-### Computer Vision & Machine Learning
+For a deployed environment set `DEBUG=False` and provide explicit `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`, `DATABASE_URL`, `CELERY_BROKER_URL`, and `CELERY_RESULT_BACKEND`. Never reuse the example secret key.
 
-* MediaPipe
-* OpenCV
-* NumPy
-* Pandas
-* XGBoost (planned)
-* Rule-Based System
+### Mobile app
 
-### Frontend
+1. From `vectofit_frontend/`, copy `.env.example` to `.env` and set `VECTOFIT_API_URL` to the backend API root, including `/api`.
+2. Install JavaScript dependencies with `npm ci`, start Metro with `npm start`, then use `npm run android` or `npm run ios`.
+3. Use `http://10.0.2.2:8000/api` for the standard Android emulator, `http://127.0.0.1:8000/api` for the iOS simulator, or the development computer’s LAN address for a physical device.
 
-* Angular
-* Ionic
+Metro reads the environment file when it starts. Restart Metro after changing the URL.
 
-## Project Structure
+### Admin console
 
-```text
-vectofit_backend/
-├── apps/
-├── config/
-├── data/
-├── docs/
-├── logs/
-├── scripts/
-├── tests/
-├── requirements.txt
-├── README.md
-└── manage.py
-```
+From `vectofit_admin/`, run `npm ci` and `npm run dev`. Its API base URL and local login/setup details should be configured for the selected backend environment.
 
-## Getting Started
+## Data handling status
 
-### 1. Clone the repository
+See [DATA_HANDLING.md](DATA_HANDLING.md) for current access boundaries, retention behavior, and remaining deployment decisions.
 
-```bash
-git clone <repository-url>
-cd vectofit_backend
-```
+## Project status
 
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Activate the virtual environment.
-
-**Windows**
-
-```bash
-.venv\Scripts\activate
-```
-
-**Linux/macOS**
-
-```bash
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project root and configure the required environment variables.
-
-### 5. Apply database migrations
-
-```bash
-python manage.py migrate
-```
-
-### 6. Create an administrator account
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Run the development server
-
-```bash
-python manage.py runserver
-```
-
-The application will be available at:
-
-```
-http://127.0.0.1:8000/
-```
-
-## Development
-
-Whenever new database models are added:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-If new packages are installed:
-
-```bash
-pip freeze > requirements.txt
-```
-
-## Current Status
-
-VectoFit is currently under active development as part of an undergraduate thesis. Features, architecture, and documentation may change as the project progresses.
-
-## License
-
-This project is intended for academic and research purposes.
+This is an academic research system under active development. Movement metrics and model predictions should be interpreted within the validation and limitations documented by the thesis; the repository does not establish clinical validation or a production deployment configuration.
