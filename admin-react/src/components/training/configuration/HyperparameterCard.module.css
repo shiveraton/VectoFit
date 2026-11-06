@@ -1,0 +1,172 @@
+
+.parameter-card[data-v-hyperparameter-card] {
+  position: relative;
+  min-width: 0;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.02);
+}
+.parameter-header[data-v-hyperparameter-card] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.parameter-heading[data-v-hyperparameter-card] {
+  min-width: 0;
+}
+.parameter-title[data-v-hyperparameter-card],
+.technical-name[data-v-hyperparameter-card] {
+  display: block;
+}
+.parameter-title[data-v-hyperparameter-card] {
+  color: var(--vf-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+.technical-name[data-v-hyperparameter-card] {
+  margin-top: 2px;
+  color: var(--vf-light-muted);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 8px;
+}
+.help-button[data-v-hyperparameter-card] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: var(--vf-muted);
+  background: #fafafa;
+  border: 1px solid var(--vf-border);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+  transition: all 0.15s ease;
+}
+.help-button[data-v-hyperparameter-card]:hover,
+.help-button[aria-expanded="true"][data-v-hyperparameter-card] {
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border-color: #fed7aa;
+}
+.parameter-question[data-v-hyperparameter-card] {
+  margin-top: 10px;
+  color: var(--vf-muted);
+  font-size: 9px;
+  line-height: 1.55;
+}
+.parameter-control[data-v-hyperparameter-card] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 13px;
+}
+.parameter-range[data-v-hyperparameter-card] {
+  width: 100%;
+  accent-color: var(--vf-orange);
+  cursor: pointer;
+}
+.parameter-range[data-v-hyperparameter-card]::-webkit-slider-runnable-track {
+  height: 5px;
+  background: linear-gradient(
+    to right,
+    #fb923c var(--parameter-progress),
+    #e4e4e7 var(--parameter-progress)
+  );
+  border-radius: 999px;
+}
+.parameter-range[data-v-hyperparameter-card]::-moz-range-track {
+  height: 5px;
+  background: #e4e4e7;
+  border-radius: 999px;
+}
+.parameter-range[data-v-hyperparameter-card]::-moz-range-progress {
+  height: 5px;
+  background: #fb923c;
+  border-radius: 999px;
+}
+.parameter-number[data-v-hyperparameter-card] {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  color: var(--vf-text);
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 7px;
+  outline: none;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+.parameter-number[data-v-hyperparameter-card]:focus {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.08);
+}
+.parameter-value[data-v-hyperparameter-card] {
+  min-width: 54px;
+  padding: 7px 8px;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border: 1px solid #fed7aa;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+.parameter-scale[data-v-hyperparameter-card] {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--vf-light-muted);
+  font-size: 8px;
+}
+.parameter-recommendation[data-v-hyperparameter-card] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+  color: var(--vf-light-muted);
+  font-size: 8px;
+}
+.parameter-recommendation strong[data-v-hyperparameter-card] {
+  color: var(--vf-muted);
+  font-size: 9px;
+}
+.parameter-help[data-v-hyperparameter-card] {
+  margin-top: 10px;
+  padding: 10px;
+  color: var(--vf-muted);
+  background: #fffaf6;
+  border: 1px solid #fed7aa;
+  border-radius: 7px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.parameter-help p[data-v-hyperparameter-card] {
+  margin: 0;
+}
+.help-effects[data-v-hyperparameter-card] {
+  display: grid;
+  gap: 4px;
+  margin-top: 7px;
+}
+.help-effects strong[data-v-hyperparameter-card] {
+  color: var(--vf-text);
+}
+.help-fade-enter-active[data-v-hyperparameter-card],
+.help-fade-leave-active[data-v-hyperparameter-card] {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.help-fade-enter-from[data-v-hyperparameter-card],
+.help-fade-leave-to[data-v-hyperparameter-card] {
+  opacity: 0;
+  transform: translateY(-3px);
+}
+

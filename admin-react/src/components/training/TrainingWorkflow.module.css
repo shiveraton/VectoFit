@@ -1,0 +1,62 @@
+
+.workflow[data-v-training-workflow] {
+  display: flex;
+  align-items: center;
+  padding: 26px 28px;
+}
+.workflow-step[data-v-training-workflow] {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+}
+.workflow-number[data-v-training-workflow] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 3px;
+  color: var(--vf-muted);
+  background: #f4f4f5;
+  border: 1px solid var(--vf-border);
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 700;
+}
+.workflow-step.active .workflow-number[data-v-training-workflow] {
+  color: #ffffff;
+  background: var(--vf-gradient);
+  border-color: transparent;
+}
+.workflow-step strong[data-v-training-workflow] {
+  color: var(--vf-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+.workflow-step span[data-v-training-workflow] {
+  color: var(--vf-light-muted);
+  font-size: 9px;
+}
+.workflow-line[data-v-training-workflow] {
+  width: 45px;
+  height: 1px;
+  margin: 0 12px 26px;
+  background: #fed7aa;
+}
+@media (max-width: 800px) {
+.workflow[data-v-training-workflow] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+.workflow-step[data-v-training-workflow] {
+    width: 100%;
+}
+.workflow-line[data-v-training-workflow] {
+    width: 1px;
+    height: 20px;
+    margin: 0 0 0 14px;
+}
+}
+

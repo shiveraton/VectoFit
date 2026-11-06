@@ -3,3 +3,6 @@ dist*/
 .env
 .env.*
 !.env.example
+
+# Keep migration audit and parity records reviewable.
+!*.md
