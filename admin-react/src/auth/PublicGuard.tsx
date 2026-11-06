@@ -6,7 +6,7 @@ export default function PublicGuard() {
   const location = useLocation();
   // Include the destination to preserve the source's per-navigation session check.
   const session = useQuery({ queryKey: [...queryKeys.publicSession, location.key], queryFn: () => publicClient.get<unknown>('me/'), gcTime: 0 });
-  if (session.isPending) return <main aria-busy="true">Loading session...</main>;
+  if (session.isPending || session.isFetching) return <main aria-busy="true">Loading session...</main>;
   if (session.isError) return <Navigate to={'/annotator/login?next=' + encodeURIComponent(location.pathname + location.search + location.hash)} replace />;
   return <Outlet />;
 }

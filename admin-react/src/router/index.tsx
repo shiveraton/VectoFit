@@ -18,4 +18,6 @@ export default createBrowserRouter([
     { path: '/annotator', element: <AnnotatorLayout />, children: [{ index: true }, { path: ':id' }] },
   ] },
   { element: <AuthLayout />, children: [{ path: '/login', element: <Login /> }, { path: '/register', element: <Register /> }] },
+  // Vue renders an empty RouterView for unmatched private URLs.
+  { path: '*', element: null },
 ]);

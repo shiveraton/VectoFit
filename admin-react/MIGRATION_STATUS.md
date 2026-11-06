@@ -60,3 +60,22 @@ Rechecked the existing Phase 2 implementation on request; no source-layer omissi
 - Vue and Django source files remain unchanged. No new dependencies or permanent test suite were added during this revalidation.
 
 Phase 2 is complete. Data-page ports and full route parity verification remain pending as documented above.
+
+## Phase 3 completion check — 2026-11-06
+
+Reviewed the existing app shell against the reference routers, layouts and the approved token-auth changes. Completed three corrections:
+
+- PublicGuard now waits during every session refetch, including when React Query retains a previous success. Protected content is not rendered before the current navigation's session check finishes.
+- Unmatched private URLs use an empty fallback, preserving Vue's blank RouterView output instead of React Router's default error screen. This adds no named page or visible 404 UI; public mode retains its explicit 404 page and numeric dataset-id check.
+- Public bundle generation now also rejects AuthLayout, private Login/Register and PrivateGuard/privateSession modules, in addition to the existing admin exclusions.
+
+Verification passed:
+
+- Existing focused auth checks: token persistence, cross-tab synchronization, both roles, missing/invalid tokens, 401/403 handling, network-error retention, malformed role responses, login token response shapes, identity races and query cache clearing.
+- Route matching using React Router: every private shell path has its expected role guard; login/register remain outside those guards; evaluation redirects to models; unmatched private paths render empty without router errors. Public auth routes, annotator routes, numeric ids, catch-all 404s and exclusion of admin routes behave as intended.
+- Public guard checks: loading/refetch blocks Outlet; failure preserves the full path/search/hash in the login next parameter; success permits Outlet; each navigation uses its own session query.
+- All three layout CSS Modules match the source scoped CSS after whitespace normalization. Server-rendered AdminLayout markup retains the skip link, navigation destinations, annotation breadcrumb/current state and collapsed mobile-menu state. This was not a browser or responsive visual check.
+- Public bundle gate accepts public modules and rejects all listed private modules using both Windows and POSIX paths. Generated JS excludes private shell/auth markers in public mode and contains them in private mode.
+- npm run build, npm run build:public and npm run build:private all passed, including their strict TypeScript build step.
+
+Phase 3 is complete. QueryClientProvider is mounted in both entry points; separate entry graphs register only their mode's routes. Vue/backend files and unrelated root changes were left untouched. No permanent test suite was added. Data-route page elements remain intentionally pending Phase 4; full browser/API and visual parity checks remain pending Phase 5.
