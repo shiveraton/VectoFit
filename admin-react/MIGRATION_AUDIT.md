@@ -5317,3 +5317,7 @@ export const trainingService = {
 
 };
 ```
+
+## Approved scope update (2026-11-06)
+User authorized private auth guards and a consistent token condition for admin and annotator. Both private role trees require a persisted token validated by accounts/me, with role-appropriate routing. Both private sign-outs clear the token. Public mode retains its existing cookie/CSRF guard. These are intentional differences from the Vue reference. The Phase 0 stop condition is resolved.
+
