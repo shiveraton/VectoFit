@@ -47,3 +47,16 @@ npm run dev -- --port 5174
 ```
 
 For public-mode comparison, use `npm run dev:public` in each directory with the same respective port arguments. The React app currently supports comparison of authentication/layout behavior only; data pages remain pending.
+
+## Phase 2 revalidation — 2026-11-06
+
+Rechecked the existing Phase 2 implementation on request; no source-layer omissions or unintended rewrites were found.
+
+- SHA-256 comparison: 19 files are byte-identical to the Vue reference: eight service modules (including their types, interfaces and local constants), seven files under src/assets (including the shared stylesheets), two public assets, config/publicAuth.ts and training/configuration/trainingParameters.ts.
+- config/client.ts matches the reference after normalizing line endings and applying only the required getAuthToken import/accessor substitution. Its MODE branches, base URL precedence, endpoints, authorization format and header fallback remain intact. The accessor reads Zustand getState(), not a React hook.
+- Local Axios adapter verification passed for development, production, public and private modes: default base URLs, both VITE URL overrides, token changes between requests, missing-token behavior, public-mode token suppression, AxiosHeaders and plain-object header handling. No HTTP requests were sent.
+- npm run build passed (strict TypeScript project build followed by Vite).
+- No Vue, Pinia or vue-router imports were found in the copied services/configuration. Vue-specific hooks, focus composables and routing remain outside the framework-neutral copy phase. Formatters embedded in those Vue modules require porting with their consumers; they are not standalone source modules that can be copied as-is.
+- Vue and Django source files remain unchanged. No new dependencies or permanent test suite were added during this revalidation.
+
+Phase 2 is complete. Data-page ports and full route parity verification remain pending as documented above.
