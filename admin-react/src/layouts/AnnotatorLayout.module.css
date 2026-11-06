@@ -1,0 +1,73 @@
+﻿
+.annotator-layout {
+  min-height: 100vh;
+  background: var(--vf-background);
+  color: var(--vf-text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.annotator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 76px;
+  padding: 12px 32px;
+  background: #fff;
+  border-bottom: 1px solid var(--vf-border);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo {
+  display: block;
+  width: 145px;
+  max-height: 48px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 28px;
+  background: #e4e4e7;
+}
+
+.brand-label {
+  color: #71717a;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+
+
+
+
+.annotator-main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+@media (max-width: 640px) {
+  .annotator-header {
+    padding: 12px 18px;
+  }
+
+  .brand-logo {
+    width: 115px;
+  }
+
+  .header-brand {
+    gap: 10px;
+  }
+
+  .annotator-main {
+    padding: 20px 16px;
+  }
+}
+
