@@ -4,8 +4,12 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/annotator/:path*/",
+      "destination": "https://vectofit.onrender.com/api/annotator/:path*/"
+    },
+    {
       "source": "/api/annotator/:path*",
-      "destination": "https://vectofit.onrender.com/api/annotator/:path*"
+      "destination": "https://vectofit.onrender.com/api/annotator/:path*/"
     },
     { "source": "/", "destination": "/index.html" },
     { "source": "/annotator", "destination": "/index.html" },
