@@ -86,6 +86,7 @@ export default function DatasetAnnotation(input: {}) {
         const video = videoRef.current;
         if (!video)
             return;
+        setVideoError("");
         video.playbackRate = playbackRate;
         seekToRep();
     }
@@ -156,10 +157,11 @@ export default function DatasetAnnotation(input: {}) {
         <strong data-v-dataset-annotation="">{display(pendingReviewCount)}</strong></div></section>
         <div data-v-dataset-annotation="" className={cx("annotation-workspace")}><section data-v-dataset-annotation="" className={cx("annotation-card video-panel")}><div data-v-dataset-annotation="" className={cx("video-source-meta")}><span data-v-dataset-annotation="">{"Current video: "}</span>
         <strong data-v-dataset-annotation="">{display(activeVideoLabel)}</strong></div>
-            {(activeVideoUrl) ? (<video data-v-dataset-annotation="" key={activeVideoUrl} ref={videoRef} src={activeVideoUrl} controls playsInline onLoadedMetadata={handleVideoLoadedMetadata} onTimeUpdate={handleTimeUpdate}></video>) : (<div data-v-dataset-annotation="" className={cx("video-unavailable")}><strong data-v-dataset-annotation="">{"Source video unavailable"}</strong>
+            {(activeVideoUrl) ? (<video data-v-dataset-annotation="" key={activeVideoUrl} ref={videoRef} src={activeVideoUrl} controls playsInline preload="metadata" onError={() => setVideoError("Unable to load this video. Retry, or return to the dataset list.")} onLoadedMetadata={handleVideoLoadedMetadata} onTimeUpdate={handleTimeUpdate}></video>) : (<div data-v-dataset-annotation="" className={cx("video-unavailable")}><strong data-v-dataset-annotation="">{"Source video unavailable"}</strong>
             <p data-v-dataset-annotation="">{" This repetition does not have a playable video URL. Check the imported video's processing status. "}</p></div>)}
-        {(videoError) ? (<p data-v-dataset-annotation="" className={cx("video-error")}>{display(videoError)}</p>) : (null)}
+        {(videoError) ? (<p data-v-dataset-annotation="" className={cx("video-error")} role="alert">{display(videoError)}</p>) : (null)}
         <div data-v-dataset-annotation="" className={cx("video-controls")}><button data-v-dataset-annotation="" type="button" disabled={isSaving || currentIndex === 0} onClick={() => previous()}>{" Previous "}</button>
+        {videoError && activeVideoUrl && <button type="button" onClick={() => { setVideoError(""); videoRef.current?.load(); }}>Retry video</button>}
         <button data-v-dataset-annotation="" type="button" disabled={!activeVideoUrl} onClick={() => playRep()}>{" Play Rep "}</button>
         <button data-v-dataset-annotation="" type="button" disabled={isSaving || currentIndex >= samples.length - 1} onClick={() => next()}>{" Next "}</button>
         <select data-v-dataset-annotation="" value={playbackRate ?? ''} onChange={(event) => setPlaybackRate(Number(event.target.value))} aria-label="Playback speed"><option data-v-dataset-annotation="" value={0.5}>{"0.5×"}</option>

@@ -1,14 +1,10 @@
-import mimetypes
-from pathlib import Path
-from urllib.parse import quote
-
 import cv2
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -24,6 +20,7 @@ from rest_framework.views import APIView
 from apps.accounts.models import Profile
 from apps.datasets.models import Dataset, KneeAnnotation
 from apps.datasets.services.assignments import assigned_review_samples
+from apps.datasets.services.media import protected_file_response
 from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.annotation import latest_annotation
 from apps.datasets.services.knee_label import knee_target
@@ -147,7 +144,10 @@ class LogoutView(PublicView):
 
 def eligible_samples(user):
     return assigned_review_samples(user).select_related(
-        "dataset", "rep_assessment", "dataset_video__participant", "dataset_video__view_angle",
+        "dataset",
+        "rep_assessment",
+        "dataset_video__participant",
+        "dataset_video__view_angle",
     )
 
 
@@ -259,7 +259,8 @@ class RatingView(PublicView):
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             sample = get_object_or_404(
-                eligible_samples(request.user).select_for_update(of=("self",)), pk=sample_id
+                eligible_samples(request.user).select_for_update(of=("self",)),
+                pk=sample_id,
             )
             # Append a tombstone when clearing; preserve every other rater and history.
             KneeAnnotation.objects.create(
@@ -272,22 +273,11 @@ class RatingView(PublicView):
 
 class VideoView(PublicView):
     def get(self, request, video_id):
-        sample = eligible_samples(request.user).filter(dataset_video_id=video_id).first()
+        sample = (
+            eligible_samples(request.user).filter(dataset_video_id=video_id).first()
+        )
         if sample is None:
             raise Http404
         file = sample.dataset_video.video_file
-        media_root = Path(settings.MEDIA_ROOT).resolve()
-        path = Path(file.path).resolve()
-        if not path.is_relative_to(media_root) or not path.is_file():
-            raise Http404
-        response = HttpResponse(
-            content_type=mimetypes.guess_type(path.name)[0]
-            or "application/octet-stream"
-        )
-        response["X-Accel-Redirect"] = "/_protected_media/" + quote(
-            path.relative_to(media_root).as_posix(), safe="/"
-        )
-        response["Content-Disposition"] = (
-            'inline; filename="review-video' + path.suffix.lower() + '"'
-        )
-        return response
+        suffix = file.name.rsplit(".", 1)[-1].lower() if "." in file.name else "bin"
+        return protected_file_response(request, file, filename=f"review-video.{suffix}")

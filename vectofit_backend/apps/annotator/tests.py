@@ -73,7 +73,9 @@ class AssignmentAccessTests(APITestCase):
             Path(directory, "assignment.mp4").write_bytes(b"test-video")
             response = self.client.get(self.base + f"videos/{self.video.pk}/")
             self.assertEqual(response.status_code, 200)
-            self.assertIn("X-Accel-Redirect", response)
+            self.assertNotIn("X-Accel-Redirect", response)
+            self.assertEqual(b"".join(response.streaming_content), b"test-video")
+            response.close()
 
     def test_revocation_denies_all_endpoints_and_preserves_ratings(self):
         record = KneeAnnotation.objects.create(sample=self.sample, annotator=self.user, annotation=None)

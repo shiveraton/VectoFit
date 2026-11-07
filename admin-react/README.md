@@ -20,7 +20,7 @@ On Render, add `https://vecto-eopvoc8oa-st4lwart.vercel.app` to `CSRF_TRUSTED_OR
 
 Verify through the Vercel domain: `/api/annotator/csrf/` must return JSON and set a CSRF cookie; anonymous `/api/annotator/me/` and `/api/annotator/datasets/` must return 403. Then verify registration, sign-in, refresh, and sign-out in a browser. HTML from any API URL indicates incorrect routing or an older deployment.
 
-Video delivery currently requires an Nginx upstream that handles `X-Accel-Redirect` and the internal `/_protected_media/` location in `deploy/annotator/nginx.conf`. A direct Gunicorn Render service does not implement that file delivery mechanism.
+Protected playback streams through Django on Render; Nginx `X-Accel-Redirect` is no longer required. The public video endpoint checks the logged-in annotator and active assignment on each request, supports single byte ranges for seeking, and sends private/no-store responses. Keep the same-origin `/api/annotator/*` proxy. Render must have persistent media storage mounted at `MEDIA_ROOT`, containing the files referenced by the dataset records. Local uploads do not automatically exist on Render. Session FPS extraction still requires local file paths.
 
 Private admin and annotator workspaces use the same validated token condition and role guard; both private sign-outs clear the token and cached data. Public mode uses the existing cookie/CSRF API. `/evaluation` continues to redirect to `/models`; unregistered source components have not gained routes.
 

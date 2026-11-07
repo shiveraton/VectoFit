@@ -1,8 +1,8 @@
-import mimetypes
-import re
 from django.contrib.auth import get_user_model
 from django.core import signing
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework.permissions import AllowAny
@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from apps.accounts.roles import is_annotator
 
 from .models import Dataset, DatasetAnnotatorAssignment, DatasetVideo
+from .services.media import protected_file_response
 
 MEDIA_SIGNING_SALT = "vectofit.dataset-media"
 MEDIA_URL_MAX_AGE_SECONDS = 15 * 60
@@ -42,6 +43,7 @@ def signed_dataset_media_url(request, kind, object_id, dataset):
     return request.build_absolute_uri(f"{path}?token={token}")
 
 
+@method_decorator(never_cache, name="dispatch")
 class DatasetMediaView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -95,67 +97,4 @@ class DatasetMediaView(APIView):
             if not has_access:
                 return HttpResponse(status=404)
 
-        if not media_file:
-            return HttpResponse(status=404)
-
-        file_handle = media_file.open("rb")
-        file_size = media_file.size
-        content_type = (
-            mimetypes.guess_type(media_file.name)[0] or "application/octet-stream"
-        )
-        range_header = request.headers.get("Range")
-
-        if not range_header:
-            response = FileResponse(file_handle, content_type=content_type)
-            response["Accept-Ranges"] = "bytes"
-            response["Cache-Control"] = "private, no-store"
-            return response
-
-        match = re.fullmatch(r"bytes=(\d*)-(\d*)", range_header.strip())
-        if match is None or file_size == 0:
-            file_handle.close()
-            response = HttpResponse(status=416)
-            response["Content-Range"] = f"bytes */{file_size}"
-            return response
-
-        first, last = match.groups()
-        if first:
-            start = int(first)
-            end = int(last) if last else file_size - 1
-        else:
-            suffix_length = int(last or 0)
-            start = max(file_size - suffix_length, 0)
-            end = file_size - 1
-
-        if start >= file_size or end < start:
-            file_handle.close()
-            response = HttpResponse(status=416)
-            response["Content-Range"] = f"bytes */{file_size}"
-            return response
-
-        end = min(end, file_size - 1)
-        file_handle.seek(start)
-        remaining = end - start + 1
-
-        def stream_range():
-            nonlocal remaining
-            try:
-                while remaining:
-                    chunk = file_handle.read(min(64 * 1024, remaining))
-                    if not chunk:
-                        break
-                    remaining -= len(chunk)
-                    yield chunk
-            finally:
-                file_handle.close()
-
-        response = StreamingHttpResponse(
-            stream_range(),
-            status=206,
-            content_type=content_type,
-        )
-        response["Accept-Ranges"] = "bytes"
-        response["Content-Range"] = f"bytes {start}-{end}/{file_size}"
-        response["Content-Length"] = str(end - start + 1)
-        response["Cache-Control"] = "private, no-store"
-        return response
+        return protected_file_response(request, media_file)
