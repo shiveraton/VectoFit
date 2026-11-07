@@ -4,6 +4,7 @@ export const publicClient = axios.create({
   baseURL: `${(import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "")}/annotator/`,
   xsrfCookieName: "csrftoken",
   xsrfHeaderName: "X-CSRFToken",
+  timeout: 15000,
 });
 
 publicClient.interceptors.response.use((response) => {
@@ -23,8 +24,8 @@ export function validateIdentity(data: unknown) {
   return data;
 }
 
-export async function getPublicSession() {
-  const { data } = await publicClient.get<unknown>('me/');
+export async function getPublicSession(signal?: AbortSignal) {
+  const { data } = await publicClient.get<unknown>('me/', { signal });
   return validateIdentity(data);
 }
 
