@@ -67,6 +67,10 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ] if DEBUG else [],
 )
 
+# Dashboard values may contain spaces or newlines after comma separators.
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS if origin.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS if origin.strip()]
+
 if not DEBUG and (
     not ALLOWED_HOSTS
     or "*" in ALLOWED_HOSTS
