@@ -39,6 +39,12 @@ ALLOWED_HOSTS = env.list(
     default=["127.0.0.1", "localhost"] if DEBUG else [],
 )
 
+# Render supplies the exact public hostname for this service (without a scheme).
+# Keep explicit hosts for custom domains and other deployment environments.
+RENDER_EXTERNAL_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default="").strip()
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=[
