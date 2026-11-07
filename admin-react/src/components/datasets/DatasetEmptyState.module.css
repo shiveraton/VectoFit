@@ -1,0 +1,27 @@
+
+.empty-state[data-v-dataset-empty-state] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 52px 20px 56px;
+  text-align: center;
+}
+.empty-state h3[data-v-dataset-empty-state] {
+  margin: 0 0 7px;
+  color: var(--vf-dark, #18181b);
+  font-size: 16px;
+  font-weight: 700;
+}
+.empty-state p[data-v-dataset-empty-state] {
+  max-width: 390px;
+  margin: 0 auto 20px;
+  color: var(--vf-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.button-icon[data-v-dataset-empty-state] {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+}
+

@@ -1,0 +1,80 @@
+
+.structure-grid[data-v-structure-grid] {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.structure-item[data-v-structure-grid] {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 86px;
+  padding: 17px 22px;
+  border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
+  transition: background 0.18s ease;
+}
+.structure-item[data-v-structure-grid]:hover {
+  background: #fffaf6;
+}
+.structure-item[data-v-structure-grid]:nth-child(odd) {
+  border-right: 1px solid var(--vf-border-light, #f1f1f2);
+}
+.structure-item[data-v-structure-grid]:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+.structure-icon[data-v-structure-grid] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.feature-icon[data-v-structure-grid],
+.sample-icon[data-v-structure-grid] {
+  color: var(--vf-orange-dark, #ea580c);
+  background: var(--vf-orange-soft, #fff7ed);
+}
+.target-icon[data-v-structure-grid] {
+  color: #b45309;
+  background: #fffbeb;
+}
+.error-icon[data-v-structure-grid] {
+  color: var(--vf-red, #ef4444);
+  background: var(--vf-red-soft, #fef2f2);
+}
+.structure-content[data-v-structure-grid] {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.structure-title[data-v-structure-grid] {
+  color: var(--vf-muted, #71717a);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.structure-value[data-v-structure-grid] {
+  color: var(--vf-text, #27272a);
+  font-size: 14px;
+  font-weight: 500;
+}
+@media (max-width: 700px) {
+.structure-grid[data-v-structure-grid] {
+    grid-template-columns: 1fr;
+}
+.structure-item[data-v-structure-grid]:nth-child(odd) {
+    border-right: none;
+}
+.structure-item[data-v-structure-grid]:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--vf-border-light, #f1f1f2);
+}
+.structure-item[data-v-structure-grid]:last-child {
+    border-bottom: none;
+}
+}
+

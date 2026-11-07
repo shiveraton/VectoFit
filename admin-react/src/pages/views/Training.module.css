@@ -1,0 +1,54 @@
+
+.history-card[data-v-training] {
+  margin-bottom: 20px;
+}
+.job-select[data-v-training] {
+  min-width: 280px;
+  max-width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--vf-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--vf-text);
+  font: inherit;
+  font-size: 13px;
+}
+.history-empty[data-v-training] {
+  margin: 0;
+  padding: 18px 22px;
+  color: var(--vf-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.loading-state[data-v-training] {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 26px 22px;
+  color: var(--vf-muted);
+  font-size: 12px;
+}
+.loading-dot[data-v-training] {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vf-orange);
+  animation: pulse-training 1s ease-in-out infinite;
+}
+@keyframes pulse-training {
+0%,
+  100% {
+    opacity: 0.35;
+}
+50% {
+    opacity: 1;
+}
+}
+@media (max-width: 700px) {
+.job-select[data-v-training] {
+    width: 100%;
+    min-width: 0;
+}
+}
+
+

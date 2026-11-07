@@ -1,0 +1,120 @@
+
+.configuration-section[data-v-view-angle-selector] {
+  padding: 24px 22px;
+  border-bottom: 1px solid var(--vf-border-light);
+}
+.wide-section[data-v-view-angle-selector] {
+  grid-column: 1 / -1;
+}
+.configuration-label[data-v-view-angle-selector] {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 15px;
+}
+.configuration-number[data-v-view-angle-selector] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border: 1px solid #fed7aa;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.configuration-label strong[data-v-view-angle-selector],
+.configuration-label span[data-v-view-angle-selector] {
+  display: block;
+}
+.configuration-label strong[data-v-view-angle-selector] {
+  color: var(--vf-text);
+  font-size: 12px;
+}
+.configuration-label div > span[data-v-view-angle-selector] {
+  margin-top: 4px;
+  color: var(--vf-light-muted);
+  font-size: 12px;
+}
+.view-options[data-v-view-angle-selector] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.view-option[data-v-view-angle-selector] {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 9px;
+  cursor: default;
+}
+.view-option.selected[data-v-view-angle-selector] {
+  background: #fffaf6;
+  border-color: #fb923c;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.08);
+}
+.view-icon[data-v-view-angle-selector] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  color: var(--vf-orange-dark);
+  background: var(--vf-orange-soft);
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.view-copy[data-v-view-angle-selector] {
+  min-width: 0;
+  flex: 1;
+}
+.view-copy strong[data-v-view-angle-selector],
+.view-copy small[data-v-view-angle-selector],
+.view-copy > span[data-v-view-angle-selector] {
+  display: block;
+}
+.view-copy strong[data-v-view-angle-selector] {
+  color: var(--vf-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+.view-copy small[data-v-view-angle-selector] {
+  margin-top: 2px;
+  color: var(--vf-orange-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+.view-copy > span[data-v-view-angle-selector] {
+  margin-top: 6px;
+  color: var(--vf-light-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.view-indicator[data-v-view-angle-selector] {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border: 1.5px solid #d4d4d8;
+  border-radius: 50%;
+}
+.selected .view-indicator[data-v-view-angle-selector] {
+  border: 3px solid #fb923c;
+  box-shadow: inset 0 0 0 1px #ffffff;
+}
+@media (max-width: 800px) {
+.view-options[data-v-view-angle-selector] {
+    grid-template-columns: 1fr;
+}
+}
+

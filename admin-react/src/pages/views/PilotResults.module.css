@@ -1,0 +1,21 @@
+
+h1[data-v-pilot-results] { margin: 8px 0;
+}
+h2[data-v-pilot-results] { margin-top: 0; font-size: 1rem;
+}
+p[data-v-pilot-results] { color: var(--vf-muted);
+}
+.panel[data-v-pilot-results] { margin-bottom: 18px; padding: 20px; background: #fff; border: 1px solid var(--vf-border); border-radius: 10px; overflow-x: auto;
+}
+.metadata[data-v-pilot-results] { display: flex; flex-wrap: wrap; gap: 20px;
+}
+.message[data-v-pilot-results] { color: #b42318;
+}
+table[data-v-pilot-results] { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;
+}
+th[data-v-pilot-results], td[data-v-pilot-results] { padding: 10px; border-bottom: 1px solid var(--vf-border); vertical-align: top;
+}
+th[data-v-pilot-results] { color: var(--vf-muted); font-size: 0.72rem; text-transform: uppercase;
+}
+
+

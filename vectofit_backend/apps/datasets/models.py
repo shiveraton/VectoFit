@@ -8,10 +8,7 @@ from django.db.models import Q
 
 def dataset_upload_to(instance, filename):
     safe_name = PurePosixPath(filename.replace("\\", "/")).name
-    return (
-        f"dataset_videos/dataset_{instance.dataset_id}"
-        f"{uuid.uuid4().hex}_{safe_name}"
-    )
+    return f"dataset_videos/dataset_{instance.dataset_id}{uuid.uuid4().hex}_{safe_name}"
 
 
 class Participant(models.Model):
@@ -171,6 +168,27 @@ class DatasetSample(models.Model):
     def __str__(self):
         label = "unlabelled" if self.is_correct is None else str(self.is_correct)
         return f"DatasetSample(dataset={self.dataset_id}, label={label})"
+
+
+class DatasetAnnotatorAssignment(models.Model):
+    dataset = models.ForeignKey(
+        Dataset,
+        on_delete=models.CASCADE,
+        related_name="annotator_assignments",
+    )
+    annotator = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        related_name="dataset_assignments",
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("dataset", "annotator")
+        ordering: ClassVar[list] = ["-assigned_at"]
+
+    def __str__(self):
+        return f"Dataset {self.dataset_id} assigned to {self.annotator.username}"
 
 
 class KneeAnnotation(models.Model):
