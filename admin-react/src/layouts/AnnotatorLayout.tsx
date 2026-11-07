@@ -13,12 +13,14 @@ export default function AnnotatorLayout() {
         if (import.meta.env.MODE === 'public') {
             try {
                 await publicLogout();
+            }
+            catch {
+                window.alert('The server could not confirm sign out. Your session may still be active.');
+            }
+            finally {
                 await cache.cancelQueries();
                 cache.clear();
                 await navigate('/annotator/login', { replace: true });
-            }
-            catch {
-                window.alert('Sign out failed. Please try again.');
             }
             return;
         }

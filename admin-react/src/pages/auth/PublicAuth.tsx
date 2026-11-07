@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
-import { initializeCsrf, publicClient } from '../../config/publicAuth';
+import { initializeCsrf, publicClient, validateIdentity } from '../../config/publicAuth';
 import styles from './PublicAuth.module.css';
 export default function PublicAuth() {
   const location = useLocation(); const navigate = useNavigate(); const [params] = useSearchParams();
@@ -13,7 +13,9 @@ export default function PublicAuth() {
   const submit = useMutation({ mutationFn: async () => {
     await initializeCsrf();
     if (registering) await publicClient.post('register/', { username, email, password, confirm_password: confirmation, invitation_code: invitation });
-    const { data } = await publicClient.post<{ csrfToken: string }>('login/', { username, password });
+    const { data } = await publicClient.post('login/', { username, password });
+    validateIdentity(data);
+    if (typeof data.csrfToken !== 'string' || !data.csrfToken) throw new Error('Invalid sign-in response.');
     publicClient.defaults.headers.common['X-CSRFToken'] = data.csrfToken;
     setPassword(''); setConfirmation(''); setInvitation('');
     await navigate(next, { replace: true });

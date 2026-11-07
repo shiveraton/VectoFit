@@ -12,7 +12,11 @@ export default function AnnotatorHome(input: {}) {
     const cx = bindStyles(styles);
     const navigate = useNavigate();
     const router = { push: navigate };
-    const query = useQuery({ queryKey: queryKeys.annotationDatasets, queryFn: async () => { const response = await client.get<AnnotationDataset[]>(import.meta.env.MODE === 'public' ? '/annotator/datasets/' : '/datasets/annotation-datasets/'); return response.data; } });
+    const query = useQuery({ queryKey: queryKeys.annotationDatasets, queryFn: async () => { const response = await client.get<AnnotationDataset[]>(import.meta.env.MODE === 'public' ? '/annotator/datasets/' : '/datasets/annotation-datasets/'); const data: unknown = response.data;
+        if (!Array.isArray(data) || !data.every(item => item && typeof item === 'object' && Number.isInteger(item.id) && item.id > 0 && typeof item.name === 'string')) {
+            throw new Error('Invalid annotation dataset response.');
+        }
+        return data as AnnotationDataset[]; } });
     const datasets = query.data ?? [];
     const error = query.error ? 'Unable to load annotation datasets.' : null;
     const isLoading = query.isFetching;
