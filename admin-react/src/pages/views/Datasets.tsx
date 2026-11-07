@@ -4,6 +4,7 @@ import { useDatasets } from "../../hooks/useDatasets";
 import { useParticipants } from "../../hooks/useParticipants";
 import { useAnnotationPool } from "../../hooks/useAnnotationPool";
 import { VIEW_ANGLE_BY_ID, type Dataset } from "../../services/datasetService";
+import DatasetAssignments from "../../components/datasets/DatasetAssignments";
 import SummaryCard from "../../components/datasets/SummaryCard";
 import DatasetEmptyState from "../../components/datasets/DatasetEmptyState";
 import StructureGrid from "../../components/datasets/StructureGrid";
@@ -24,6 +25,7 @@ export default function Datasets(input: {}) {
     const { participants, createParticipant } = useParticipants();
     const { filteredJobs, selectedJob, setSearch: setAnnotationSearch, search: annotationSearch, setStatusFilter: setAnnotationStatusFilter, statusFilter: annotationStatusFilter, isLoading: isAnnotationPoolLoading, error: annotationPoolError, fetchJobs: fetchAnnotationJobs, selectJob, clearSelection, } = useAnnotationPool();
     const [activeTab, setActiveTab] = useState<"datasets" | "annotation-pool">("datasets");
+    const [accessDataset, setAccessDataset] = useState<Dataset | null>(null);
     const reviewMetrics = (dataset: Dataset) => dataset as Dataset & DatasetReviewMetrics;
     const hasSamples = (dataset: Dataset) => dataset.sample_count > 0;
     const hasUnlabelledSamples = (dataset: Dataset) => dataset.sample_count > dataset.labelled_sample_count;
@@ -190,7 +192,7 @@ export default function Datasets(input: {}) {
                 <td data-v-datasets=""><span data-v-datasets="" className={cx("status-badge", `status-${dataset.status.toLowerCase()}`)}>{(dataset.status === 'PROCESSING') ? (<span data-v-datasets=""></span>) : (null)}
                 {" "}
                 {display(dataset.status)}</span></td>
-                <td data-v-datasets=""><div data-v-datasets="" className={cx("action-cell")}>{(isAnnotationReady(dataset)) ? (<button data-v-datasets="" type="button" onClick={() => { openAnnotation(dataset.id); }} className={cx("action-button")}>{" Annotate "}</button>) : ((dataset.status === 'READY' && isReviewComplete(dataset)) ? (<span data-v-datasets="" className={cx("action-complete")}>{display(isZipCollection(dataset) ? "Review complete" : "Complete")}</span>) : ((dataset.status === 'READY' && isZipCollection(dataset)) ? (<span data-v-datasets="" title="ZIP folder labels are source labels. Manual-review completion is tracked separately." className={cx("muted-value")}>{display(zipReviewStatus(dataset))}</span>) : ((dataset.status === 'PROCESSING') ? (<span data-v-datasets="" className={cx("processing-state")}><span data-v-datasets="" className={cx("processing-spinner")}></span></span>) : ((isZipCollection(dataset) &&
+                <td data-v-datasets=""><div data-v-datasets="" className={cx("action-cell")}><button type="button" className={cx("action-button")} data-assignment-id={dataset.id} aria-label={`Manage access for ${dataset.name}`} onClick={() => setAccessDataset(dataset)}>Manage access</button>{(isAnnotationReady(dataset)) ? (<button data-v-datasets="" type="button" onClick={() => { openAnnotation(dataset.id); }} className={cx("action-button")}>{" Annotate "}</button>) : ((dataset.status === 'READY' && isReviewComplete(dataset)) ? (<span data-v-datasets="" className={cx("action-complete")}>{display(isZipCollection(dataset) ? "Review complete" : "Complete")}</span>) : ((dataset.status === 'READY' && isZipCollection(dataset)) ? (<span data-v-datasets="" title="ZIP folder labels are source labels. Manual-review completion is tracked separately." className={cx("muted-value")}>{display(zipReviewStatus(dataset))}</span>) : ((dataset.status === 'PROCESSING') ? (<span data-v-datasets="" className={cx("processing-state")}><span data-v-datasets="" className={cx("processing-spinner")}></span></span>) : ((isZipCollection(dataset) &&
                         ['PARTIAL', 'FAILED'].includes(dataset.status)) ? (<span data-v-datasets="" title={`${dataset.failed_video_count ?? 0} video(s) failed processing`} className={cx("muted-value")}>{" Check videos "}</span>) : ((dataset.status === 'FAILED' && !isZipCollection(dataset)) ? (<button data-v-datasets="" type="button" onClick={() => { handleRetryDataset(dataset.id); }} className={cx("action-button retry-button")}>{" Retry "}</button>) : ((dataset.status === 'PENDING') ? (<span data-v-datasets="" className={cx("muted-value")}>{" Queued "}</span>) : (<span data-v-datasets="" className={cx("muted-value")}></span>)))))))}</div></td></tr>))}</tbody></table></div>))}</section>) : (null)}
         {(activeTab === 'datasets') ? (<section data-v-datasets="" className={cx("content-card")}><div data-v-datasets="" className={cx("section-header")}><div data-v-datasets="" className={cx("section-title-row")}><div data-v-datasets="" className={cx("section-marker")}></div>
         <div data-v-datasets=""><h2 data-v-datasets="">{"Dataset Structure"}</h2>
@@ -257,6 +259,7 @@ export default function Datasets(input: {}) {
                             {display(activity.annotation.notes)}</span>) : (<span data-v-datasets="">{"Rating cleared"}</span>)}
                         <span data-v-datasets="">{display(activity.rubric_version)}</span></div>
                         <time data-v-datasets="" dateTime={activity.created_at}>{display(formatActivityDate(activity.created_at))}</time></li>))}</ul>)}</aside>) : (null)}</div>)))}</section>)}
+    {activeTab === "datasets" && accessDataset && <DatasetAssignments key={accessDataset.id} dataset={accessDataset} onClose={() => { setAccessDataset(null); document.querySelector<HTMLButtonElement>(`button[data-assignment-id="${accessDataset.id}"]`)?.focus(); }} />}
     <CreateDatasetModal onFormChange={setDatasetForm} data-v-datasets="" isOpen={isModalOpen} isSubmitting={isCreating} form={datasetForm} participants={participants} onCreateParticipant={handleAddParticipant} onClose={closeCreateModal} onSubmit={handleCreateDataset}></CreateDatasetModal>
     <DatasetImportModal data-v-datasets="" isOpen={isImportModalOpen} onClose={() => { setIsImportModalOpen(false); }} onImported={handleBulkImported}></DatasetImportModal></div></>);
 }

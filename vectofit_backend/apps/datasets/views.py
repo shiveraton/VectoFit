@@ -31,6 +31,7 @@ from .services.bulk_import import create_archive_preview
 from .services.import_executor import execute_bulk_import
 from .services.tasks import process_dataset_video_task
 from .permissions import IsAnnotator
+from .services.assignments import assigned_review_samples
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,9 @@ class DatasetViewSet(viewsets.ModelViewSet):
         if dataset.videos.exists():
             samples = samples.filter(dataset_video__requires_manual_review=True)
 
+        if not request.user.is_staff:
+            samples = samples.filter(pk__in=assigned_review_samples(request.user).values("pk"))
+
         samples = samples.order_by(
             "dataset_video__participant__participant_code",
             Case(
@@ -178,6 +182,12 @@ class DatasetViewSet(viewsets.ModelViewSet):
             }
         )
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == "annotation" and not self.request.user.is_staff:
+            queryset = queryset.filter(pk__in=assigned_review_samples(self.request.user).values("dataset_id"))
+        return queryset
+
     lookup_value_regex = r"\d+"
     queryset = Dataset.objects.all().order_by("-created_at")
     serializer_class = DatasetSerializer
@@ -214,6 +224,8 @@ class DatasetSampleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(pk__in=assigned_review_samples(self.request.user).values("pk"))
 
         dataset_id = self.request.query_params.get("dataset")
 
@@ -377,6 +389,8 @@ class AnnotationDatasetListView(APIView):
             status="READY",
             samples__dataset_video__requires_manual_review=True,
         ).distinct().order_by("name")
+        if not request.user.is_staff:
+            datasets = datasets.filter(pk__in=assigned_review_samples(request.user).values("dataset_id"))
         return Response(
             [{"id": item.pk, "name": item.name} for item in datasets]
         )

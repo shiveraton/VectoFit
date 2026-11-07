@@ -8,7 +8,6 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import F
 from django.http import Http404, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
@@ -23,7 +22,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import Profile
-from apps.datasets.models import Dataset, DatasetAnnotatorAssignment, DatasetSample, KneeAnnotation
+from apps.datasets.models import Dataset, KneeAnnotation
+from apps.datasets.services.assignments import assigned_review_samples
 from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.annotation import latest_annotation
 from apps.datasets.services.knee_label import knee_target
@@ -146,20 +146,8 @@ class LogoutView(PublicView):
 
 
 def eligible_samples(user):
-    assignments = DatasetAnnotatorAssignment.objects.filter(
-        annotator=user, is_active=True,
-    ).values("dataset_id")
-    return DatasetSample.objects.filter(
-        dataset_id__in=assignments,
-        dataset__status="READY",
-        dataset_video__status="READY",
-        dataset_video__requires_manual_review=True,
-        dataset_video__dataset_id=F("dataset_id"),
-    ).select_related(
-        "dataset",
-        "rep_assessment",
-        "dataset_video__participant",
-        "dataset_video__view_angle",
+    return assigned_review_samples(user).select_related(
+        "dataset", "rep_assessment", "dataset_video__participant", "dataset_video__view_angle",
     )
 
 

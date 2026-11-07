@@ -193,7 +193,7 @@ class KneeAnnotationAPITests(APITestCase):
         self.assertEqual(response.data[0]["activity_count"], 1)
         self.assertEqual(response.data[0]["activity"][0]["sample_id"], self.sample.id)
 
-    def test_annotator_can_use_shared_annotation_pool(self):
+    def test_unassigned_annotator_cannot_use_shared_annotation_pool(self):
         annotator = User.objects.create_user(
             username="public-annotator",
             email="public@example.com",
@@ -219,13 +219,13 @@ class KneeAnnotationAPITests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
         self.assertEqual(
             KneeAnnotation.objects.filter(
                 sample=self.sample,
                 annotator=annotator,
             ).count(),
-            1,
+            0,
         )
 
     def test_regular_user_cannot_annotate(self):

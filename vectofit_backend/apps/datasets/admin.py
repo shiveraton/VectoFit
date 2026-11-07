@@ -2,7 +2,13 @@ from typing import ClassVar
 
 from django.contrib import admin
 
-from .models import Dataset, DatasetAnnotatorAssignment, DatasetSample, Participant, ViewAngle
+from .models import (
+    Dataset,
+    DatasetAnnotatorAssignment,
+    DatasetSample,
+    Participant,
+    ViewAngle,
+)
 
 
 @admin.register(DatasetAnnotatorAssignment)
@@ -14,12 +20,32 @@ class DatasetAnnotatorAssignmentAdmin(admin.ModelAdmin):
     readonly_fields = ("assigned_at",)
     list_select_related = ("dataset", "annotator")
 
+    def get_readonly_fields(self, request, obj=None):
+        return ("assigned_at", "dataset", "annotator") if obj else ("assigned_at",)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def save_model(self, request, obj, form, change):
+        from .services.assignments import set_assignment
+
+        saved = set_assignment(obj.dataset, obj.annotator, obj.is_active, request.user)
+        if saved is None:
+            super().save_model(request, obj, form, change)
+        else:
+            obj.pk = saved.pk
+            obj.assigned_at = saved.assigned_at
+            obj._state.adding = False
+            obj._state.db = saved._state.db
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "annotator":
             from django.contrib.auth import get_user_model
 
             kwargs["queryset"] = get_user_model().objects.filter(
-                is_active=True, is_staff=False, is_superuser=False,
+                is_active=True,
+                is_staff=False,
+                is_superuser=False,
                 profile__is_annotator=True,
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

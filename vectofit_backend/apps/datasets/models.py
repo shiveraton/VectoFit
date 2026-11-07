@@ -191,7 +191,7 @@ class DatasetAnnotatorAssignment(models.Model):
         from django.core.exceptions import ValidationError
 
         super().clean()
-        if self.annotator_id:
+        if self.annotator_id and self.is_active:
             user = self.annotator
             if (
                 not user.is_active or user.is_staff or user.is_superuser
@@ -205,6 +205,24 @@ class DatasetAnnotatorAssignment(models.Model):
 
     def __str__(self):
         return f"Dataset {self.dataset_id} assigned to {self.annotator.username}"
+
+
+class DatasetAssignmentEvent(models.Model):
+    class Action(models.TextChoices):
+        GRANTED = "granted", "Granted"
+        REVOKED = "revoked", "Revoked"
+
+    assignment = models.ForeignKey(
+        DatasetAnnotatorAssignment, on_delete=models.CASCADE, related_name="events",
+    )
+    actor = models.ForeignKey(
+        "auth.User", on_delete=models.SET_NULL, null=True, related_name="dataset_assignment_events",
+    )
+    action = models.CharField(max_length=12, choices=Action.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering: ClassVar[list] = ["-created_at", "-id"]
 
 
 class KneeAnnotation(models.Model):
