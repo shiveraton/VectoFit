@@ -20,7 +20,6 @@ db.sqlite3
 media/
 staticfiles/
 *.md
-!docs/dataset-assignment-plan.md
 
 # Local settings
 local_settings.py
