@@ -2,7 +2,27 @@ from typing import ClassVar
 
 from django.contrib import admin
 
-from .models import Dataset, DatasetSample, Participant, ViewAngle
+from .models import Dataset, DatasetAnnotatorAssignment, DatasetSample, Participant, ViewAngle
+
+
+@admin.register(DatasetAnnotatorAssignment)
+class DatasetAnnotatorAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("dataset", "annotator", "is_active", "assigned_at")
+    list_filter = ("is_active", "dataset")
+    search_fields = ("dataset__name", "annotator__username")
+    autocomplete_fields = ("dataset", "annotator")
+    readonly_fields = ("assigned_at",)
+    list_select_related = ("dataset", "annotator")
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "annotator":
+            from django.contrib.auth import get_user_model
+
+            kwargs["queryset"] = get_user_model().objects.filter(
+                is_active=True, is_staff=False, is_superuser=False,
+                profile__is_annotator=True,
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Participant)

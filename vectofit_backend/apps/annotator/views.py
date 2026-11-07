@@ -23,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import Profile
-from apps.datasets.models import Dataset, DatasetSample, KneeAnnotation
+from apps.datasets.models import Dataset, DatasetAnnotatorAssignment, DatasetSample, KneeAnnotation
 from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.annotation import latest_annotation
 from apps.datasets.services.knee_label import knee_target
@@ -145,8 +145,12 @@ class LogoutView(PublicView):
         return Response({"detail": "Signed out."})
 
 
-def eligible_samples():
+def eligible_samples(user):
+    assignments = DatasetAnnotatorAssignment.objects.filter(
+        annotator=user, is_active=True,
+    ).values("dataset_id")
     return DatasetSample.objects.filter(
+        dataset_id__in=assignments,
         dataset__status="READY",
         dataset_video__status="READY",
         dataset_video__requires_manual_review=True,
@@ -186,7 +190,7 @@ def sample_data(sample, user, fps=None):
 
 class DatasetListView(PublicView):
     def get(self, request):
-        ids = eligible_samples().values("dataset_id")
+        ids = eligible_samples(request.user).values("dataset_id")
         return Response(
             [
                 {"id": dataset.pk, "name": f"Dataset {dataset.pk}"}
@@ -198,7 +202,7 @@ class DatasetListView(PublicView):
 class SessionView(PublicView):
     def get(self, request, dataset_id):
         samples = list(
-            eligible_samples()
+            eligible_samples(request.user)
             .filter(dataset_id=dataset_id)
             .order_by("dataset_video_id", "rep_assessment__rep_number", "id")
         )
@@ -267,7 +271,7 @@ class RatingView(PublicView):
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             sample = get_object_or_404(
-                eligible_samples().select_for_update(of=("self",)), pk=sample_id
+                eligible_samples(request.user).select_for_update(of=("self",)), pk=sample_id
             )
             # Append a tombstone when clearing; preserve every other rater and history.
             KneeAnnotation.objects.create(
@@ -280,7 +284,7 @@ class RatingView(PublicView):
 
 class VideoView(PublicView):
     def get(self, request, video_id):
-        sample = eligible_samples().filter(dataset_video_id=video_id).first()
+        sample = eligible_samples(request.user).filter(dataset_video_id=video_id).first()
         if sample is None:
             raise Http404
         file = sample.dataset_video.video_file

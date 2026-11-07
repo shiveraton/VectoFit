@@ -182,6 +182,22 @@ class DatasetAnnotatorAssignment(models.Model):
         related_name="dataset_assignments",
     )
     assigned_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Untick to revoke access without deleting the assignment or ratings.",
+    )
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        super().clean()
+        if self.annotator_id:
+            user = self.annotator
+            if (
+                not user.is_active or user.is_staff or user.is_superuser
+                or not getattr(getattr(user, "profile", None), "is_annotator", False)
+            ):
+                raise ValidationError({"annotator": "Choose an active, non-staff annotator."})
 
     class Meta:
         unique_together = ("dataset", "annotator")
