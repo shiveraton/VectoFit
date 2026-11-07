@@ -6,7 +6,6 @@ export const publicClient = axios.create({
   xsrfHeaderName: "X-CSRFToken",
 });
 
-// A successful SPA fallback response is HTML, not a successful API request.
 publicClient.interceptors.response.use((response) => {
   if (!String(response.headers['content-type'] || '').includes('application/json')) {
     throw new Error('The annotation API returned an invalid response. Check the production API routing.');
