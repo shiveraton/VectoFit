@@ -12,6 +12,16 @@ Run Django on port 8000. The `/api` development proxy and copied environment han
 
 Scripts: `dev`, `build`, `preview`, `build:public`, `build:private`, `dev:public`. Default/private output is `dist-private`; public output is `dist-public`. Public mode has a separate entry/router and rejects private admin/auth modules during bundling.
 
+## Manage deployed annotators locally
+
+Run `npm run dev:render -- --port 5174` and open `http://localhost:5174/login`.
+This uses the private admin UI with a same-origin development proxy to
+`https://vectofit.onrender.com/api`. The dedicated mode ignores local API URL
+overrides. Sign out of any previous local account and sign in with an active
+staff account on Render. Registration, account discovery, password changes,
+and assignments must use the same backend to refer to the same accounts.
+The normal `npm run dev` command continues to target local Django.
+
 ## Vercel public annotator
 
 Use `admin-react` as the Vercel project root. Its `vercel.json` builds the public bundle and proxies `/api/annotator/*` to `https://vectofit.onrender.com/api/annotator/*` before applying the annotator page fallback. Keep `VITE_API_BASE_URL` unset in Vercel so all requests, including session cookies and video URLs, stay on the frontend origin. `VITE_API_URL` does not control public builds.

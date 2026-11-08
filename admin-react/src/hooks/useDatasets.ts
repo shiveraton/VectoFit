@@ -10,7 +10,7 @@ export function useDatasets() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const query = useQuery({ queryKey: queryKeys.datasets, queryFn: datasetService.getDatasets, refetchInterval: query => query.state.data?.some(dataset => dataset.status === 'PROCESSING') ? 3000 : false });
+  const query = useQuery({ queryKey: queryKeys.datasets, queryFn: datasetService.getDatasets, staleTime: 15_000, placeholderData: previousData => previousData, refetchInterval: query => query.state.data?.some(dataset => dataset.status === 'PROCESSING') ? 3000 : false });
   const create = useMutation({ mutationFn: datasetService.createDatasetWithVideo, onSuccess: async () => {
     setSuccessMessage('Dataset created successfully.'); setDatasetForm(emptyForm()); setIsModalOpen(false);
     await cache.invalidateQueries({ queryKey: queryKeys.datasets });

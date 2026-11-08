@@ -297,24 +297,39 @@ class DatasetSerializer(serializers.ModelSerializer):
         return signed_dataset_media_url(request, "dataset", obj.pk, obj)
 
     def get_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return len(obj.summary_samples)
         return obj.samples.count()
 
     def get_labelled_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return sum(sample.is_correct is not None for sample in obj.summary_samples)
         return obj.samples.filter(is_correct__isnull=False).count()
 
     def get_is_usable_for_training(self, obj):
         return self.get_labelled_sample_count(obj) > 0
 
     def get_video_count(self, obj):
+        if hasattr(obj, "summary_videos"):
+            return len(obj.summary_videos)
         return obj.videos.count()
 
     def get_ready_video_count(self, obj):
+        if hasattr(obj, "summary_videos"):
+            return sum(video.status == DatasetVideo.Status.READY for video in obj.summary_videos)
         return obj.videos.filter(status="READY").count()
 
     def get_failed_video_count(self, obj):
+        if hasattr(obj, "summary_videos"):
+            return sum(video.status == DatasetVideo.Status.FAILED for video in obj.summary_videos)
         return obj.videos.filter(status="FAILED").count()
 
     def get_inherited_labelled_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return sum(
+                sample.is_correct is not None and sample.annotator_id is None
+                and sample.annotated_at is None for sample in obj.summary_samples
+            )
         return obj.samples.filter(
             is_correct__isnull=False,
             annotator__isnull=True,
@@ -322,11 +337,24 @@ class DatasetSerializer(serializers.ModelSerializer):
         ).count()
 
     def get_review_selected_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return sum(
+                sample.dataset_video_id is not None
+                and sample.dataset_video.requires_manual_review
+                for sample in obj.summary_samples
+            )
         return obj.samples.filter(
             dataset_video__requires_manual_review=True,
         ).count()
 
     def get_human_reviewed_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return sum(
+                sample.dataset_video_id is not None
+                and sample.dataset_video.requires_manual_review
+                and (sample.annotator_id is not None or sample.annotated_at is not None)
+                for sample in obj.summary_samples
+            )
         return (
             obj.samples.filter(
                 dataset_video__requires_manual_review=True,
@@ -336,6 +364,13 @@ class DatasetSerializer(serializers.ModelSerializer):
         )
 
     def get_pending_review_sample_count(self, obj):
+        if hasattr(obj, "summary_samples"):
+            return sum(
+                sample.dataset_video_id is not None
+                and sample.dataset_video.requires_manual_review
+                and sample.annotator_id is None and sample.annotated_at is None
+                for sample in obj.summary_samples
+            )
         return obj.samples.filter(
             dataset_video__requires_manual_review=True,
             annotator__isnull=True,
@@ -343,6 +378,8 @@ class DatasetSerializer(serializers.ModelSerializer):
         ).count()
 
     def get_participant_count(self, obj):
+        if hasattr(obj, "summary_videos"):
+            return len({video.participant_id for video in obj.summary_videos if video.participant_id})
         return (
             obj.videos.filter(participant__isnull=False)
             .values("participant_id")
@@ -351,6 +388,14 @@ class DatasetSerializer(serializers.ModelSerializer):
         )
 
     def get_view_angles(self, obj):
+        if hasattr(obj, "summary_videos"):
+            angles = sorted({
+                video.view_angle.angle_variant for video in obj.summary_videos
+                if video.view_angle_id is not None
+            })
+            if not angles and obj.view_angle_id and obj.view_angle:
+                angles = [obj.view_angle.angle_variant]
+            return angles
         angles = list(
             obj.videos.filter(view_angle__isnull=False)
             .values_list("view_angle__angle_variant", flat=True)
@@ -363,6 +408,8 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     def get_angle_training_stats(self, obj):
         """Return the label counts the training configuration needs per view."""
+        if hasattr(obj, "summary_samples") and hasattr(obj, "summary_videos"):
+            return self._get_prefetched_angle_training_stats(obj)
         stats = {}
         has_videos = obj.videos.exists()
 
@@ -421,6 +468,69 @@ class DatasetSerializer(serializers.ModelSerializer):
                 "video_count": videos.count(),
             }
         return stats
+
+    def _get_prefetched_angle_training_stats(self, obj):
+        stats = {}
+        videos = obj.summary_videos
+        samples = obj.summary_samples
+        has_videos = bool(videos)
+        for angle in self.get_view_angles(obj):
+            if has_videos:
+                angle_videos = [
+                    video for video in videos
+                    if video.status == DatasetVideo.Status.READY
+                    and video.view_angle_id is not None
+                    and video.view_angle.angle_variant == angle
+                ]
+                angle_samples = [
+                    sample for sample in samples
+                    if sample.dataset_video_id is not None
+                    and sample.dataset_video.status == DatasetVideo.Status.READY
+                    and sample.dataset_video.view_angle.angle_variant == angle
+                ]
+                participant_count = len({
+                    video.participant_id for video in angle_videos if video.participant_id
+                })
+            else:
+                angle_videos = []
+                angle_samples = [sample for sample in samples if sample.dataset_video_id is None]
+                participant_count = 1 if obj.participant_id else 0
+
+            labelled = [sample for sample in angle_samples if sample.is_correct is not None]
+            incorrect = [sample for sample in labelled if sample.is_correct is False]
+            error_labels = {}
+            for sample in incorrect:
+                label = "_".join((sample.error_label or "").strip().casefold().split())
+                if label and label != "correct_form":
+                    error_labels[label] = error_labels.get(label, 0) + 1
+            knee_counts = {
+                "good": 0, "bad": 0, "borderline": 0,
+                "unassessable": 0, "disputed": 0, "missing": 0,
+            }
+            for sample in angle_samples:
+                target = final_knee_target(sample)
+                knee_counts[target if target in knee_counts else "missing"] += 1
+            stats[angle] = {
+                "sample_count": len(angle_samples),
+                "labelled_sample_count": len(labelled),
+                "good_count": sum(sample.is_correct is True for sample in labelled),
+                "bad_count": len(incorrect),
+                "error_type_sample_count": sum(sample.is_correct is True for sample in labelled)
+                + sum(error_labels.values()),
+                "error_label_counts": error_labels,
+                "knee_target_sample_count": knee_counts["good"] + knee_counts["bad"],
+                "knee_label_counts": knee_counts,
+                "participant_count": participant_count,
+                "video_count": len(angle_videos),
+            }
+        return stats
+
+
+class DatasetListSerializer(DatasetSerializer):
+    """Dataset summaries without the full sample payload unused by the table."""
+
+    class Meta(DatasetSerializer.Meta):
+        fields = [field for field in DatasetSerializer.Meta.fields if field != "samples"]
 
 
 class DatasetVideoSerializer(serializers.ModelSerializer):

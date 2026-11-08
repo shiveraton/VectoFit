@@ -41,3 +41,27 @@ export async function publicLogout() {
   await initializeCsrf();
   await publicClient.post("logout/");
 }
+
+export function publicAuthError(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+      return 'The annotation service took too long to respond. Please try again.';
+    }
+    if (!error.response) return 'Unable to reach the annotation service. Check your connection and try again.';
+    const { status, data } = error.response;
+    if (status === 404) return 'The sign-in service was not found. Please contact the administrator.';
+    if (status >= 500) return 'The annotation service encountered an error. Please try again later.';
+    if (status === 403 && typeof data === 'string' && data.includes('CSRF verification failed')) {
+      return 'The sign-in security check failed. Reload this page and try again. If it persists, contact the administrator.';
+    }
+    if ((status === 400 || status === 401 || status === 403) && data && typeof data === 'object') {
+      const messages = Object.values(data).flatMap(value =>
+        typeof value === 'string' ? [value] : Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [],
+      );
+      if (messages.length) return messages.join(' ');
+    }
+    return `The request failed (HTTP ${status}). Please try again.`;
+  }
+  // Client-side response validation errors carry specific, actionable messages.
+  return error instanceof Error ? error.message : 'Sign-in could not be completed. Please try again.';
+}

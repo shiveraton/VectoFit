@@ -21,5 +21,5 @@ export default defineConfig(({ mode }) => ({
   }],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   build: { outDir: mode === 'public' ? 'dist-public' : 'dist-private' },
-  server: { proxy: { '/api': { target: 'http://localhost:8000', changeOrigin: true, secure: false } } },
+  server: { proxy: { '/api': { target: mode === 'render' ? 'https://vectofit.onrender.com' : 'http://localhost:8000', changeOrigin: true, secure: mode === 'render' } } },
 }));

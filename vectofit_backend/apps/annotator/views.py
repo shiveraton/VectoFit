@@ -181,7 +181,7 @@ class DatasetListView(PublicView):
         ids = eligible_samples(request.user).values("dataset_id")
         return Response(
             [
-                {"id": dataset.pk, "name": f"Dataset {dataset.pk}"}
+                {"id": dataset.pk, "name": dataset.name}
                 for dataset in Dataset.objects.filter(pk__in=ids).order_by("pk")
             ]
         )
@@ -213,7 +213,7 @@ class SessionView(PublicView):
             {
                 "dataset": {
                     "id": dataset_id,
-                    "name": f"Dataset {dataset_id}",
+                    "name": samples[0].dataset.name,
                     "video_url": None,
                     "sample_count": len(rows),
                     "labelled_sample_count": sum(

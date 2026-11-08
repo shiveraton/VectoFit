@@ -3,7 +3,7 @@ import logging
 
 import cv2
 from django.db import transaction
-from django.db.models import Case, IntegerField, Q, Value, When
+from django.db.models import Case, IntegerField, Prefetch, Q, Value, When
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -21,6 +21,7 @@ from .models import (
 )
 from .serializers import (
     DatasetBulkImportSerializer,
+    DatasetListSerializer,
     DatasetSampleSerializer,
     DatasetSerializer,
     DatasetVideoSerializer,
@@ -32,6 +33,7 @@ from .services.import_executor import execute_bulk_import
 from .services.tasks import process_dataset_video_task
 from .permissions import IsAnnotator
 from .services.assignments import assigned_review_samples
+from .services.knee_label import final_knee_target
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,6 @@ def _enqueue_dataset_processing(dataset_id: int, user_id: int) -> None:
         )
 
 
-# Return review metadata for a knee annotation change.
 def _annotation_review_fields(serializer, user):
     if "knee_annotation" not in serializer.validated_data:
         return {}
@@ -78,6 +79,11 @@ class ViewAngleViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class DatasetViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == "list":
+            return DatasetListSerializer
+        return super().get_serializer_class()
+
     @action(
         detail=True,
         methods=["post"],
@@ -184,6 +190,23 @@ class DatasetViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if self.action == "list":
+            samples = DatasetSample.objects.select_related(
+                "dataset_video__participant", "dataset_video__view_angle"
+            ).prefetch_related(
+                Prefetch(
+                    "knee_annotation_records",
+                    queryset=KneeAnnotation.objects.order_by(
+                        "annotator_id", "-created_at", "-id"
+                    ),
+                    to_attr="prefetched_knee_annotation_records",
+                )
+            )
+            videos = DatasetVideo.objects.select_related("participant", "view_angle")
+            queryset = queryset.prefetch_related(
+                Prefetch("samples", queryset=samples, to_attr="summary_samples"),
+                Prefetch("videos", queryset=videos, to_attr="summary_videos"),
+            )
         if self.action == "annotation" and not self.request.user.is_staff:
             queryset = queryset.filter(pk__in=assigned_review_samples(self.request.user).values("dataset_id"))
         return queryset

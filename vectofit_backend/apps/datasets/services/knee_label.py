@@ -44,8 +44,15 @@ def final_knee_target(sample):
 
 def _latest_by_annotator(sample):
     latest_by_annotator = {}
-    records = sample.knee_annotation_records.select_related("annotator")
-    for record in records.order_by("annotator_id", "-created_at", "-id"):
+    prefetched = getattr(sample, "prefetched_knee_annotation_records", None)
+    records = (
+        prefetched
+        if prefetched is not None
+        else sample.knee_annotation_records.select_related("annotator").order_by(
+            "annotator_id", "-created_at", "-id"
+        )
+    )
+    for record in records:
         if record.annotator_id not in latest_by_annotator:
             latest_by_annotator[record.annotator_id] = record
     return latest_by_annotator
