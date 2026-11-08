@@ -303,6 +303,7 @@
 .action-cell[data-v-datasets] {
   display: flex;
   align-items: center;
+  gap: 8px;
   min-height: 30px;
 }
 .action-button[data-v-datasets] {

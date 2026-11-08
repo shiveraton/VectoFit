@@ -41,9 +41,6 @@ export default function Datasets(input: {}) {
     retryDataset,
   } = useDatasets();
   const { participants, createParticipant } = useParticipants();
-  const [activeTab, setActiveTab] = useState<"datasets" | "annotation-pool">(
-    "datasets",
-  );
   const {
     filteredJobs,
     selectedJob,
@@ -56,7 +53,10 @@ export default function Datasets(input: {}) {
     fetchJobs: fetchAnnotationJobs,
     selectJob,
     clearSelection,
-  } = useAnnotationPool(activeTab === "annotation-pool");
+  } = useAnnotationPool();
+  const [activeTab, setActiveTab] = useState<"datasets" | "annotation-pool">(
+    "datasets",
+  );
   const [accessDataset, setAccessDataset] = useState<Dataset | null>(null);
   const reviewMetrics = (dataset: Dataset) =>
     dataset as Dataset & DatasetReviewMetrics;
@@ -490,6 +490,7 @@ export default function Datasets(input: {}) {
                         <td data-v-datasets="">
                           <div data-v-datasets="" className={cx("action-cell")}>
                             <button
+                              data-v-datasets=""
                               type="button"
                               className={cx("action-button")}
                               data-assignment-id={dataset.id}
