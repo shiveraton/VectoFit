@@ -110,3 +110,5 @@ vectofit_admin/dist-private/
 # Rendered deployment configuration includes production secrets
 deploy/annotator/generated/
 .neon
+
+!vectofit_backend/DATASET_VIDEO_STORAGE.md

@@ -1,3 +1,4 @@
+from apps.analytics.utils.file_resolver import resolved_video_path, VideoResolutionError
 import cv2
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
@@ -200,11 +201,15 @@ class SessionView(PublicView):
         for sample in samples:
             video = sample.dataset_video
             if video.pk not in fps:
-                cap = cv2.VideoCapture(video.video_file.path)
                 try:
-                    fps[video.pk] = float(cap.get(cv2.CAP_PROP_FPS) or 0)
-                finally:
-                    cap.release()
+                    with resolved_video_path(video.video_file) as video_path:
+                        cap = cv2.VideoCapture(video_path)
+                        try:
+                            fps[video.pk] = float(cap.get(cv2.CAP_PROP_FPS) or 0)
+                        finally:
+                            cap.release()
+                except (VideoResolutionError, OSError, cv2.error):
+                    fps[video.pk] = 0.0
         rows = [
             sample_data(sample, request.user, fps[sample.dataset_video_id])
             for sample in samples

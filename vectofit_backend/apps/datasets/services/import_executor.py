@@ -7,7 +7,7 @@ from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 from django.core.files import File
-from django.core.files.storage import default_storage
+from ..storage import dataset_video_storage
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, ValidationError
@@ -27,8 +27,6 @@ MAX_SOURCE_PATH_LENGTH = 255
 
 
 class ChunkedStorageFile(File):
-    """Stream ZIP members to storage using larger I/O chunks."""
-
     def chunks(self, chunk_size=COPY_CHUNK_SIZE):
         while True:
             chunk = self.read(chunk_size)
@@ -198,7 +196,7 @@ def _load_staged_import(token, user):
 def _delete_stored_files(stored_file_names):
     for stored_name in stored_file_names:
         try:
-            default_storage.delete(stored_name)
+            dataset_video_storage().delete(stored_name)
         except Exception:
             logger.exception(
                 "Could not clean up imported file: %s",
@@ -207,9 +205,6 @@ def _delete_stored_files(stored_file_names):
 
 
 def _store_archive_videos(archive_path, videos):
-    """
-    Copy videos to permanent storage before opening the database transaction.
-    """
     stored_file_names = []
     stored_by_archive_path = {}
     bytes_copied = 0
@@ -228,7 +223,7 @@ def _store_archive_videos(archive_path, videos):
                         member,
                         name=Path(storage_name).name,
                     )
-                    stored_name = default_storage.save(
+                    stored_name = dataset_video_storage().save(
                         storage_name,
                         content,
                     )
@@ -406,7 +401,6 @@ def execute_bulk_import(*, validated_data, user):
         _delete_stored_files(stored_file_names)
         raise
 
-    # Permanent video files and database rows now exist.
     _remove_stage_files(archive_path, metadata_path)
 
     logger.info(

@@ -5,6 +5,8 @@ from typing import ClassVar
 from django.db import models
 from django.db.models import Q
 
+from .storage import dataset_video_storage
+
 
 def dataset_upload_to(instance, filename):
     safe_name = PurePosixPath(filename.replace("\\", "/")).name
@@ -98,7 +100,7 @@ class Dataset(models.Model):
         help_text="Camera view used to capture this dataset.",
     )
 
-    video_file = models.FileField(upload_to="datasets/videos/", null=True, blank=True)
+    video_file = models.FileField(upload_to="datasets/videos/", storage=dataset_video_storage, null=True, blank=True)
 
     review_policy = models.CharField(
         max_length=12,
@@ -274,7 +276,7 @@ class DatasetVideo(models.Model):
         ViewAngle, on_delete=models.RESTRICT, related_name="dataset_videos"
     )
 
-    video_file = models.FileField(upload_to="dataset_video_upload_to")
+    video_file = models.FileField(upload_to="dataset_video_upload_to", storage=dataset_video_storage)
 
     source_label = models.BooleanField(
         null=True,

@@ -1,3 +1,4 @@
+from apps.analytics.utils.file_resolver import resolved_video_path, VideoResolutionError
 from typing import ClassVar
 import logging
 
@@ -57,7 +58,6 @@ def _annotation_review_fields(serializer, user):
     return {"annotator": user, "annotated_at": timezone.now()}
 
 
-# Return review metadata for a coarse label change.
 def _label_review_fields(annotation_changed, label, user):
     if annotation_changed:
         return {}
@@ -157,12 +157,13 @@ class DatasetViewSet(viewsets.ModelViewSet):
             if not video_file:
                 return 0.0
             try:
-                cap = cv2.VideoCapture(video_file.path)
-                try:
-                    return float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
-                finally:
-                    cap.release()
-            except (OSError, cv2.error):
+                with resolved_video_path(video_file) as video_path:
+                    cap = cv2.VideoCapture(video_path)
+                    try:
+                        return float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+                    finally:
+                        cap.release()
+            except (OSError, cv2.error, VideoResolutionError):
                 return 0.0
 
         legacy_fps = read_fps(dataset.video_file)

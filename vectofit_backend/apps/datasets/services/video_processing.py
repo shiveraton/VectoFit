@@ -1,3 +1,4 @@
+from apps.analytics.utils.file_resolver import resolved_video_path
 from django.db import transaction
 
 from apps.assessments.models import AssessmentSession, RepAssessment
@@ -50,7 +51,8 @@ def process_video_repetitions(
             f"No active exercise variant for {dataset.exercise_type}."
         )
 
-    result = VideoProcessor.process_video(video_file.path)
+    with resolved_video_path(video_file) as video_path:
+        result = VideoProcessor.process_video(video_path)
 
     if result.get("status") != "success":
         raise RuntimeError(

@@ -39,8 +39,6 @@ ALLOWED_HOSTS = env.list(
     default=["127.0.0.1", "localhost"] if DEBUG else [],
 )
 
-# Render supplies the exact public hostname for this service (without a scheme).
-# Keep explicit hosts for custom domains and other deployment environments.
 RENDER_EXTERNAL_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default="").strip()
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -67,7 +65,6 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ] if DEBUG else [],
 )
 
-# Dashboard values may contain spaces or newlines after comma separators.
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS if origin.strip()]
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS if origin.strip()]
 
@@ -206,7 +203,32 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "dataset_videos": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+}
+
+DATASET_R2_ENABLED = env.bool("DATASET_R2_ENABLED", default=False)
+if DATASET_R2_ENABLED:
+    r2_variables = ("R2_ENDPOINT_URL", "R2_BUCKET_NAME", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY")
+    r2_values = {name: env(name, default="").strip() for name in r2_variables}
+    missing_r2_variables = [name for name, value in r2_values.items() if not value]
+    if missing_r2_variables:
+        raise ImproperlyConfigured("Missing R2 settings: " + ", ".join(missing_r2_variables))
+    STORAGES["dataset_videos"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "endpoint_url": r2_values["R2_ENDPOINT_URL"],
+            "bucket_name": r2_values["R2_BUCKET_NAME"],
+            "access_key": r2_values["R2_ACCESS_KEY_ID"],
+            "secret_key": r2_values["R2_SECRET_ACCESS_KEY"],
+            "region_name": env("R2_REGION", default="auto"),
+            "default_acl": None,
+            "querystring_auth": True,
+            "file_overwrite": False,
+        },
+    }
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(env("MEDIA_ROOT", default=str(BASE_DIR / "media")))

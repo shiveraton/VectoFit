@@ -1,3 +1,4 @@
+from apps.analytics.utils.file_resolver import resolved_video_path
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -142,7 +143,8 @@ def process_dataset_video_item_task(dataset_video_id, user_id):
                 f"No active exercise variant for {video.dataset.exercise_type}."
             )
 
-        result = VideoProcessor.process_video(video.video_file.path)
+        with resolved_video_path(video.video_file) as video_path:
+            result = VideoProcessor.process_video(video_path)
 
         if result.get("status") != "success":
             raise RuntimeError(
