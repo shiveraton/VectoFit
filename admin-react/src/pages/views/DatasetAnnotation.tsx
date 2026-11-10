@@ -551,10 +551,10 @@ export default function DatasetAnnotation(input: {}) {
                             {"Direction uncertain"}
                           </option>
                           <option data-v-dataset-annotation="" value="valgus">
-                            {"Valgus"}
+                            {"Valgus(inward)"}
                           </option>
                           <option data-v-dataset-annotation="" value="varus">
-                            {"Varus"}
+                            {"Varus(outward)"}
                           </option>
                         </select>
                       </div>
