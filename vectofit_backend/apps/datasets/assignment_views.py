@@ -66,11 +66,16 @@ class AssignmentListView(StaffView):
         } for row in page]
         response = paginator.get_paginated_response(rows)
         response.data["eligible_sample_count"] = sample_count
+        response.data["all_annotators_access"] = dataset.all_annotators_access
         return response
 
 
 class AssignmentStateSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
+
+
+class DatasetAccessModeSerializer(serializers.Serializer):
+    all_annotators_access = serializers.BooleanField()
 
 
 class AssignmentDetailView(StaffView):
@@ -81,6 +86,16 @@ class AssignmentDetailView(StaffView):
         annotator = get_object_or_404(get_user_model().objects.select_related("profile"), pk=annotator_id)
         assignment = set_assignment(dataset, annotator, serializer.validated_data["is_active"], request.user)
         return Response({"id": assignment.pk if assignment else None, "is_active": assignment.is_active if assignment else False})
+
+
+class DatasetAccessModeView(StaffView):
+    def put(self, request, dataset_id):
+        serializer = DatasetAccessModeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        dataset = get_object_or_404(Dataset, pk=dataset_id)
+        dataset.all_annotators_access = serializer.validated_data["all_annotators_access"]
+        dataset.save(update_fields=["all_annotators_access"])
+        return Response({"all_annotators_access": dataset.all_annotators_access})
 
 
 class AssignmentEventListView(StaffView):

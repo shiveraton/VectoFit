@@ -22,13 +22,16 @@ def signed_dataset_media_url(request, kind, object_id, dataset):
         return None
 
     user = request.user
-    if (
-        not user.is_staff
-        and not DatasetAnnotatorAssignment.objects.filter(
-            dataset=dataset,
-            annotator=user,
-            is_active=True,
-        ).exists()
+    if not user.is_staff and (
+        not is_annotator(user)
+        or (
+            not dataset.all_annotators_access
+            and not DatasetAnnotatorAssignment.objects.filter(
+                dataset=dataset,
+                annotator=user,
+                is_active=True,
+            ).exists()
+        )
     ):
         return None
 
@@ -88,11 +91,14 @@ class DatasetMediaView(APIView):
         if not user.is_staff:
             has_access = (
                 is_annotator(user)
-                and DatasetAnnotatorAssignment.objects.filter(
-                    dataset=dataset,
-                    annotator=user,
-                    is_active=True,
-                ).exists()
+                and (
+                    dataset.all_annotators_access
+                    or DatasetAnnotatorAssignment.objects.filter(
+                        dataset=dataset,
+                        annotator=user,
+                        is_active=True,
+                    ).exists()
+                )
             )
             if not has_access:
                 return HttpResponse(status=404)

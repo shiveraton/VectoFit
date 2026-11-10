@@ -116,6 +116,11 @@ class Dataset(models.Model):
     random_seed = models.IntegerField(null=True, blank=True)
     selected_video_paths = models.JSONField(default=list, blank=True)
 
+    all_annotators_access = models.BooleanField(
+        default=False,
+        help_text="Allow all active annotator accounts to review this dataset.",
+    )
+
     def __str__(self):
         return self.name
 

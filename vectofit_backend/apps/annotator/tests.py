@@ -97,6 +97,18 @@ class AssignmentAccessTests(APITestCase):
         request.user = self.user
         with override_settings(ALLOWED_HOSTS=["localhost"]):
             self.assertIsNotNone(signed_dataset_media_url(request, "dataset-video", self.video.pk, self.dataset))
+            request.user = self.other
+            self.dataset.all_annotators_access = True
+            self.dataset.save(update_fields=["all_annotators_access"])
+            self.assertIsNotNone(signed_dataset_media_url(request, "dataset-video", self.video.pk, self.dataset))
+            self.other.profile.is_annotator = False
+            self.other.profile.save(update_fields=["is_annotator"])
+            self.assertIsNone(signed_dataset_media_url(request, "dataset-video", self.video.pk, self.dataset))
+            self.other.profile.is_annotator = True
+            self.other.profile.save(update_fields=["is_annotator"])
+            self.dataset.all_annotators_access = False
+            self.dataset.save(update_fields=["all_annotators_access"])
+            request.user = self.user
             self.assignment.is_active = False
             self.assignment.save(update_fields=["is_active"])
             self.assertIsNone(signed_dataset_media_url(request, "dataset-video", self.video.pk, self.dataset))

@@ -52,7 +52,10 @@ def assigned_samples(user):
     assignments = DatasetAnnotatorAssignment.objects.filter(
         annotator=user, is_active=True,
     ).values("dataset_id")
-    return DatasetSample.objects.filter(dataset_id__in=assignments)
+    shared_datasets = Dataset.objects.filter(all_annotators_access=True).values("pk")
+    return DatasetSample.objects.filter(
+        Q(dataset_id__in=assignments) | Q(dataset_id__in=shared_datasets)
+    )
 
 
 def assigned_review_samples(user):

@@ -1,4 +1,4 @@
-from .assignment_views import AnnotatorPickerView, AssignmentListView, AssignmentDetailView, AssignmentEventListView
+from .assignment_views import AnnotatorPickerView, AssignmentListView, AssignmentDetailView, AssignmentEventListView, DatasetAccessModeView
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
@@ -26,6 +26,7 @@ router.register(r"retry", DatasetViewSet, basename="retry")
 urlpatterns = [
     path("annotators/", AnnotatorPickerView.as_view(), name="dataset-annotators"),
     path("<int:dataset_id>/assignments/", AssignmentListView.as_view(), name="dataset-assignments"),
+    path("<int:dataset_id>/assignments/access-mode/", DatasetAccessModeView.as_view(), name="dataset-assignment-access-mode"),
     path("<int:dataset_id>/assignments/events/", AssignmentEventListView.as_view(), name="dataset-assignment-events"),
     path("<int:dataset_id>/assignments/<int:annotator_id>/", AssignmentDetailView.as_view(), name="dataset-assignment-detail"),
     path(

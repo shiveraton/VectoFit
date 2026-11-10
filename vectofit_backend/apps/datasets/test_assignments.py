@@ -39,6 +39,34 @@ class AssignmentManagementTests(APITestCase):
         self.assertFalse(DatasetAnnotatorAssignment.objects.filter(annotator=self.other).exists())
         self.assertFalse(DatasetAssignmentEvent.objects.exists())
 
+    def test_shared_access_includes_all_annotators_and_can_be_disabled(self):
+        response = self.client.put(
+            self.list_url + "access-mode/", {"all_annotators_access": True}, format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertTrue(self.dataset.all_annotators_access)
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.get(f"/api/datasets/{self.dataset.pk}/annotation/").status_code, 200)
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(self.client.put(
+            self.list_url + "access-mode/", {"all_annotators_access": False}, format="json",
+        ).status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertFalse(self.dataset.all_annotators_access)
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.get(f"/api/datasets/{self.dataset.pk}/annotation/").status_code, 404)
+
+    def test_shared_access_does_not_grant_non_annotator_media_access(self):
+        self.dataset.all_annotators_access = True
+        self.dataset.save(update_fields=["all_annotators_access"])
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(self.list_url).data
+        self.assertTrue(response["all_annotators_access"])
+        self.assertEqual(self.client.put(
+            self.list_url + "access-mode/", {}, format="json",
+        ).status_code, 400)
+
     def test_all_management_endpoints_are_staff_only(self):
         for user in (self.user, None):
             self.client.force_authenticate(user=user)
