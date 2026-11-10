@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     "apps.datasets",
     "apps.exercises",
     "apps.training",
+    "apps.validation",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
@@ -119,6 +120,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.validation.middleware.ValidatorIsolationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

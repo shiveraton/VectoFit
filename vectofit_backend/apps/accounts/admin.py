@@ -4,8 +4,8 @@ from .models import Profile
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "is_annotator", "account_active", "account_staff")
-    list_filter = ("is_annotator", "user__is_active", "user__is_staff")
+    list_display = ("user", "is_annotator", "is_validator", "account_active", "account_staff")
+    list_filter = ("is_annotator", "is_validator", "user__is_active", "user__is_staff")
     search_fields = ("user__username", "user__email")
     list_select_related = ("user",)
     autocomplete_fields = ("user",)

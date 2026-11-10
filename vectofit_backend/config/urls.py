@@ -22,6 +22,8 @@ from django.http import JsonResponse
 from apps.core.views import health_check
 
 urlpatterns = [
+    path("api/validation/", include("apps.validation.urls")),
+    path("validation/", include(("apps.validation.urls", "validation"), namespace="validation-short")),
     path("api/annotator/", include("apps.annotator.urls")),
     path('admin/', admin.site.urls),
     path("health", health_check, name="health-check"),

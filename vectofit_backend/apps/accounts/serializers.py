@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 from .models import Profile, User
+from .roles import is_annotator
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -68,14 +69,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     is_annotator = serializers.SerializerMethodField()
+    is_validator = serializers.BooleanField(source="profile.is_validator", read_only=True, default=False)
 
     class Meta:
         model = User
-        fields: ClassVar[list] = ["id", "username", "email", "is_annotator"]
+        fields: ClassVar[list] = ["id", "username", "email", "is_annotator", "is_validator"]
 
     def get_is_annotator(self, obj):
-        profile = getattr(obj, "profile", None)
-        return bool(profile and profile.is_annotator)
+        return is_annotator(obj)
 
 
 class RegisterSerializer(serializers.ModelSerializer):

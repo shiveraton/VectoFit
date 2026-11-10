@@ -6,6 +6,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
     is_annotator = models.BooleanField(default=False)
+    is_validator = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     profile_picture = models.ImageField(
