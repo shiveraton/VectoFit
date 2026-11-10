@@ -20,7 +20,7 @@ from .models import (
 )
 from .services.annotation import latest_annotation
 from .services.knee_label import final_knee_target, knee_target
-from .services.frontal import require_frontal_annotation
+from .services.frontal import require_frontal_annotation, sample_angle
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
@@ -125,6 +125,7 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
     )
 
     dataset_video = serializers.SerializerMethodField()
+    view_angle_name = serializers.SerializerMethodField()
     video_fps = serializers.SerializerMethodField()
     is_manually_annotated = serializers.SerializerMethodField()
 
@@ -136,6 +137,7 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
             "id",
             "dataset",
             "dataset_video",
+            "view_angle_name",
             "video_fps",
             "is_manually_annotated",
             "knee_annotation",
@@ -154,6 +156,9 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
             "annotated_at",
             "created_at",
         ]
+
+    def get_view_angle_name(self, obj):
+        return sample_angle(obj)
 
     def get_dataset_video(self, obj):
         if obj.dataset_video_id is None:

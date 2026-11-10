@@ -1,0 +1,76 @@
+{
+  "dataset_id": 17,
+  "created_at": "2026-11-10T07:43:38.453399+00:00",
+  "before": {
+    "review_policy": "subset",
+    "selection_method": "stratified",
+    "review_count": 10,
+    "random_seed": 42,
+    "selected_video_paths": [
+      "bw_dataset_v1_light/bad/diagonal/P05.mp4",
+      "bw_dataset_v1_light/bad/frontal/P05.mp4",
+      "bw_dataset_v1_light/bad/sagittal/P03.mp4",
+      "bw_dataset_v1_light/good/diagonal/P04.mp4",
+      "bw_dataset_v1_light/good/frontal/P03.mp4",
+      "bw_dataset_v1_light/good/sagittal/P03.mp4",
+      "bw_dataset_v1_light/bad/diagonal/P02.mp4",
+      "bw_dataset_v1_light/bad/frontal/P02.mp4",
+      "bw_dataset_v1_light/bad/sagittal/P02.mp4",
+      "bw_dataset_v1_light/good/diagonal/P05.mp4"
+    ],
+    "video_review_flags": {
+      "31": false,
+      "32": false,
+      "34": false,
+      "33": false,
+      "36": false,
+      "35": false,
+      "37": false,
+      "38": true,
+      "39": false,
+      "40": true,
+      "42": true,
+      "41": false,
+      "43": false,
+      "44": false,
+      "46": false,
+      "45": true,
+      "47": true,
+      "48": true,
+      "49": true,
+      "50": false,
+      "51": false,
+      "52": false,
+      "53": false,
+      "54": false,
+      "55": true,
+      "56": true,
+      "57": false,
+      "58": true,
+      "59": false,
+      "60": false
+    },
+    "queue_repetitions": 16,
+    "ratings_sha256": "e5dafd7ae94b72516bd820f0c1466116778a1b9482abb4c090228019ea948bb0"
+  },
+  "after": {
+    "selected_frontal_videos": 10,
+    "queue_repetitions": 56,
+    "participants": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05"
+    ],
+    "ratings_preserved": true,
+    "ratings_sha256": "e5dafd7ae94b72516bd820f0c1466116778a1b9482abb4c090228019ea948bb0",
+    "repetitions_by_participant": {
+      "P01": 18,
+      "P02": 13,
+      "P03": 14,
+      "P04": 5,
+      "P05": 6
+    }
+  }
+}

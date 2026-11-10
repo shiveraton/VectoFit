@@ -52,6 +52,7 @@ export interface DatasetSample {
   id: number;
   dataset: number;
   dataset_video: DatasetVideoPlayback | number | null;
+  view_angle_name?: string | null;
   video_fps?: number | null;
   is_manually_annotated?: boolean;
   rep_assessment: RepAssessment;
@@ -67,6 +68,7 @@ export interface DatasetSample {
 }
 
 export interface AnnotationSession {
+  excluded_view_sample_count?: number;
   dataset: {
     id: number;
     name: string;
@@ -101,7 +103,9 @@ export const emptyKneeAnnotation = (): KneeAnnotation => ({
 export const datasetAnnotationService = {
   async getSession(datasetId: number): Promise<AnnotationSession> {
     const response = await client.get<AnnotationSession>(
-      isPublic ? `/annotator/datasets/${datasetId}/session/` : `/datasets/${datasetId}/annotation/`,
+      isPublic
+        ? `/annotator/datasets/${datasetId}/session/`
+        : `/datasets/${datasetId}/annotation/`,
     );
     return response.data;
   },
@@ -112,7 +116,10 @@ export const datasetAnnotationService = {
   ): Promise<DatasetSample> {
     if (isPublic) {
       await initializeCsrf();
-      const { data } = await publicClient.patch<DatasetSample>(`samples/${sampleId}/rating/`, payload);
+      const { data } = await publicClient.patch<DatasetSample>(
+        `samples/${sampleId}/rating/`,
+        payload,
+      );
       return data;
     }
     const response = await client.patch<DatasetSample>(
@@ -125,7 +132,10 @@ export const datasetAnnotationService = {
   async clear(sampleId: number): Promise<DatasetSample> {
     if (isPublic) {
       await initializeCsrf();
-      const { data } = await publicClient.patch<DatasetSample>(`samples/${sampleId}/rating/`, { knee_annotation: null });
+      const { data } = await publicClient.patch<DatasetSample>(
+        `samples/${sampleId}/rating/`,
+        { knee_annotation: null },
+      );
       return data;
     }
     const response = await client.patch<DatasetSample>(

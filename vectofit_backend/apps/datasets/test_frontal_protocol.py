@@ -101,6 +101,7 @@ class FrontalProtocolTests(APITestCase):
         response = self.client.get(self.base + f"datasets/{self.dataset.pk}/session/")
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.data["samples"][0]["dataset_video"])
+        self.assertEqual(response.data["samples"][0]["view_angle_name"], "frontal")
         self.dataset.view_angle = None
         self.dataset.save(update_fields=["view_angle"])
         response = self.client.patch(self.base + f"samples/{self.sample.pk}/rating/",

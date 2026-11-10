@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from apps.accounts.models import Profile
 from apps.datasets.models import Dataset, KneeAnnotation
 from apps.datasets.services.assignments import assigned_review_samples, assigned_samples, review_samples
-from apps.datasets.services.frontal import require_frontal_annotation
+from apps.datasets.services.frontal import require_frontal_annotation, sample_angle
 from apps.datasets.services.media import protected_file_response
 from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.annotation import latest_annotation
@@ -160,6 +160,7 @@ def sample_data(sample, user, fps=None):
     return {
         "id": sample.pk,
         "dataset": sample.dataset_id,
+        "view_angle_name": sample_angle(sample),
         "dataset_video": {
             "id": video.pk,
             "video_url": f"/api/annotator/videos/{video.pk}/",

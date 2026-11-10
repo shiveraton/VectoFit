@@ -10,6 +10,8 @@ import type {
 } from "../../services/datasetAnnotationService";
 import { bindStyles, each, display, scopeAttributes } from "../../presentation";
 import styles from "./DatasetAnnotation.module.css";
+import { annotationVideoUrl } from "../../services/frontalAnnotation";
+
 export default function DatasetAnnotation(input: {}) {
   const cx = bindStyles(styles);
   const params = useParams();
@@ -74,8 +76,10 @@ export default function DatasetAnnotation(input: {}) {
     const video = currentSample?.dataset_video;
     return video && typeof video === "object" ? video : null;
   })();
-  const activeVideoUrl = (() =>
-    activeVideo?.video_url ?? session?.dataset.video_url ?? null)();
+  const activeVideoUrl = annotationVideoUrl(
+    currentSample,
+    session?.dataset.video_url ?? null,
+  );
   const activeVideoLabel = (() => {
     const video = activeVideo;
     if (!video) {
@@ -223,6 +227,12 @@ export default function DatasetAnnotation(input: {}) {
           >
             {display(error)}
           </div>
+        ) : null}
+        {!isLoading && (session?.excluded_view_sample_count ?? 0) > 0 ? (
+          <p role="status">
+            {session?.excluded_view_sample_count} repetitions excluded because
+            their camera view is not frontal or is unknown.
+          </p>
         ) : null}
         {!isLoading && session && samples.length === 0 ? (
           <section
