@@ -1,7 +1,17 @@
 from typing import Mapping
 
 def knee_target(annotation: Mapping[str, Mapping[str, str | None]]) -> str:
-    grades = [annotation[side].get("grade") for side in ("left", "right")]
+    if not isinstance(annotation, Mapping):
+        return "incomplete"
+    grades = []
+    for side in ("left", "right"):
+        knee = annotation.get(side)
+        if not isinstance(knee, Mapping):
+            return "incomplete"
+        grade = knee.get("grade")
+        if not isinstance(grade, str) or grade not in {"aligned", "borderline", "deviated", "unassessable"}:
+            return "incomplete"
+        grades.append(grade)
     if "deviated" in grades:
         return "bad"
     if "unassessable" in grades:
@@ -45,6 +55,10 @@ def final_knee_target(sample):
 def _latest_by_annotator(sample):
     latest_by_annotator = {}
     prefetched = getattr(sample, "prefetched_knee_annotation_records", None)
+    if prefetched is None:
+        cached = getattr(sample, "_prefetched_objects_cache", {}).get("knee_annotation_records")
+        if cached is not None:
+            prefetched = sorted(cached, key=lambda record: (record.created_at, record.pk), reverse=True)
     records = (
         prefetched
         if prefetched is not None

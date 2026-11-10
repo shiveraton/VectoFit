@@ -1,0 +1,1363 @@
+{
+  "eligibility_policy_version": "knee_alignment_v1",
+  "inspected_count": 199,
+  "eligible_count": 14,
+  "eligible_sample_ids": [
+    391,
+    393,
+    395,
+    396,
+    423,
+    424,
+    425,
+    426,
+    427,
+    428,
+    429,
+    504,
+    505,
+    506
+  ],
+  "class_counts": {
+    "good": 11,
+    "bad": 3
+  },
+  "excluded_count": 185,
+  "exclusion_counts": {
+    "non_frontal_view": 143,
+    "missing_annotation": 40,
+    "borderline": 2
+  },
+  "participants": {
+    "7": {
+      "eligible": 4,
+      "good": 1,
+      "bad": 3,
+      "excluded": 39
+    },
+    "8": {
+      "eligible": 7,
+      "good": 7,
+      "bad": 0,
+      "excluded": 29
+    },
+    "10": {
+      "eligible": 3,
+      "good": 3,
+      "bad": 0,
+      "excluded": 37
+    },
+    "6": {
+      "eligible": 0,
+      "good": 0,
+      "bad": 0,
+      "excluded": 44
+    },
+    "9": {
+      "eligible": 0,
+      "good": 0,
+      "bad": 0,
+      "excluded": 36
+    }
+  },
+  "exclusions": [
+    {
+      "dataset_id": 17,
+      "sample_id": 324,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 325,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 326,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 327,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 328,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 329,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 330,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 331,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 332,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 333,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 334,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 335,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 336,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 337,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 338,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 339,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 340,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 341,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 342,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 343,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 344,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 345,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 346,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 347,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 348,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 349,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 350,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 351,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 352,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 353,
+      "participant_id": 6,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 354,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 355,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 356,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 357,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 358,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 359,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 360,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 361,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 362,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 363,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 364,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 365,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 366,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 367,
+      "participant_id": 6,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 368,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 369,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 370,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 371,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 372,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 373,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 374,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 375,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 376,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 377,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 378,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 379,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 380,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 381,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 382,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 383,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 384,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 385,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 386,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 387,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 388,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 389,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 390,
+      "participant_id": 7,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 392,
+      "participant_id": 7,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 394,
+      "participant_id": 7,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 397,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 398,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 399,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 400,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 401,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 402,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 403,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 404,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 405,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 406,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 407,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 408,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 409,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 410,
+      "participant_id": 7,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 411,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 412,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 413,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 414,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 415,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 416,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 417,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 418,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 419,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 420,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 421,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 422,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 430,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 431,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 432,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 433,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 434,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 435,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 436,
+      "participant_id": 8,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 437,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 438,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 439,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 440,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 441,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 442,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 443,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 444,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 445,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 446,
+      "participant_id": 8,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 447,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 448,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 449,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 450,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 451,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 452,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 453,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 454,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 455,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 456,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 457,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 458,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 459,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 460,
+      "participant_id": 9,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 461,
+      "participant_id": 9,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 462,
+      "participant_id": 9,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 463,
+      "participant_id": 9,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 464,
+      "participant_id": 9,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 465,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 466,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 467,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 468,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 469,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 470,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 471,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 472,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 473,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 474,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 475,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 476,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 477,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 478,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 479,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 480,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 481,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 482,
+      "participant_id": 9,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 483,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 484,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 485,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 486,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 487,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 488,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 489,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 490,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 491,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 492,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 493,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 494,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 495,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 496,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 497,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 498,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 499,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 500,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 501,
+      "participant_id": 10,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 502,
+      "participant_id": 10,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 503,
+      "participant_id": 10,
+      "reason_code": "missing_annotation",
+      "detail": "No current knee annotation is available."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 507,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 508,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 509,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 510,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 511,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 512,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 513,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 514,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 515,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 516,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 517,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 518,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 519,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 520,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 521,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    },
+    {
+      "dataset_id": 17,
+      "sample_id": 522,
+      "participant_id": 10,
+      "reason_code": "non_frontal_view",
+      "detail": "Knee alignment requires a known frontal view."
+    }
+  ],
+  "training_blockers": [
+    "Cannot create a participant-level split: target class participant coverage is insufficient ('bad': 1 participant(s)). Dataset has 3 participants and 14 usable samples; class sample counts are {'bad': 3, 'good': 11}. Collect samples for the underrepresented class from at least two participants."
+  ]
+}

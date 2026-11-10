@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from itertools import combinations
 
 import cv2
+from rest_framework.exceptions import ValidationError
 from apps.analytics.services import fppa
 from apps.analytics.services.feature_schemas import schema_for_target
 from apps.analytics.services.features import (
@@ -14,9 +15,13 @@ from apps.analytics.services.features import (
     to_feature_row,
 )
 from apps.datasets.models import Dataset, DatasetSample, DatasetVideo
+from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.knee_label import (
     knee_label_evidence,
 )
+from apps.datasets.services.frontal import sample_angle
+
+ELIGIBILITY_POLICY_VERSION = "knee_alignment_v1"
 
 
 class DatasetNotUsableError(Exception):
@@ -29,6 +34,10 @@ class InsufficientGroupsError(DatasetNotUsableError):
 
 class TrainingConfigurationError(Exception):
     """Raised when the training configuration is invalid."""
+
+
+class FrameTimingError(FeatureExtractionError):
+    pass
 
 
 class SampleSet:
@@ -57,6 +66,49 @@ class SampleSet:
         self.sample_metadata = list(sample_metadata or [])
         self.prediction_target = prediction_target
         self.view_angle = view_angle
+        self.exclusions = []
+        self.inspected_count = len(self.rows)
+        self.annotation_evidence = []
+        self.configuration_blockers = []
+        self.eligibility_policy_version = (
+            ELIGIBILITY_POLICY_VERSION if prediction_target == "knee_alignment" else None
+        )
+
+    def readiness_report(self):
+        participants = {}
+        for metadata in self.sample_metadata:
+            key = str(metadata["participant_id"])
+            row = participants.setdefault(key, {"eligible": 0, "good": 0, "bad": 0, "excluded": 0})
+            row["eligible"] += 1
+            row[metadata["target"]] += 1
+        for exclusion in self.exclusions:
+            key = str(exclusion["participant_id"]) if exclusion["participant_id"] is not None else "unassigned"
+            row = participants.setdefault(key, {"eligible": 0, "good": 0, "bad": 0, "excluded": 0})
+            row["excluded"] += 1
+        blockers = list(self.configuration_blockers)
+        if not self.rows:
+            blockers.append("No eligible repetitions.")
+        if len(set(self.labels)) < 2:
+            blockers.append("Both good and bad classes are required.")
+        if len(set(self.groups)) < 2:
+            blockers.append("At least two eligible participants are required.")
+        if self.rows and len(set(self.labels)) >= 2 and len(set(self.groups)) >= 2:
+            try:
+                group_split(self.groups, labels=self.labels)
+            except InsufficientGroupsError as exc:
+                blockers.append(str(exc))
+        return {
+            "eligibility_policy_version": self.eligibility_policy_version,
+            "inspected_count": self.inspected_count,
+            "eligible_count": len(self),
+            "eligible_sample_ids": self.sample_ids,
+            "class_counts": {label: self.class_distribution.get(label, 0) for label in ("good", "bad")},
+            "excluded_count": len(self.exclusions),
+            "exclusion_counts": dict(Counter(row["reason_code"] for row in self.exclusions)),
+            "participants": participants,
+            "exclusions": self.exclusions,
+            "training_blockers": blockers,
+        }
 
     def __len__(self):
         return len(self.rows)
@@ -168,6 +220,13 @@ def _training_frame_rate(sample, dataset):
     raise FeatureExtractionError(
         "No usable frame timestamps or source video FPS are available for velocity features."
     )
+
+
+def _required_training_frame_rate(sample, dataset):
+    try:
+        return _training_frame_rate(sample, dataset)
+    except FeatureExtractionError as exc:
+        raise FrameTimingError(str(exc)) from exc
 
 
 def _available_angles(dataset):
@@ -289,7 +348,7 @@ def _extract_sample_features(
             ),
             fallback_frame_height,
         )
-        effective_fps, timing_source = _training_frame_rate(sample, dataset)
+        effective_fps, timing_source = _required_training_frame_rate(sample, dataset)
         extracted, fppa_metadata = fppa.extract_fppa_features(
             fppa_frames,
             frame_width=frame_width,
@@ -301,7 +360,7 @@ def _extract_sample_features(
                 f"FPPA extraction was invalid: {fppa_metadata.get('reason')}"
             )
     else:
-        effective_fps, timing_source = _training_frame_rate(sample, dataset)
+        effective_fps, timing_source = _required_training_frame_rate(sample, dataset)
         extracted = extract_rep_features(
             frames,
             fps=effective_fps,
@@ -309,6 +368,110 @@ def _extract_sample_features(
         )
         fppa_metadata = None
     return extracted, fppa_metadata, timing_source
+
+
+def prepare_knee_samples(datasets, selected_features=None, *, fallback_frame_width=1280, fallback_frame_height=720):
+    schema = schema_for_target("knee_alignment")
+    features = list(selected_features or schema.feature_order)
+    unknown = set(features) - set(schema.feature_order)
+    if unknown:
+        raise TrainingConfigurationError(f"Unknown FPPA features: {sorted(unknown)}")
+    result = SampleSet(features=features, rows=[], labels=[], groups=[], feature_names=features,
+                       warnings=[], errors=[], prediction_target="knee_alignment", view_angle="frontal")
+    result.inspected_count = 0
+    for dataset in datasets:
+        if dataset.purpose != "training":
+            result.configuration_blockers.append(f"Dataset {dataset.pk} must have training purpose.")
+        samples = dataset.samples.select_related(
+            "dataset__view_angle", "dataset_video__view_angle", "dataset_video__participant",
+            "rep_assessment__session__body_profile",
+        ).prefetch_related("knee_annotation_records")
+        for sample in samples.order_by("id"):
+            result.inspected_count += 1
+            participant_id = _participant_id_for_sample(sample, dataset)
+
+            def exclude(reason, detail):
+                result.exclusions.append({"dataset_id": dataset.pk, "sample_id": sample.pk,
+                    "participant_id": participant_id, "reason_code": reason, "detail": detail})
+                result.errors.append(f"Dataset {dataset.pk}, sample {sample.pk}: {detail}")
+
+            if sample_angle(sample) != "frontal":
+                exclude("non_frontal_view", "Knee alignment requires a known frontal view.")
+                continue
+            video = sample.dataset_video if sample.dataset_video_id else None
+            if dataset.status != "READY" or (video and (
+                video.status != DatasetVideo.Status.READY or video.dataset_id != dataset.pk
+            )):
+                exclude("not_ready", "The dataset and source video must be READY and belong together.")
+                continue
+            if participant_id is None:
+                exclude("missing_participant", "No participant is assigned.")
+                continue
+            evidence = knee_label_evidence(sample)
+            result.annotation_evidence.append({"sample_id": sample.pk, **evidence})
+            annotations = evidence["annotations"]
+            active = [record for record in annotations if record["annotation"] is not None]
+            if not active:
+                exclude("missing_annotation", "No current knee annotation is available.")
+                continue
+            try:
+                for record in active:
+                    KneeAnnotationField().to_internal_value(record["annotation"])
+            except (ValidationError, TypeError, KeyError):
+                exclude("incomplete_annotation", "The current knee annotation is incomplete or invalid.")
+                continue
+            if any(record["annotator_id"] is None for record in active):
+                exclude("missing_human_provenance", "All current ratings require an identified human annotator.")
+                continue
+            target = evidence["target"]
+            if target not in {"good", "bad"}:
+                exclude(target or "missing_annotation", f"Knee target {target or 'missing'} was excluded from training.")
+                continue
+            raw = sample.rep_assessment.landmark_series
+            if not raw:
+                exclude("missing_landmark_data", "No landmark data is available.")
+                continue
+            if not isinstance(raw, list):
+                exclude("feature_extraction_failure", "Landmark data must be a list of frames.")
+                continue
+            frames = _frames_from_landmark_series(raw)
+            if len(frames) < 3:
+                exclude("insufficient_frames", "At least three landmark frames are required.")
+                continue
+            try:
+                extracted, metadata, timing_source = _extract_sample_features(
+                    sample, frames, sample.rep_assessment.session, dataset, schema.version,
+                    fallback_frame_width, fallback_frame_height,
+                )
+                row = to_feature_row(extracted, features)
+            except FrameTimingError as exc:
+                exclude("invalid_timing", str(exc))
+                continue
+            except (FeatureExtractionError, ValueError, TypeError, KeyError) as exc:
+                exclude("feature_extraction_failure", str(exc))
+                continue
+            group = f"participant-{participant_id}"
+            result.rows.append(row)
+            result.labels.append(target)
+            result.groups.append(group)
+            result.sample_ids.append(sample.pk)
+            result.sample_metadata.append({
+                "sample_id": sample.pk, "dataset_id": dataset.pk, "dataset_name": dataset.name,
+                "dataset_video_id": sample.dataset_video_id,
+                "source_path": video.source_path if video else "",
+                "source_label": video.source_label if video else None,
+                "participant_id": participant_id, "participant_group": group, "view_angle": "frontal",
+                "timing_source": timing_source, "is_correct": sample.is_correct,
+                "error_label": sample.error_label or "", "annotator_id": sample.annotator_id,
+                "annotator_ids": sorted({record["annotator_id"] for record in active}),
+                "knee_annotations": annotations,
+                "annotated_at": sample.annotated_at.isoformat() if sample.annotated_at else None,
+                "target": target, "label_origin": "human", "fppa_metadata": metadata,
+            })
+            for warning in extracted.get("_warnings", []):
+                if warning not in result.warnings:
+                    result.warnings.append(warning)
+    return result
 
 
 def build_samples(
@@ -332,6 +495,15 @@ def build_samples(
             "FPPA knee-alignment training requires the frontal view."
         )
     _validate_training_datasets(datasets, view_angle)
+    if prediction_target == "knee_alignment":
+        result = prepare_knee_samples(
+            datasets, selected_features, fallback_frame_width=fallback_frame_width,
+            fallback_frame_height=fallback_frame_height,
+        )
+        if not result.rows or len(set(result.labels)) < 2:
+            raise DatasetNotUsableError(" ".join(result.readiness_report()["training_blockers"])
+                                       + " " + " | ".join(result.errors[:10]))
+        return result
     schema = schema_for_target(prediction_target)
     if not selected_features:
         selected_features = list(schema.feature_order)
@@ -358,35 +530,11 @@ def build_samples(
                 )
                 continue
 
-            evidence = (
-                knee_label_evidence(sample)
-                if prediction_target == "knee_alignment"
-                else None
-            )
-            annotations = evidence["annotations"] if evidence else []
-            annotator_ids = [
-                record["annotator_id"]
-                for record in annotations
-                if record["annotator_id"] is not None
-            ]
-            if evidence is None:
-                human_label = (
-                    sample.annotator_id is not None or sample.annotated_at is not None
-                )
-            else:
-                human_label = bool(annotations) and all(
-                    record["annotator_id"] is not None for record in annotations
-                )
+            annotations = []
+            annotator_ids = []
+            human_label = sample.annotator_id is not None or sample.annotated_at is not None
             if prediction_target == "binary_form":
                 target = 1 if sample.is_correct else 0
-            elif prediction_target == "knee_alignment":
-                target = evidence["target"]
-                if target not in {"good", "bad"}:
-                    errors.append(
-                        f"Dataset {dataset.pk}, sample {sample.pk}: knee target "
-                        f"{target or 'missing'} was excluded from training."
-                    )
-                    continue
             elif sample.is_correct:
                 target = "correct_form"
             else:

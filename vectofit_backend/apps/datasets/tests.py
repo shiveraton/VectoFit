@@ -15,7 +15,7 @@ from apps.assessments.models import AssessmentSession, RepAssessment
 from apps.accounts.models import Profile
 from apps.exercises.models import ExerciseVariant
 
-from .models import Dataset, DatasetSample, KneeAnnotation
+from .models import Dataset, DatasetSample, KneeAnnotation, ViewAngle
 from .serializers import DatasetBulkImportSerializer
 from .services.knee_label import final_knee_target, knee_target
 
@@ -112,6 +112,8 @@ class KneeAnnotationAPITests(APITestCase):
         self.client.force_authenticate(user=self.admin_user)
         dataset = Dataset.objects.create(
             name="Annotation Dataset",
+            status="READY",
+            view_angle=ViewAngle.objects.get_or_create(angle_variant="frontal")[0],
             description="Annotation round-trip test",
             exercise_type="bodyweight_squat",
             purpose="training",

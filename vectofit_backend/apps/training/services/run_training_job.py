@@ -125,6 +125,13 @@ def _build_manifest(
             )
         },
     }
+    if prediction_target == "knee_alignment":
+        manifest.update({
+            "eligibility_policy_version": sample_set.eligibility_policy_version,
+            "exclusions": sample_set.exclusions,
+            "eligibility_summary": sample_set.readiness_report(),
+            "annotation_evidence": sample_set.annotation_evidence,
+        })
     canonical_manifest = json.dumps(
         manifest,
         sort_keys=True,
