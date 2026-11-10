@@ -20,6 +20,7 @@ from .models import (
 )
 from .services.annotation import latest_annotation
 from .services.knee_label import final_knee_target, knee_target
+from .services.frontal import require_frontal_annotation
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
@@ -83,14 +84,14 @@ class KneeAnnotationField(serializers.Field):
             item = value[side]
             if not isinstance(item, dict) or set(item) != {"grade", "direction"}:
                 raise serializers.ValidationError(f"Invalid {side} knee annotation.")
-            if item["grade"] is not None and item["grade"] not in allowed_grades:
+            if not isinstance(item["grade"], str) or item["grade"] not in allowed_grades:
                 raise serializers.ValidationError(f"Invalid {side} knee grade.")
             if (
                 item["direction"] is not None
-                and item["direction"] not in allowed_directions
+                and (not isinstance(item["direction"], str) or item["direction"] not in allowed_directions)
             ):
                 raise serializers.ValidationError(f"Invalid {side} knee direction.")
-        if value["symmetry_observation"] not in {
+        if not isinstance(value["symmetry_observation"], str) or value["symmetry_observation"] not in {
             "symmetric",
             "asymmetric",
             "uncertain",
@@ -103,6 +104,15 @@ class KneeAnnotationField(serializers.Field):
 
 
 class DatasetSampleSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        if "knee_annotation" in attrs and self.instance is not None:
+            require_frontal_annotation(self.instance)
+            from .services.assignments import review_samples
+
+            if not review_samples().filter(pk=self.instance.pk).exists():
+                raise serializers.ValidationError("This sample is not available for annotation.")
+        return super().validate(attrs)
+
     knee_annotation = KneeAnnotationField(required=False, allow_null=True)
     target_label = serializers.SerializerMethodField()
     is_correct = serializers.BooleanField(
@@ -176,10 +186,8 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
         annotation = self.get_knee_annotation(obj)
         if not annotation:
             return None
-        grades = [annotation.get(side, {}).get("grade") for side in ("left", "right")]
-        if any(grade is None for grade in grades):
-            return None
-        return knee_target(annotation)
+        target = knee_target(annotation)
+        return None if target == "incomplete" else target
 
     def update(self, instance, validated_data):
         annotation = validated_data.pop("knee_annotation", serializers.empty)
@@ -336,46 +344,32 @@ class DatasetSerializer(serializers.ModelSerializer):
             annotated_at__isnull=True,
         ).count()
 
-    def get_review_selected_sample_count(self, obj):
-        if hasattr(obj, "summary_samples"):
-            return sum(
-                sample.dataset_video_id is not None
-                and sample.dataset_video.requires_manual_review
-                for sample in obj.summary_samples
+    def _review_progress(self, obj):
+        from .services.assignments import review_samples
+        from .services.knee_label import knee_label_evidence
+
+        cache = getattr(self, "_review_progress_cache", None)
+        if cache is None:
+            cache = self._review_progress_cache = {}
+        if obj.pk not in cache:
+            samples = list(review_samples().filter(dataset=obj).prefetch_related("knee_annotation_records"))
+            reviewed = sum(
+                any(record["annotator_id"] is not None and record["annotation"] is not None
+                    for record in knee_label_evidence(sample)["annotations"])
+                for sample in samples
             )
-        return obj.samples.filter(
-            dataset_video__requires_manual_review=True,
-        ).count()
+            cache[obj.pk] = (len(samples), reviewed)
+        return cache[obj.pk]
+
+    def get_review_selected_sample_count(self, obj):
+        return self._review_progress(obj)[0]
 
     def get_human_reviewed_sample_count(self, obj):
-        if hasattr(obj, "summary_samples"):
-            return sum(
-                sample.dataset_video_id is not None
-                and sample.dataset_video.requires_manual_review
-                and (sample.annotator_id is not None or sample.annotated_at is not None)
-                for sample in obj.summary_samples
-            )
-        return (
-            obj.samples.filter(
-                dataset_video__requires_manual_review=True,
-            )
-            .filter(Q(annotator__isnull=False) | Q(annotated_at__isnull=False))
-            .count()
-        )
+        return self._review_progress(obj)[1]
 
     def get_pending_review_sample_count(self, obj):
-        if hasattr(obj, "summary_samples"):
-            return sum(
-                sample.dataset_video_id is not None
-                and sample.dataset_video.requires_manual_review
-                and sample.annotator_id is None and sample.annotated_at is None
-                for sample in obj.summary_samples
-            )
-        return obj.samples.filter(
-            dataset_video__requires_manual_review=True,
-            annotator__isnull=True,
-            annotated_at__isnull=True,
-        ).count()
+        total, reviewed = self._review_progress(obj)
+        return total - reviewed
 
     def get_participant_count(self, obj):
         if hasattr(obj, "summary_videos"):

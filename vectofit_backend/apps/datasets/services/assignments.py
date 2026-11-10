@@ -1,8 +1,9 @@
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from rest_framework.exceptions import ValidationError
 
 from ..models import Dataset, DatasetAnnotatorAssignment, DatasetAssignmentEvent, DatasetSample
+from .frontal import frontal_samples
 
 
 @transaction.atomic
@@ -40,15 +41,19 @@ def set_assignment(dataset, annotator, is_active, actor):
 
 
 def review_samples():
-    return DatasetSample.objects.filter(
-        dataset__status="READY", dataset_video__status="READY",
-        dataset_video__requires_manual_review=True,
-        dataset_video__dataset_id=F("dataset_id"),
+    return frontal_samples(DatasetSample.objects.filter(dataset__status="READY")).filter(
+        Q(dataset_video__isnull=True)
+        | Q(dataset_video__status="READY", dataset_video__requires_manual_review=True,
+            dataset_video__dataset_id=F("dataset_id"))
     )
 
 
-def assigned_review_samples(user):
+def assigned_samples(user):
     assignments = DatasetAnnotatorAssignment.objects.filter(
         annotator=user, is_active=True,
     ).values("dataset_id")
-    return review_samples().filter(dataset_id__in=assignments)
+    return DatasetSample.objects.filter(dataset_id__in=assignments)
+
+
+def assigned_review_samples(user):
+    return review_samples().filter(pk__in=assigned_samples(user).values("pk"))

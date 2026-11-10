@@ -20,7 +20,8 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Profile
 from apps.datasets.models import Dataset, KneeAnnotation
-from apps.datasets.services.assignments import assigned_review_samples
+from apps.datasets.services.assignments import assigned_review_samples, assigned_samples, review_samples
+from apps.datasets.services.frontal import require_frontal_annotation
 from apps.datasets.services.media import protected_file_response
 from apps.datasets.serializers import KneeAnnotationField
 from apps.datasets.services.annotation import latest_annotation
@@ -164,7 +165,7 @@ def sample_data(sample, user, fps=None):
             "video_url": f"/api/annotator/videos/{video.pk}/",
             "participant_code": video.participant.participant_code,
             "view_angle_name": video.view_angle.angle_variant,
-        },
+        } if video else None,
         "video_fps": fps,
         "knee_annotation": annotation,
         "target_label": knee_target(annotation) if annotation else None,
@@ -200,6 +201,8 @@ class SessionView(PublicView):
         fps = {}
         for sample in samples:
             video = sample.dataset_video
+            if video is None:
+                continue
             if video.pk not in fps:
                 try:
                     with resolved_video_path(video.video_file) as video_path:
@@ -211,7 +214,7 @@ class SessionView(PublicView):
                 except (VideoResolutionError, OSError, cv2.error):
                     fps[video.pk] = 0.0
         rows = [
-            sample_data(sample, request.user, fps[sample.dataset_video_id])
+            sample_data(sample, request.user, fps.get(sample.dataset_video_id))
             for sample in samples
         ]
         return Response(
@@ -219,7 +222,7 @@ class SessionView(PublicView):
                 "dataset": {
                     "id": dataset_id,
                     "name": samples[0].dataset.name,
-                    "video_url": None,
+                    "video_url": f"/api/annotator/datasets/{dataset_id}/video/" if samples[0].dataset.video_file else None,
                     "sample_count": len(rows),
                     "labelled_sample_count": sum(
                         row["knee_annotation"] is not None for row in rows
@@ -264,9 +267,12 @@ class RatingView(PublicView):
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             sample = get_object_or_404(
-                eligible_samples(request.user).select_for_update(of=("self",)),
+                assigned_samples(request.user).select_for_update(of=("self",)),
                 pk=sample_id,
             )
+            require_frontal_annotation(sample)
+            if not review_samples().filter(pk=sample.pk).exists():
+                raise Http404
             # Append a tombstone when clearing; preserve every other rater and history.
             KneeAnnotation.objects.create(
                 sample=sample,
@@ -286,3 +292,11 @@ class VideoView(PublicView):
         file = sample.dataset_video.video_file
         suffix = file.name.rsplit(".", 1)[-1].lower() if "." in file.name else "bin"
         return protected_file_response(request, file, filename=f"review-video.{suffix}")
+
+
+class LegacyVideoView(PublicView):
+    def get(self, request, dataset_id):
+        sample = eligible_samples(request.user).filter(dataset_id=dataset_id, dataset_video__isnull=True).first()
+        if sample is None or not sample.dataset.video_file:
+            raise Http404
+        return protected_file_response(request, sample.dataset.video_file, filename="review-video.mp4")

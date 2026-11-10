@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -173,6 +174,10 @@ class Command(BaseCommand):
                 for metadata, row in zip(sample_set.sample_metadata, sample_set.rows)
             ],
             "excluded_samples": sample_set.errors,
+            "eligibility_policy_version": sample_set.eligibility_policy_version,
+            "exclusions": sample_set.exclusions,
+            "eligibility_summary": sample_set.readiness_report(),
+            "annotation_evidence": sample_set.annotation_evidence,
             "model_definitions": {
                 "M0": "XGBoost with four FPPA features",
                 "M1": "XGBoost with four FPPA features and bilateral asymmetry",
@@ -216,6 +221,9 @@ class Command(BaseCommand):
                 for cutoff in SENSITIVITY_CUTOFFS_DEG
             ],
         }
+        results["manifest_sha256"] = hashlib.sha256(
+            json.dumps(results, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
         Path(options["output"]).write_text(
             json.dumps(results, indent=2), encoding="utf-8"
         )

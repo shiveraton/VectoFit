@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view()),
     path("datasets/", views.DatasetListView.as_view()),
     path("datasets/<int:dataset_id>/session/", views.SessionView.as_view()),
+    path("datasets/<int:dataset_id>/video/", views.LegacyVideoView.as_view()),
     path("samples/<int:sample_id>/rating/", views.RatingView.as_view()),
     path("videos/<int:video_id>/", views.VideoView.as_view()),
 ]

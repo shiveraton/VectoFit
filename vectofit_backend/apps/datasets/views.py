@@ -33,7 +33,7 @@ from .services.bulk_import import create_archive_preview
 from .services.import_executor import execute_bulk_import
 from .services.tasks import process_dataset_video_task
 from .permissions import IsAnnotator
-from .services.assignments import assigned_review_samples
+from .services.assignments import assigned_review_samples, assigned_samples, review_samples
 from .services.knee_label import final_knee_target
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,13 @@ class ViewAngleViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class DatasetViewSet(viewsets.ModelViewSet):
+    @action(detail=True, methods=["get"], url_path="knee-readiness")
+    def knee_readiness(self, request, pk=None):
+        from apps.training.services.data_loader import prepare_knee_samples
+
+        samples = prepare_knee_samples([self.get_object()])
+        return Response(samples.readiness_report())
+
     def get_serializer_class(self):
         if self.action == "list":
             return DatasetListSerializer
@@ -118,14 +125,11 @@ class DatasetViewSet(viewsets.ModelViewSet):
     def annotation(self, request, pk=None):
         dataset = self.get_object()
 
-        samples = dataset.samples.select_related(
+        samples = review_samples().filter(dataset=dataset).select_related(
             "rep_assessment",
             "dataset_video__participant",
             "dataset_video__view_angle",
         )
-        if dataset.videos.exists():
-            samples = samples.filter(dataset_video__requires_manual_review=True)
-
         if not request.user.is_staff:
             samples = samples.filter(pk__in=assigned_review_samples(request.user).values("pk"))
 
@@ -249,7 +253,10 @@ class DatasetSampleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            queryset = queryset.filter(pk__in=assigned_review_samples(self.request.user).values("pk"))
+            if self.action in {"partial_update", "update"}:
+                queryset = queryset.filter(pk__in=assigned_samples(self.request.user).values("pk"))
+            else:
+                queryset = queryset.filter(pk__in=assigned_review_samples(self.request.user).values("pk"))
 
         dataset_id = self.request.query_params.get("dataset")
 
@@ -316,10 +323,7 @@ class AnnotationPoolView(APIView):
         response = []
 
         for dataset in datasets:
-            samples = dataset.samples.all()
-            if dataset.videos.exists():
-                samples = samples.filter(dataset_video__requires_manual_review=True)
-
+            samples = review_samples().filter(dataset=dataset)
             sample_count = samples.count()
 
             records = list(
@@ -409,10 +413,7 @@ class AnnotationDatasetListView(APIView):
     permission_classes: ClassVar[list] = [IsAnnotator]
 
     def get(self, request):
-        datasets = Dataset.objects.filter(
-            status="READY",
-            samples__dataset_video__requires_manual_review=True,
-        ).distinct().order_by("name")
+        datasets = Dataset.objects.filter(pk__in=review_samples().values("dataset_id")).order_by("name")
         if not request.user.is_staff:
             datasets = datasets.filter(pk__in=assigned_review_samples(request.user).values("dataset_id"))
         return Response(

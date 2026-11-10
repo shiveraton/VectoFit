@@ -1,0 +1,56 @@
+.report {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--vf-border-light);
+  color: var(--vf-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.report h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.report button {
+  padding: 8px 12px;
+  border: 1px solid var(--vf-control-border);
+  border-radius: 8px;
+  background: var(--vf-surface, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.report button:focus-visible,
+.report summary:focus-visible {
+  outline: 2px solid var(--vf-orange);
+  outline-offset: 3px;
+}
+
+.report details {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.report table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.report th,
+.report td {
+  padding: 8px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--vf-border-light);
+}
+
+.report th:first-child {
+  text-align: left;
+}
+
+.report [role="alert"] {
+  color: var(--vf-red);
+}
