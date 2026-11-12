@@ -318,3 +318,19 @@
     flex: 1;
   }
 }
+
+.reference-button {
+  margin-top: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--vf-border);
+  border-radius: 8px;
+  background: var(--vf-surface);
+  color: var(--vf-text);
+  font: inherit;
+  cursor: pointer;
+}
+.reference-button:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
+}

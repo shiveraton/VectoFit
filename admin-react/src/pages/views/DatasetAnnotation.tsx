@@ -11,6 +11,7 @@ import type {
 import { bindStyles, each, display, scopeAttributes } from "../../presentation";
 import styles from "./DatasetAnnotation.module.css";
 import { annotationVideoUrl } from "../../services/frontalAnnotation";
+import SquatReferenceModal from "../../components/datasets/SquatReferenceModal";
 
 export default function DatasetAnnotation(input: {}) {
   const cx = bindStyles(styles);
@@ -22,6 +23,7 @@ export default function DatasetAnnotation(input: {}) {
     import.meta.env.MODE === "public" ? "/annotator" : "/dataset";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [referenceOpen, setReferenceOpen] = useState(false);
   const [videoError, setVideoError] = useState("");
   const [reviewingCompleted, setReviewingCompleted] = useState(false);
   const kneeSides = ["left", "right"] as const;
@@ -466,6 +468,17 @@ export default function DatasetAnnotation(input: {}) {
                         {display(currentSample.rep_assessment.rep_number)}
                       </span>
                       <h2 data-v-dataset-annotation="">{"Knee Alignment"}</h2>
+                      <button
+                        type="button"
+                        className={cx("reference-button")}
+                        aria-haspopup="dialog"
+                        onClick={() => {
+                          videoRef.current?.pause();
+                          setReferenceOpen(true);
+                        }}
+                      >
+                        View reference
+                      </button>
                       {currentSampleLabelState ? (
                         <p
                           data-v-dataset-annotation=""
@@ -627,6 +640,9 @@ export default function DatasetAnnotation(input: {}) {
           </>
         ) : null}
       </div>
+      {referenceOpen && (
+        <SquatReferenceModal onClose={() => setReferenceOpen(false)} />
+      )}
     </>
   );
 }
