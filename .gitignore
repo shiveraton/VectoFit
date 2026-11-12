@@ -112,3 +112,7 @@ deploy/annotator/generated/
 .neon
 
 !vectofit_backend/DATASET_VIDEO_STORAGE.md
+
+# Backend dependency repair artifacts
+.venv_before_dependency_repair/
+!docs/backend-dependencies.md

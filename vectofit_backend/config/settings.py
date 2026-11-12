@@ -33,6 +33,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
+TRAINING_ENABLE_LEGACY_SPLIT = env.bool("TRAINING_ENABLE_LEGACY_SPLIT", default=False)
 
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",

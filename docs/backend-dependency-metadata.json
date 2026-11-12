@@ -1,0 +1,282 @@
+[
+  {
+    "package": "numpy",
+    "version": "1.26.4",
+    "source": "https://pypi.org/pypi/numpy/1.26.4/json",
+    "requires_python": ">=3.9",
+    "requires_dist": null,
+    "windows_python311_wheels": [
+      {
+        "filename": "numpy-1.26.4-cp311-cp311-win_amd64.whl",
+        "sha256": "cd25bcecc4974d09257ffcd1f098ee778f7834c3ad767fe5db785be9a4aa9cb2"
+      }
+    ]
+  },
+  {
+    "package": "scipy",
+    "version": "1.15.3",
+    "source": "https://pypi.org/pypi/scipy/1.15.3/json",
+    "requires_python": ">=3.10",
+    "requires_dist": [
+      "numpy<2.5,>=1.23.5",
+      "pytest; extra == \"test\"",
+      "pytest-cov; extra == \"test\"",
+      "pytest-timeout; extra == \"test\"",
+      "pytest-xdist; extra == \"test\"",
+      "asv; extra == \"test\"",
+      "mpmath; extra == \"test\"",
+      "gmpy2; extra == \"test\"",
+      "threadpoolctl; extra == \"test\"",
+      "scikit-umfpack; extra == \"test\"",
+      "pooch; extra == \"test\"",
+      "hypothesis>=6.30; extra == \"test\"",
+      "array-api-strict<2.1.1,>=2.0; extra == \"test\"",
+      "Cython; extra == \"test\"",
+      "meson; extra == \"test\"",
+      "ninja; sys_platform != \"emscripten\" and extra == \"test\"",
+      "sphinx<8.0.0,>=5.0.0; extra == \"doc\"",
+      "intersphinx_registry; extra == \"doc\"",
+      "pydata-sphinx-theme>=0.15.2; extra == \"doc\"",
+      "sphinx-copybutton; extra == \"doc\"",
+      "sphinx-design>=0.4.0; extra == \"doc\"",
+      "matplotlib>=3.5; extra == \"doc\"",
+      "numpydoc; extra == \"doc\"",
+      "jupytext; extra == \"doc\"",
+      "myst-nb; extra == \"doc\"",
+      "pooch; extra == \"doc\"",
+      "jupyterlite-sphinx>=0.19.1; extra == \"doc\"",
+      "jupyterlite-pyodide-kernel; extra == \"doc\"",
+      "mypy==1.10.0; extra == \"dev\"",
+      "typing_extensions; extra == \"dev\"",
+      "types-psutil; extra == \"dev\"",
+      "pycodestyle; extra == \"dev\"",
+      "ruff>=0.0.292; extra == \"dev\"",
+      "cython-lint>=0.12.2; extra == \"dev\"",
+      "rich-click; extra == \"dev\"",
+      "doit>=0.36.0; extra == \"dev\"",
+      "pydevtool; extra == \"dev\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "scipy-1.15.3-cp311-cp311-win_amd64.whl",
+        "sha256": "ae48a786a28412d744c62fd7816a4118ef97e5be0bee968ce8f0a2fba7acf3bb"
+      }
+    ]
+  },
+  {
+    "package": "scipy",
+    "version": "1.17.1",
+    "source": "https://pypi.org/pypi/scipy/1.17.1/json",
+    "requires_python": ">=3.11",
+    "requires_dist": [
+      "numpy<2.7,>=1.26.4",
+      "pytest>=8.0.0; extra == \"test\"",
+      "pytest-cov; extra == \"test\"",
+      "pytest-timeout; extra == \"test\"",
+      "pytest-xdist; extra == \"test\"",
+      "asv; extra == \"test\"",
+      "mpmath; extra == \"test\"",
+      "gmpy2; extra == \"test\"",
+      "threadpoolctl; extra == \"test\"",
+      "scikit-umfpack; extra == \"test\"",
+      "pooch; extra == \"test\"",
+      "hypothesis>=6.30; extra == \"test\"",
+      "array-api-strict>=2.3.1; extra == \"test\"",
+      "Cython; extra == \"test\"",
+      "meson; extra == \"test\"",
+      "ninja; sys_platform != \"emscripten\" and extra == \"test\"",
+      "sphinx<8.2.0,>=5.0.0; extra == \"doc\"",
+      "intersphinx_registry; extra == \"doc\"",
+      "pydata-sphinx-theme>=0.15.2; extra == \"doc\"",
+      "sphinx-copybutton; extra == \"doc\"",
+      "sphinx-design>=0.4.0; extra == \"doc\"",
+      "matplotlib>=3.5; extra == \"doc\"",
+      "numpydoc; extra == \"doc\"",
+      "jupytext; extra == \"doc\"",
+      "myst-nb>=1.2.0; extra == \"doc\"",
+      "pooch; extra == \"doc\"",
+      "jupyterlite-sphinx>=0.19.1; extra == \"doc\"",
+      "jupyterlite-pyodide-kernel; extra == \"doc\"",
+      "linkify-it-py; extra == \"doc\"",
+      "tabulate; extra == \"doc\"",
+      "click<8.3.0; extra == \"dev\"",
+      "spin; extra == \"dev\"",
+      "mypy==1.10.0; extra == \"dev\"",
+      "typing_extensions; extra == \"dev\"",
+      "types-psutil; extra == \"dev\"",
+      "pycodestyle; extra == \"dev\"",
+      "ruff>=0.12.0; extra == \"dev\"",
+      "cython-lint>=0.12.2; extra == \"dev\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "scipy-1.17.1-cp311-cp311-win_amd64.whl",
+        "sha256": "d30e57c72013c2a4fe441c2fcb8e77b14e152ad48b5464858e07e2ad9fbfceff"
+      }
+    ]
+  },
+  {
+    "package": "opencv-contrib-python",
+    "version": "4.11.0.86",
+    "source": "https://pypi.org/pypi/opencv-contrib-python/4.11.0.86/json",
+    "requires_python": ">=3.6",
+    "requires_dist": [
+      "numpy>=1.13.3; python_version < \"3.7\"",
+      "numpy>=1.21.0; python_version <= \"3.9\" and platform_system == \"Darwin\" and platform_machine == \"arm64\"",
+      "numpy>=1.21.2; python_version >= \"3.10\"",
+      "numpy>=1.21.4; python_version >= \"3.10\" and platform_system == \"Darwin\"",
+      "numpy>=1.23.5; python_version >= \"3.11\"",
+      "numpy>=1.26.0; python_version >= \"3.12\"",
+      "numpy>=1.19.3; python_version >= \"3.6\" and platform_system == \"Linux\" and platform_machine == \"aarch64\"",
+      "numpy>=1.17.0; python_version >= \"3.7\"",
+      "numpy>=1.17.3; python_version >= \"3.8\"",
+      "numpy>=1.19.3; python_version >= \"3.9\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "opencv_contrib_python-4.11.0.86-cp37-abi3-win_amd64.whl",
+        "sha256": "654758a9ae8ca9a75fca7b64b19163636534f0eedffe1e14c3d7218988625c8d"
+      }
+    ]
+  },
+  {
+    "package": "mediapipe",
+    "version": "0.10.14",
+    "source": "https://pypi.org/pypi/mediapipe/0.10.14/json",
+    "requires_python": null,
+    "requires_dist": [
+      "absl-py",
+      "attrs>=19.1.0",
+      "flatbuffers>=2.0",
+      "jax",
+      "jaxlib",
+      "matplotlib",
+      "numpy",
+      "opencv-contrib-python",
+      "protobuf<5,>=4.25.3",
+      "sounddevice>=0.4.4"
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "mediapipe-0.10.14-cp311-cp311-win_amd64.whl",
+        "sha256": "1b7687d3b63590bcc601ad195b923b80a1b2d6be5cdf43711edc661cecd3dd47"
+      }
+    ]
+  },
+  {
+    "package": "jax",
+    "version": "0.4.30",
+    "source": "https://pypi.org/pypi/jax/0.4.30/json",
+    "requires_python": ">=3.9",
+    "requires_dist": [
+      "jaxlib<=0.4.30,>=0.4.27",
+      "ml-dtypes>=0.2.0",
+      "numpy>=1.22",
+      "opt-einsum",
+      "scipy>=1.9",
+      "importlib-metadata>=4.6; python_version < \"3.10\"",
+      "numpy>=1.23.2; python_version >= \"3.11\"",
+      "numpy>=1.26.0; python_version >= \"3.12\"",
+      "scipy>=1.11.1; python_version >= \"3.12\"",
+      "jaxlib==0.4.29; extra == \"ci\"",
+      "jaxlib==0.4.30; extra == \"cuda\"",
+      "jax-cuda12-plugin[with_cuda]<=0.4.30,>=0.4.30; extra == \"cuda\"",
+      "jaxlib==0.4.30; extra == \"cuda12\"",
+      "jax-cuda12-plugin[with_cuda]<=0.4.30,>=0.4.30; extra == \"cuda12\"",
+      "jaxlib==0.4.30; extra == \"cuda12-local\"",
+      "jax-cuda12-plugin==0.4.30; extra == \"cuda12-local\"",
+      "jaxlib==0.4.30; extra == \"cuda12-pip\"",
+      "jax-cuda12-plugin[with_cuda]<=0.4.30,>=0.4.30; extra == \"cuda12-pip\"",
+      "jaxlib==0.4.27; extra == \"minimum-jaxlib\"",
+      "jaxlib<=0.4.30,>=0.4.30; extra == \"tpu\"",
+      "libtpu-nightly==0.1.dev20240617; extra == \"tpu\"",
+      "requests; extra == \"tpu\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "jax-0.4.30-py3-none-any.whl",
+        "sha256": "289b30ae03b52f7f4baf6ef082a9f4e3e29c1080e22d13512c5ecf02d5f1a55b"
+      }
+    ]
+  },
+  {
+    "package": "jax",
+    "version": "0.10.2",
+    "source": "https://pypi.org/pypi/jax/0.10.2/json",
+    "requires_python": ">=3.11",
+    "requires_dist": [
+      "jaxlib<=0.10.2,>=0.10.1",
+      "ml_dtypes>=0.5.0",
+      "numpy>=2.0",
+      "opt_einsum",
+      "scipy>=1.14",
+      "jaxlib==0.10.1; extra == \"minimum-jaxlib\"",
+      "jaxlib==0.10.1; extra == \"ci\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"tpu\"",
+      "libtpu==0.0.42.*; extra == \"tpu\"",
+      "requests; extra == \"tpu\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"cuda\"",
+      "jax-cuda12-plugin[with-cuda]<=0.10.2,>=0.10.2; extra == \"cuda\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"cuda12\"",
+      "jax-cuda12-plugin[with-cuda]<=0.10.2,>=0.10.2; extra == \"cuda12\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"cuda13\"",
+      "jax-cuda13-plugin[with-cuda]<=0.10.2,>=0.10.2; extra == \"cuda13\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"cuda12-local\"",
+      "jax-cuda12-plugin<=0.10.2,>=0.10.2; extra == \"cuda12-local\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"cuda13-local\"",
+      "jax-cuda13-plugin<=0.10.2,>=0.10.2; extra == \"cuda13-local\"",
+      "jaxlib<=0.10.2,>=0.10.2; extra == \"rocm7-local\"",
+      "jax-rocm7-plugin==0.10.2.*; extra == \"rocm7-local\"",
+      "kubernetes; extra == \"k8s\"",
+      "xprof; extra == \"xprof\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "jax-0.10.2-py3-none-any.whl",
+        "sha256": "724d73c4678d8b06f6a6ab4db1b8a2fea8cd4f1e2c2564f99601634ec7b8d1c6"
+      }
+    ]
+  },
+  {
+    "package": "jaxlib",
+    "version": "0.4.30",
+    "source": "https://pypi.org/pypi/jaxlib/0.4.30/json",
+    "requires_python": ">=3.9",
+    "requires_dist": [
+      "scipy>=1.9",
+      "numpy>=1.22",
+      "ml-dtypes>=0.2.0",
+      "scipy>=1.11.1; python_version >= \"3.12\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "jaxlib-0.4.30-cp311-cp311-win_amd64.whl",
+        "sha256": "3a2e2c11c179f8851a72249ba1ae40ae817dfaee9877d23b3b8f7c6b7a012f76"
+      }
+    ]
+  },
+  {
+    "package": "ml_dtypes",
+    "version": "0.5.3",
+    "source": "https://pypi.org/pypi/ml_dtypes/0.5.3/json",
+    "requires_python": ">=3.9",
+    "requires_dist": [
+      "numpy>=1.21",
+      "numpy>=1.21.2; python_version >= \"3.10\"",
+      "numpy>=1.23.3; python_version >= \"3.11\"",
+      "numpy>=1.26.0; python_version >= \"3.12\"",
+      "numpy>=2.1.0; python_version >= \"3.13\"",
+      "absl-py; extra == \"dev\"",
+      "pytest; extra == \"dev\"",
+      "pytest-xdist; extra == \"dev\"",
+      "pylint>=2.6.0; extra == \"dev\"",
+      "pyink; extra == \"dev\""
+    ],
+    "windows_python311_wheels": [
+      {
+        "filename": "ml_dtypes-0.5.3-cp311-cp311-win_amd64.whl",
+        "sha256": "58e39349d820b5702bb6f94ea0cb2dc8ec62ee81c0267d9622067d8333596a46"
+      }
+    ]
+  }
+]
