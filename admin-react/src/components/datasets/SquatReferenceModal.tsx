@@ -47,8 +47,8 @@ export default function SquatReferenceModal({
     >
       <header className={styles.header}>
         <div>
-          <h2 id="squat-reference-title">Squat reference</h2>
-          <p>Bodyweight squat ? Frontal view</p>
+          <h2 id="squat-reference-title">Squat Reference</h2>
+          <p>Bodyweight Squat | Frontal view</p>
         </div>
         <button type="button" onClick={onClose} autoFocus>
           Close
@@ -76,11 +76,7 @@ export default function SquatReferenceModal({
             </p>
           ) : (
             <div className={styles.playback}>
-              <span>
-                {autoplay
-                  ? "Loops automatically. Use the video controls to pause or play."
-                  : "Use Play to start the reference. Reduced motion is enabled."}
-              </span>
+              <span>{autoplay}</span>
               <button
                 type="button"
                 onClick={() => {
