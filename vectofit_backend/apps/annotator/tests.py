@@ -1,9 +1,11 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
+from unittest import skipUnless
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import connection
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
@@ -95,6 +97,26 @@ class AssignmentAccessTests(APITestCase):
         self.assertEqual(response.data["knee_annotation"], annotation)
         self.assertEqual(response.data["target_label"], "bad")
         self.assertEqual(KneeAnnotation.objects.filter(sample=self.sample, annotator=self.user).count(), 2)
+
+    @skipUnless(connection.vendor == "postgresql", "Requires PostgreSQL schema alteration")
+    def test_rating_save_after_repairing_legacy_timestamp_column(self):
+        from importlib import import_module
+        from django.apps import apps
+        repair = import_module(
+            "apps.datasets.migrations.0019_repair_kneeannotation_timestamp_default"
+        )
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'ALTER TABLE "datasets_kneeannotation" '
+                'ADD COLUMN "updated_at" timestamp with time zone NOT NULL'
+            )
+        try:
+            with connection.schema_editor() as schema_editor:
+                repair.repair_legacy_timestamp(apps, schema_editor)
+            self.test_complete_rating_can_be_saved_revised_and_read_back()
+        finally:
+            with connection.cursor() as cursor:
+                cursor.execute('ALTER TABLE "datasets_kneeannotation" DROP COLUMN "updated_at"')
 
     def test_revocation_denies_all_endpoints_and_preserves_ratings(self):
         record = KneeAnnotation.objects.create(sample=self.sample, annotator=self.user, annotation=None)
