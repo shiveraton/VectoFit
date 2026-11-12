@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import {
   datasetAnnotationService,
+  annotationRequestError,
   emptyKneeAnnotation,
   type DatasetSample,
   type AnnotationSession,
@@ -196,7 +197,7 @@ export function useDatasetAnnotation() {
       return true;
     } catch (err) {
       console.error(err);
-      error.value = "Failed to save knee annotation.";
+      error.value = annotationRequestError(err, "Failed to save knee annotation.");
       return false;
     } finally {
       isSaving.value = false;
@@ -254,7 +255,7 @@ export function useDatasetAnnotation() {
       loadCurrentSample();
     } catch (err) {
       console.error(err);
-      error.value = "Failed to clear knee annotation.";
+      error.value = annotationRequestError(err, "Failed to clear knee annotation.");
     } finally {
       isSaving.value = false;
     }

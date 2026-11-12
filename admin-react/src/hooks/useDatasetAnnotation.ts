@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   datasetAnnotationService,
+  annotationRequestError,
   emptyKneeAnnotation,
   type AnnotationSession,
   type DatasetSample,
@@ -161,8 +162,8 @@ export function useDatasetAnnotation(datasetId: number) {
         );
       }
       return true;
-    } catch {
-      setError("Failed to save knee annotation.");
+    } catch (error) {
+      setError(annotationRequestError(error, "Failed to save knee annotation."));
       return false;
     } finally {
       lock.current = false;
@@ -180,8 +181,8 @@ export function useDatasetAnnotation(datasetId: number) {
         target_label: null,
       });
       setAnnotation(emptyKneeAnnotation());
-    } catch {
-      setError("Failed to clear knee annotation.");
+    } catch (error) {
+      setError(annotationRequestError(error, "Failed to clear knee annotation."));
     } finally {
       lock.current = false;
     }

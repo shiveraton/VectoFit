@@ -77,6 +77,25 @@ class AssignmentAccessTests(APITestCase):
             self.assertEqual(b"".join(response.streaming_content), b"test-video")
             response.close()
 
+    def test_complete_rating_can_be_saved_revised_and_read_back(self):
+        annotation = {
+            "left": {"grade": "aligned", "direction": "none"},
+            "right": {"grade": "aligned", "direction": "none"},
+            "symmetry_observation": "not_recorded",
+            "notes": "",
+        }
+        url = self.base + f"samples/{self.sample.pk}/rating/"
+        response = self.client.patch(url, {"knee_annotation": annotation}, format="json")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["knee_annotation"], annotation)
+        self.assertEqual(response.data["target_label"], "good")
+        annotation["left"] = {"grade": "deviated", "direction": "valgus"}
+        response = self.client.patch(url, {"knee_annotation": annotation}, format="json")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["knee_annotation"], annotation)
+        self.assertEqual(response.data["target_label"], "bad")
+        self.assertEqual(KneeAnnotation.objects.filter(sample=self.sample, annotator=self.user).count(), 2)
+
     def test_revocation_denies_all_endpoints_and_preserves_ratings(self):
         record = KneeAnnotation.objects.create(sample=self.sample, annotator=self.user, annotation=None)
         self.assignment.is_active = False
