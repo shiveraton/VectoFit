@@ -77,16 +77,13 @@ class TrainingJobCreateView(APIView):
             prediction_target=data["prediction_target"],
             feature_selection=feature_selection,
             hyperparameters=data["hyperparameters"],
-            random_seed=data["random_seed"],
-            test_size=data["test_size"],
+            split_strategy="leave_one_participant_out",
         )
         job.datasets.set(Dataset.objects.filter(pk__in=data["dataset_ids"]))
         task_kwargs = {
             "dataset_ids": data["dataset_ids"],
             "feature_selection": feature_selection,
             "hyperparameters": data["hyperparameters"],
-            "test_size": data["test_size"],
-            "seed": data["random_seed"],
             "view_angle": data["view_angle"],
             "prediction_target": data["prediction_target"],
         }

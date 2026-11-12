@@ -16,8 +16,6 @@ export interface TrainingJob {
   training_manifest_summary?: Record<string, unknown>;
   feature_selection: string[];
   hyperparameters: Record<string, unknown>;
-  random_seed: number;
-  test_size: number;
   split_strategy: string;
   status: TrainingJobStatus;
   error_message: string;
@@ -80,8 +78,6 @@ export const trainingService = {
     prediction_target: PredictionTarget;
     feature_selection: string[];
     hyperparameters: Record<string, unknown>;
-    test_size: number;
-    random_seed: number;
   }): Promise<TrainingJob> {
     const response = await client.post<TrainingJob>(
       "/training/jobs/create/",
@@ -141,10 +137,10 @@ export const trainingService = {
   getSplitStrategy(): SplitStrategyOption[] {
     return [
       {
-        id: "group_by_participant",
-        name: "Group by Participant",
+        id: "leave_one_participant_out",
+        name: "Leave one participant out (LOPO)",
         description:
-          "Keeps repetitions from the same participant in a single split to prevent subject-level leakage.",
+          "Holds out each participant once and combines their out-of-fold predictions.",
       },
     ];
   },

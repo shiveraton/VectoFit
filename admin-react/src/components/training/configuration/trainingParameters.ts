@@ -9,10 +9,7 @@ export type ParameterSimulation =
   | "split"
   | "seed";
 
-export type TrainingParameterTarget =
-  | "hyperparameter"
-  | "testSize"
-  | "randomSeed";
+export type TrainingParameterTarget = "hyperparameter";
 
 export interface TrainingParameterDefinition {
   key: string;
@@ -46,13 +43,13 @@ export const TRAINING_PARAMETER_DEFINITIONS: TrainingParameterDefinition[] = [
       "Controls how many trees are used in the XGBoost ensemble. More trees increase model capacity and training cost.",
     min: 10,
     max: 500,
-    step: 10,
+    step: 1,
     lowLabel: "Fewer",
     highLabel: "More",
     lowEffect: "Smaller ensemble and faster training.",
     highEffect: "Larger ensemble with more model capacity.",
-    recommended: "200",
-    defaultValue: 200,
+    recommended: "100",
+    defaultValue: 100,
     simulation: "trees",
     inputType: "range",
     format: "integer",
@@ -66,14 +63,14 @@ export const TRAINING_PARAMETER_DEFINITIONS: TrainingParameterDefinition[] = [
     description:
       "Controls the maximum depth of each tree. Deeper trees can learn more specific patterns but may fit noise.",
     min: 1,
-    max: 10,
+    max: 6,
     step: 1,
     lowLabel: "Simpler",
     highLabel: "More detailed",
     lowEffect: "Simpler decision rules.",
     highEffect: "More detailed decision rules.",
-    recommended: "4",
-    defaultValue: 4,
+    recommended: "2",
+    defaultValue: 2,
     simulation: "depth",
     inputType: "range",
     format: "integer",
@@ -87,7 +84,7 @@ export const TRAINING_PARAMETER_DEFINITIONS: TrainingParameterDefinition[] = [
     description:
       "Controls how much each successive tree contributes to the model.",
     min: 0.01,
-    max: 0.5,
+    max: 0.3,
     step: 0.01,
     lowLabel: "Gradual",
     highLabel: "Aggressive",
@@ -99,52 +96,8 @@ export const TRAINING_PARAMETER_DEFINITIONS: TrainingParameterDefinition[] = [
     inputType: "range",
     format: "decimal",
   },
-  {
-    key: "test_size",
-    target: "testSize",
-    title: "Test Set Size",
-    technicalName: "test_size",
-    question: "How much labelled data should be held out for testing?",
-    description:
-      "Requests a test fraction of labelled repetitions while keeping participants separate. The achieved fraction depends on participant sizes.",
-    min: 0.1,
-    max: 0.5,
-    step: 0.05,
-    lowLabel: "Smaller",
-    highLabel: "Larger",
-    lowEffect: "More data remains for training.",
-    highEffect: "More data is reserved for testing.",
-    recommended: "30%",
-    defaultValue: 0.3,
-    simulation: "split",
-    inputType: "range",
-    format: "percent",
-  },
-  {
-    key: "random_seed",
-    target: "randomSeed",
-    title: "Random Seed",
-    technicalName: "random_seed",
-    question: "Which reproducible seed should this experiment use?",
-    description:
-      "Keeps the experiment reproducible when the same dataset and configuration are used again.",
-    min: 0,
-    max: 999999,
-    step: 1,
-    lowLabel: "Seed",
-    highLabel: "Seed",
-    lowEffect: "Identifies one reproducible experiment setup.",
-    highEffect: "The value itself is not better or worse.",
-    recommended: "42",
-    defaultValue: 42,
-    simulation: "seed",
-    inputType: "number",
-    format: "integer",
-  },
 ];
 
 export const FIXED_TRAINING_SETTINGS = [
-  { label: "Objective", value: "binary:logistic" },
-  { label: "Evaluation Metric", value: "logloss" },
-  { label: "Split Strategy", value: "group_by_participant" },
+  { label: "Evaluation", value: "Leave one participant out (LOPO)" },
 ];

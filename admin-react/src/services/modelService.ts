@@ -91,13 +91,11 @@ export interface ModelState {
     view_angle: "diagonal" | "frontal" | "sagittal" | "";
     prediction_target: PredictionTarget;
     feature_schema_version: string;
-    test_size: number;
     dataset_names: string[];
     sample_count: number;
     train_count: number;
     test_count: number;
     split_strategy: string;
-    random_seed: number;
     created_at: string;
     started_at: string | null;
     completed_at: string | null;

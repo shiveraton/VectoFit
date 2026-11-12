@@ -389,7 +389,7 @@ def build_model_card(entry):
         )
     )
 
-    split_ok = job.split_strategy == "group_by_participant"
+    split_ok = job.split_strategy in {"group_by_participant", "leave_one_participant_out"}
     checks.append(
         _check(
             "group_split",
