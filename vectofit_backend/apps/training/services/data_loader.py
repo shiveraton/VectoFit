@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from itertools import combinations
 
 import cv2
+from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from apps.analytics.services import fppa
 from apps.analytics.services.feature_schemas import schema_for_target
@@ -20,6 +21,8 @@ from apps.datasets.services.knee_label import (
     knee_label_evidence,
 )
 from apps.datasets.services.frontal import sample_angle
+
+from ..config import TARGET_TASK_PROFILES
 
 ELIGIBILITY_POLICY_VERSION = "knee_alignment_v1"
 
@@ -92,11 +95,17 @@ class SampleSet:
             blockers.append("Both good and bad classes are required.")
         if len(set(self.groups)) < 2:
             blockers.append("At least two eligible participants are required.")
-        if self.rows and len(set(self.labels)) >= 2 and len(set(self.groups)) >= 2:
-            try:
-                group_split(self.groups, labels=self.labels)
-            except InsufficientGroupsError as exc:
-                blockers.append(str(exc))
+        if (
+            TARGET_TASK_PROFILES[self.prediction_target] == "quality"
+            and self.rows and len(set(self.labels)) >= 2 and len(set(self.groups)) >= 2
+        ):
+            for participant in sorted(set(self.groups)):
+                training_classes = {
+                    label for label, group in zip(self.labels, self.groups)
+                    if group != participant
+                }
+                if training_classes != set(self.labels):
+                    blockers.append(f"LOPO participant {participant!r} leaves one class out of training.")
         return {
             "eligibility_policy_version": self.eligibility_policy_version,
             "inspected_count": self.inspected_count,
@@ -652,6 +661,8 @@ def build_samples(
 
 
 def group_split(groups, test_size=0.3, seed=42, labels=None, attempts=512):
+    if not (settings.DEBUG and settings.TRAINING_ENABLE_LEGACY_SPLIT):
+        raise TrainingConfigurationError("Legacy splitting is disabled; use LOPO evaluation.")
     if not 0 < test_size < 1:
         raise TrainingConfigurationError(
             "test_size must be greater than 0 and less than 1."

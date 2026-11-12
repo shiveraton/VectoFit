@@ -12,8 +12,6 @@ interface TrainingDraft {
   selectedViewAngle: ViewAngle | null;
   selectedAlgorithmId: string;
   hyperparameters: Record<string, unknown>;
-  testSize: number;
-  randomSeed: number;
   selectedJobId: number | null;
 }
 const useDraft = create<TrainingDraft>(() => ({
@@ -21,8 +19,6 @@ const useDraft = create<TrainingDraft>(() => ({
   selectedViewAngle: "frontal",
   selectedAlgorithmId: "xgboost",
   hyperparameters: {},
-  testSize: 0.3,
-  randomSeed: 42,
   selectedJobId: null,
 }));
 export function useTraining() {
@@ -195,8 +191,6 @@ export function useTraining() {
       useDraft.setState((state) => ({
         hyperparameters: { ...state.hyperparameters, [name]: value },
       })),
-    setTestSize: (testSize: number) => useDraft.setState({ testSize }),
-    setRandomSeed: (randomSeed: number) => useDraft.setState({ randomSeed }),
     startTraining: async () => {
       if (!canStartTraining || !selectedAlgorithm || !draft.selectedViewAngle)
         return null;
@@ -208,8 +202,6 @@ export function useTraining() {
           prediction_target: "knee_alignment",
           feature_selection: selectedFeatures.map((feature) => feature.id),
           hyperparameters: draft.hyperparameters,
-          test_size: draft.testSize,
-          random_seed: draft.randomSeed,
         });
       } catch {
         return null;

@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from apps.analytics.services.feature_schemas import schema_for_target
 
+from ..config import default_hyperparameters, locked_hyperparameters
 from ..models import ModelRegistry, TrainingJob
 from .data_loader import build_samples, resolve_datasets
 from .trainer import serialize_model, train_and_evaluate, training_environment
@@ -29,7 +30,6 @@ def _next_version(model_name: str) -> str:
 
 
 def _register_model(job, model_name, serialized_model, metrics):
-    """Create a uniquely versioned registry row; retry if concurrent jobs race."""
     for attempt in range(5):
         try:
             with transaction.atomic():
@@ -59,20 +59,12 @@ def _register_model(job, model_name, serialized_model, metrics):
 
 
 def _build_manifest(
-    job, datasets, sample_set, result, view_angle, prediction_target, test_size, seed
+    job, datasets, sample_set, result, view_angle, prediction_target
 ):
-    train_indices = set(result["train_idx"])
-    test_indices = set(result["test_idx"])
     sample_rows = []
     for index, metadata in enumerate(sample_set.sample_metadata):
         row = dict(metadata)
-        row["split"] = (
-            "train"
-            if index in train_indices
-            else "test"
-            if index in test_indices
-            else "unassigned"
-        )
+        row["split"] = "out_of_fold"
         row["features"] = {
             feature_name: float(value)
             for feature_name, value in zip(
@@ -81,9 +73,21 @@ def _build_manifest(
         }
         sample_rows.append(row)
 
+    fold_rows = []
+    for fold in result["folds"]:
+        row = {
+            "participant": fold["participant"],
+            "train_sample_ids": [sample_set.sample_ids[i] for i in fold["train_idx"]],
+            "test_sample_ids": [sample_set.sample_ids[i] for i in fold["test_idx"]],
+        }
+        if "scale_pos_weight" in fold:
+            row["scale_pos_weight"] = fold["scale_pos_weight"]
+        fold_rows.append(row)
+
+    environment = training_environment()
     manifest = {
-        "manifest_version": 1,
-        "environment": training_environment(),
+        "manifest_version": 2,
+        "environment": environment,
         "job_id": job.pk,
         "created_at": timezone.now().isoformat(),
         "dataset_ids": [dataset.pk for dataset in datasets],
@@ -97,9 +101,15 @@ def _build_manifest(
         "selected_features": list(sample_set.feature_names),
         "algorithm": job.algorithm,
         "hyperparameters": result["hyperparameters"],
-        "random_seed": seed,
-        "test_size": test_size,
-        "split_strategy": "group_by_participant",
+        "user_hyperparameters": {
+            name: result["hyperparameters"][name] for name in default_hyperparameters()
+        },
+        "task_profile": result["task_profile"],
+        "locked_hyperparameters": locked_hyperparameters(prediction_target, len(result["target_names"])),
+        "seed": result["seed"],
+        "xgboost_version": environment["xgboost"],
+        "split_strategy": "leave_one_participant_out",
+        "folds": fold_rows,
         "sample_count": len(sample_set),
         "train_sample_ids": [
             sample_set.sample_ids[index] for index in result["train_idx"]
@@ -125,6 +135,8 @@ def _build_manifest(
             )
         },
     }
+    if result["task_profile"] == "quality":
+        manifest["final_scale_pos_weight"] = result["final_scale_pos_weight"]
     if prediction_target == "knee_alignment":
         manifest.update({
             "eligibility_policy_version": sample_set.eligibility_policy_version,
@@ -147,8 +159,6 @@ def run_training_job(
     dataset_ids: list[int] | None = None,
     feature_selection: list[str] | None = None,
     hyperparameters: dict | None = None,
-    test_size: float = 0.3,
-    seed: int = 42,
     register_model: bool = True,
     model_name: str = "vectofit-squat-classifier",
     view_angle: str | None = None,
@@ -185,8 +195,6 @@ def run_training_job(
         result = train_and_evaluate(
             sample_set=sample_set,
             hyperparameters=hyperparameters or {},
-            test_size=test_size,
-            seed=seed,
         )
         serialized_model = serialize_model(result["model"])
         job.feature_schema_version = schema.version
@@ -197,16 +205,13 @@ def run_training_job(
             result,
             view_angle,
             prediction_target,
-            test_size,
-            seed,
         )
 
         job.datasets.set(datasets)
         job.view_angle = view_angle
         job.prediction_target = prediction_target
-        job.test_size = test_size
-        job.random_seed = seed
-        job.split_strategy = "group_by_participant"
+        job.random_seed = result["seed"]
+        job.split_strategy = "leave_one_participant_out"
         job.model_artifact.save(
             f"training_jobs/job_{job.pk}_model.json",
             ContentFile(serialized_model),
@@ -281,8 +286,6 @@ if __name__ == "__main__":
     parser.add_argument("--dataset-ids", nargs="+", type=int)
     parser.add_argument("--features", nargs="*")
     parser.add_argument("--hyperparameters", type=str, default="{}")
-    parser.add_argument("--test-size", type=float, default=0.3)
-    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--view-angle", choices=["diagonal", "frontal", "sagittal"])
     parser.add_argument(
         "--prediction-target",
@@ -298,8 +301,6 @@ if __name__ == "__main__":
             dataset_ids=args.dataset_ids,
             feature_selection=args.features,
             hyperparameters=hparams,
-            test_size=args.test_size,
-            seed=args.seed,
             view_angle=args.view_angle,
             prediction_target=args.prediction_target,
         )

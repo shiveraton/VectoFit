@@ -6,6 +6,7 @@ from rest_framework import serializers
 from apps.analytics.services.feature_schemas import schema_for_target
 from apps.analytics.services.features import AVAILABLE_FEATURES, FEATURE_ORDER
 
+from .config import default_hyperparameters, validate_hyperparameters
 from .models import ModelRegistry, TrainingJob
 
 
@@ -31,8 +32,6 @@ class TrainingJobSerializer(serializers.ModelSerializer):
             "training_manifest_summary",
             "feature_selection",
             "hyperparameters",
-            "random_seed",
-            "test_size",
             "split_strategy",
             "status",
             "error_message",
@@ -115,55 +114,22 @@ class TrainingJobRequestSerializer(serializers.Serializer):
             f"Accepted aliases: {AVAILABLE_FEATURES}."
         ),
     )
-    hyperparameters = serializers.DictField(required=False, default=dict)
-    test_size = serializers.FloatField(
-        required=False, default=0.3, min_value=0.1, max_value=0.5
-    )
-    random_seed = serializers.IntegerField(required=False, default=42)
+    hyperparameters = serializers.DictField(required=False, default=default_hyperparameters)
+
+    def to_internal_value(self, data):
+        unknown = sorted(set(data) - set(self.fields))
+        if unknown:
+            raise serializers.ValidationError({
+                name: "Unknown training field; evaluation uses LOPO with a fixed seed."
+                for name in unknown
+            })
+        return super().to_internal_value(data)
 
     def validate_hyperparameters(self, value):
-        from .services.trainer import BASELINE_HYPERPARAMETERS
-
-        editable_parameters = {
-            name
-            for name, default in BASELINE_HYPERPARAMETERS.items()
-            if isinstance(default, (int, float)) and not isinstance(default, bool)
-        }
-        unknown = sorted(set(value) - editable_parameters)
-        if unknown:
-            raise serializers.ValidationError(
-                f"Unsupported or fixed hyperparameter(s): {unknown}. "
-                f"Editable numeric parameters: {sorted(editable_parameters)}"
-            )
-
-        for name, raw in value.items():
-            if (
-                isinstance(raw, bool)
-                or not isinstance(raw, (int, float))
-                or not math.isfinite(float(raw))
-            ):
-                raise serializers.ValidationError(
-                    {name: "Value must be a finite number."}
-                )
-            number = float(raw)
-            if name in {"n_estimators", "max_depth"} and (
-                not number.is_integer() or number < 1
-            ):
-                raise serializers.ValidationError(
-                    {name: "Value must be a positive integer."}
-                )
-            if name == "learning_rate" and not 0 < number <= 1:
-                raise serializers.ValidationError(
-                    {name: "Value must be greater than 0 and at most 1."}
-                )
-            if name in {"subsample", "colsample_bytree"} and not 0 < number <= 1:
-                raise serializers.ValidationError(
-                    {name: "Value must be greater than 0 and at most 1."}
-                )
-            if name in {"min_child_weight", "reg_lambda"} and number < 0:
-                raise serializers.ValidationError({name: "Value must be non-negative."})
-
-        return value
+        try:
+            return validate_hyperparameters(value)
+        except ValueError as exc:
+            raise serializers.ValidationError(str(exc)) from exc
 
     def validate_dataset_ids(self, value):
         from apps.datasets.models import Dataset
@@ -464,13 +430,11 @@ class ModelStateSerializer(serializers.ModelSerializer):
             "view_angle": job.view_angle,
             "prediction_target": job.prediction_target,
             "feature_schema_version": job.feature_schema_version,
-            "test_size": job.test_size,
             "dataset_names": [dataset.name for dataset in job.datasets.all()],
             "sample_count": job.sample_count,
             "train_count": job.train_count,
             "test_count": job.test_count,
             "split_strategy": job.split_strategy,
-            "random_seed": job.random_seed,
             "created_at": job.created_at,
             "started_at": job.started_at,
             "completed_at": job.completed_at,

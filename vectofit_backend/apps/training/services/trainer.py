@@ -13,21 +13,13 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-from xgboost import XGBClassifier
+from xgboost import DMatrix, XGBClassifier, train
 
-from .data_loader import SampleSet, group_split
-
-BASELINE_HYPERPARAMETERS = {
-    "n_estimators": 200,
-    "max_depth": 4,
-    "learning_rate": 0.1,
-    "subsample": 0.9,
-    "colsample_bytree": 0.9,
-    "min_child_weight": 1,
-    "reg_lambda": 1.0,
-    "objective": "binary:logistic",
-    "eval_metric": "logloss",
-}
+from ..config import (
+    TARGET_TASK_PROFILES, locked_hyperparameters,
+    validate_hyperparameters,
+)
+from .data_loader import SampleSet
 
 
 def training_environment():
@@ -44,58 +36,18 @@ class InsufficientDataError(Exception):
 def resolve_hyperparameters(
     overrides=None, prediction_target="binary_form", class_count=2
 ):
-    params = dict(BASELINE_HYPERPARAMETERS)
-    if overrides:
-        unknown = set(overrides) - set(BASELINE_HYPERPARAMETERS)
-        if unknown:
-            raise ValueError(
-                f"Unsupported hyperparameter(s): {sorted(unknown)}. "
-                f"Allowed: {sorted(BASELINE_HYPERPARAMETERS)}"
-            )
-        params.update(overrides)
-
-    if prediction_target == "error_type":
-        if class_count < 2:
-            raise InsufficientDataError(
-                "error_type training requires at least two target classes."
-            )
-        params["objective"] = "multi:softprob"
-        params["eval_metric"] = "mlogloss"
-        params["num_class"] = class_count
-    else:
-        params["objective"] = "binary:logistic"
-        params["eval_metric"] = str(params.get("eval_metric") or "logloss")
-        params.pop("num_class", None)
-    return params
+    return {
+        **validate_hyperparameters(overrides or {}),
+        **locked_hyperparameters(prediction_target, class_count),
+    }
 
 
-def _check_split_viability(train_idx, test_idx, labels):
-    if not train_idx or not test_idx:
-        raise InsufficientDataError(
-            "The participant-grouped split produced an empty train or test set. "
-            "Record repetitions from at least two distinct participants."
-        )
-
-    target_classes = set(labels)
-    train_classes = {labels[i] for i in train_idx}
-    test_classes = {labels[i] for i in test_idx}
-    if train_classes != target_classes:
-        raise InsufficientDataError(
-            "The training split does not contain every target class. Add labelled "
-            "repetitions for the missing class across more participants."
-        )
-    if test_classes != target_classes:
-        raise InsufficientDataError(
-            "The held-out test split does not contain every target class. Add data "
-            "from more participants so every class can be evaluated without leakage."
-        )
-    if set(train_idx) & set(test_idx):
-        raise InsufficientDataError(
-            "Data leakage detected between training and test sample indices."
-        )
+def scale_pos_weight(labels):
+    positive_count = int(np.sum(labels == 1))
+    return float(np.sum(labels == 0) / positive_count) if positive_count else 1.0
 
 
-def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42):
+def train_and_evaluate(sample_set, hyperparameters=None):
     if not isinstance(sample_set, SampleSet):
         raise TypeError("train_and_evaluate expects a SampleSet.")
 
@@ -150,25 +102,61 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
             "The design matrix contains non-finite values; refusing to train."
         )
 
-    train_idx, test_idx = group_split(sample_set.groups, test_size, seed, labels=labels)
-    _check_split_viability(train_idx, test_idx, labels)
-
+    groups = np.asarray(sample_set.groups)
+    if len(set(groups)) < 2:
+        raise InsufficientDataError("LOPO requires at least two distinct participants.")
     params = resolve_hyperparameters(
         hyperparameters,
         prediction_target=sample_set.prediction_target,
         class_count=len(target_names),
     )
-    model = XGBClassifier(**params, random_state=seed)
-    model.fit(X[train_idx], y[train_idx])
-    y_pred = model.predict(X[test_idx]).astype(int)
-    probabilities = model.predict_proba(X[test_idx])
+    task_profile = TARGET_TASK_PROFILES[sample_set.prediction_target]
+    y_pred = np.full(len(y), -1, dtype=int)
+    probabilities = np.zeros((len(y), len(target_names)), dtype=float)
+    folds = []
+    for participant in sorted(set(groups)):
+        test_indices = np.flatnonzero(groups == participant)
+        train_indices = np.flatnonzero(groups != participant)
+        fold = {
+            "participant": str(participant),
+            "train_idx": train_indices.tolist(),
+            "test_idx": test_indices.tolist(),
+        }
+        if task_profile == "quality":
+            if set(y[train_indices]) != {0, 1}:
+                raise InsufficientDataError(
+                    f"LOPO participant {participant!r} leaves one class out of training."
+                )
+            weight = scale_pos_weight(y[train_indices])
+            fold_model = XGBClassifier(**params, scale_pos_weight=weight)
+            fold_model.fit(X[train_indices], y[train_indices])
+            probabilities[test_indices] = fold_model.predict_proba(X[test_indices])
+            fold["scale_pos_weight"] = weight
+        else:
+            native_params = {name: value for name, value in params.items() if name != "n_estimators"}
+            fold_model = train(
+                native_params,
+                DMatrix(X[train_indices], label=y[train_indices]),
+                num_boost_round=params["n_estimators"],
+            )
+            probabilities[test_indices] = fold_model.predict(DMatrix(X[test_indices]))
+        y_pred[test_indices] = probabilities[test_indices].argmax(axis=1)
+        folds.append(fold)
+
+    final_params = dict(params)
+    if task_profile == "quality":
+        final_params["scale_pos_weight"] = scale_pos_weight(y)
+    model = XGBClassifier(**final_params)
+    model.fit(X, y)
+    train_idx = test_idx = list(range(len(y)))
     class_indices = list(range(len(target_names)))
     averaging = "binary" if sample_set.prediction_target == "binary_form" else "macro"
     metrics = {
-        "evaluation_method": "participant_holdout",
+        "evaluation_method": "leave_one_participant_out",
+        "fold_count": len(folds),
         "averaging": averaging,
-        "train_participant_count": len({sample_set.groups[i] for i in train_idx}),
-        "test_participant_count": len({sample_set.groups[i] for i in test_idx}),
+        "train_participant_count": len(set(groups)) - 1,
+        "test_participant_count": 1,
         "accuracy": float(accuracy_score(y[test_idx], y_pred)),
         "balanced_accuracy": float(balanced_accuracy_score(y[test_idx], y_pred)),
         "f1": float(f1_score(y[test_idx], y_pred, average=averaging, zero_division=0)),
@@ -204,6 +192,9 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
             for row in probabilities
         ],
     }
+    metrics.update(_lopo_metrics(y, y_pred, groups, class_indices))
+    for row, sample_id in zip(metrics["oof_predictions"], sample_set.sample_ids):
+        row["sample_id"] = sample_id
     return {
         "model": model,
         "metrics": metrics,
@@ -211,44 +202,27 @@ def train_and_evaluate(sample_set, hyperparameters=None, test_size=0.3, seed=42)
         "test_idx": test_idx,
         "feature_names": list(sample_set.feature_names),
         "hyperparameters": params,
-        "seed": seed,
+        "seed": params["seed"],
+        "folds": folds,
+        "final_scale_pos_weight": final_params.get("scale_pos_weight"),
+        "task_profile": task_profile,
         "target_names": target_names,
         "class_mapping": metrics["class_mapping"],
     }
 
 
-def lopo_evaluate(sample_set, hyperparameters=None, seed=42):
-    labels = np.asarray([{"bad": 0, "good": 1}[label] for label in sample_set.labels])
-    groups = np.asarray(sample_set.groups)
-    X = np.asarray(sample_set.rows, dtype=float)
-    predictions = np.full(len(labels), -1, dtype=int)
-    params = resolve_hyperparameters(
-        hyperparameters,
-        prediction_target="knee_alignment",
-        class_count=2,
-    )
-    for participant in sorted(set(groups)):
-        test_idx = np.flatnonzero(groups == participant)
-        train_idx = np.flatnonzero(groups != participant)
-        if set(labels[train_idx]) != {0, 1}:
-            raise InsufficientDataError(
-                f"LOPO participant {participant!r} leaves one class out of training."
-            )
-        model = XGBClassifier(**params, random_state=seed)
-        model.fit(X[train_idx], labels[train_idx])
-        predictions[test_idx] = model.predict(X[test_idx]).astype(int)
-    metrics = _lopo_metrics(labels, predictions, groups)
+def lopo_evaluate(sample_set, hyperparameters=None):
+    result = train_and_evaluate(sample_set, hyperparameters)
+    metrics = result["metrics"]
     metrics.update({
-        "evaluation_method": "leave_one_participant_out",
-        "hyperparameters": params,
-        "random_seed": seed,
+        "hyperparameters": result["hyperparameters"],
+        "seed": result["seed"],
+        "folds": result["folds"],
     })
-    for row, sample_id in zip(metrics["oof_predictions"], sample_set.sample_ids):
-        row["sample_id"] = sample_id
     return metrics
 
 
-def _lopo_metrics(labels, predictions, groups):
+def _lopo_metrics(labels, predictions, groups, class_indices):
     per_participant = []
     for participant in sorted(set(groups)):
         indices = np.flatnonzero(groups == participant)
@@ -259,7 +233,7 @@ def _lopo_metrics(labels, predictions, groups):
                     f1_score(
                         labels[indices],
                         predictions[indices],
-                        labels=[0, 1],
+                        labels=class_indices,
                         average="macro",
                         zero_division=0,
                     )
@@ -269,9 +243,9 @@ def _lopo_metrics(labels, predictions, groups):
         )
     return {
         "macro_f1": float(
-            f1_score(labels, predictions, labels=[0, 1], average="macro", zero_division=0)
+            f1_score(labels, predictions, labels=class_indices, average="macro", zero_division=0)
         ),
-        "confusion_matrix": confusion_matrix(labels, predictions, labels=[0, 1]).tolist(),
+        "confusion_matrix": confusion_matrix(labels, predictions, labels=class_indices).tolist(),
         "per_participant": per_participant,
         "oof_predictions": [
             {

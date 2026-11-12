@@ -83,6 +83,7 @@ class PilotResultsViewTests(APITestCase):
         self.assertEqual(response.data["label"], "exploratory pilot")
 
 
+@override_settings(DEBUG=True, TRAINING_ENABLE_LEGACY_SPLIT=True)
 class GroupSplitTests(TestCase):
     def test_exact_search_finds_valid_partition_greedy_can_miss(self):
         groups = ["a", "b", "c", "d"]
@@ -198,13 +199,6 @@ def make_sample_set():
 
 class CorePipelineTests(TestCase):
     def test_split_and_xgboost_trainer(self):
-        tr, te = group_split(
-            ["a"] * 3 + ["b"] * 3 + ["c"] * 3 + ["d"] * 3,
-            0.3,
-            seed=1,
-        )
-        self.assertFalse(set(tr) & set(te))
-
         ss = make_sample_set()
         res = train_and_evaluate(
             ss,
@@ -212,10 +206,7 @@ class CorePipelineTests(TestCase):
                 "n_estimators": 30,
                 "max_depth": 2,
                 "learning_rate": 0.3,
-                "subsample": 1.0,
-                "colsample_bytree": 1.0,
             },
-            seed=42,
         )
         self.assertIn("accuracy", res["metrics"])
         self.assertGreaterEqual(res["metrics"]["accuracy"], 0.8)
@@ -238,7 +229,7 @@ class CorePipelineTests(TestCase):
 
         result = lopo_evaluate(
             sample_set,
-            hyperparameters={"n_estimators": 5, "max_depth": 2},
+            hyperparameters={"n_estimators": 10, "max_depth": 2},
         )
 
         self.assertIn("macro_f1", result)
@@ -363,18 +354,11 @@ class DBAndAPITests(APITestCase):
             prediction_target="error_type",
             view_angle="diagonal",
         )
-        result = train_and_evaluate(
-            sample_set,
-            hyperparameters={"n_estimators": 5, "max_depth": 2},
-            test_size=0.33,
-            seed=7,
-        )
-        self.assertEqual(
-            set(result["target_names"]),
-            {"correct_form", "knee_valgus", "shallow_depth"},
-        )
+        result = train_and_evaluate(sample_set, hyperparameters={"n_estimators": 10})
         self.assertEqual(len(result["metrics"]["confusion_matrix"]), 3)
-        self.assertEqual(result["metrics"]["prediction_target"], "error_type")
+        self.assertEqual(result["hyperparameters"]["num_class"], 3)
+        self.assertEqual(result["task_profile"], "error_type")
+        self.assertTrue(all("scale_pos_weight" not in fold for fold in result["folds"]))
 
     def annotate_frontal_samples(self):
         for sample in self.dataset.samples.filter(dataset_video__view_angle=self.frontal_view_angle):
@@ -437,10 +421,10 @@ class DBAndAPITests(APITestCase):
         self.assertTrue(all(row["knee_annotations"][0]["rubric_version"] == "knee_v1" for row in sample_set.sample_metadata))
         job = TrainingJob.objects.create(view_angle="frontal", prediction_target="knee_alignment")
         run_training_job(job, dataset_ids=[self.dataset.pk], view_angle="frontal",
-                         prediction_target="knee_alignment", hyperparameters={"n_estimators": 5})
+                         prediction_target="knee_alignment", hyperparameters={"n_estimators": 10})
         self.assertEqual(job.status, TrainingJob.Status.COMPLETED, job.error_message)
         self.assertEqual(set(job.training_manifest["train_sample_ids"] + job.training_manifest["test_sample_ids"]), set(sample_set.sample_ids))
-        self.assertEqual(job.metrics["evaluation_method"], "participant_holdout")
+        self.assertEqual(job.metrics["evaluation_method"], "leave_one_participant_out")
         self.assertEqual(job.metrics["train_participant_count"] + job.metrics["test_participant_count"], 4)
         entry = ModelRegistry.objects.get(training_job=job)
         card = build_model_card(entry)
@@ -449,17 +433,22 @@ class DBAndAPITests(APITestCase):
         response = self.client.post(reverse("model-registry-activate", args=[entry.pk]), {}, format="json")
         self.assertEqual(response.status_code, 200, response.data)
 
-    def test_queued_m1_job_exposes_schema_and_test_fraction(self):
+    def test_queued_m1_job_exposes_schema_and_lopo_configuration(self):
         self.annotate_frontal_samples()
         self.client.force_authenticate(user=self.admin)
         with patch("apps.training.views._enqueue_training_job"), self.captureOnCommitCallbacks(execute=True):
             response = self.client.post("/api/training/jobs/create/", {
                 "dataset_ids": [self.dataset.pk], "view_angle": "frontal",
-                "prediction_target": "knee_alignment", "test_size": 0.25,
+                "prediction_target": "knee_alignment",
             }, format="json")
         self.assertEqual(response.status_code, 202, response.data)
         self.assertEqual(response.data["feature_schema_version"], "fppa_v2")
-        self.assertEqual(response.data["test_size"], 0.25)
+        self.assertEqual(response.data["split_strategy"], "leave_one_participant_out")
+        self.assertNotIn("test_size", response.data)
+        self.assertNotIn("random_seed", response.data)
+        self.assertEqual(response.data["hyperparameters"], {
+            "n_estimators": 100, "learning_rate": 0.1, "max_depth": 2,
+        })
 
     def test_knee_alignment_loader_keeps_only_final_good_and_bad_targets(self):
         samples = list(
@@ -670,7 +659,7 @@ class DBAndAPITests(APITestCase):
         run_training_job(
             job,
             dataset_ids=[self.dataset.pk],
-            hyperparameters={"n_estimators": 5},
+            hyperparameters={"n_estimators": 10},
             view_angle="diagonal",
         )
         job.refresh_from_db()
@@ -696,7 +685,20 @@ class DBAndAPITests(APITestCase):
         self.assertRegex(job.training_manifest["manifest_sha256"], r"^[a-f0-9]{64}$")
         train_sample_ids = set(job.training_manifest["train_sample_ids"])
         test_sample_ids = set(job.training_manifest["test_sample_ids"])
-        self.assertFalse(train_sample_ids & test_sample_ids)
+        self.assertEqual(train_sample_ids, test_sample_ids)
+        from .config import TASK_PROFILES, default_hyperparameters
+        manifest = job.training_manifest
+        self.assertEqual(manifest["user_hyperparameters"], {
+            **default_hyperparameters(), "n_estimators": 10,
+        })
+        self.assertEqual(manifest["locked_hyperparameters"], TASK_PROFILES["quality"])
+        self.assertEqual(manifest["task_profile"], "quality")
+        self.assertEqual(manifest["seed"], 42)
+        self.assertEqual(manifest["xgboost_version"], manifest["environment"]["xgboost"])
+        self.assertNotIn("test_size", manifest)
+        for fold in manifest["folds"]:
+            self.assertFalse(set(fold["train_sample_ids"]) & set(fold["test_sample_ids"]))
+            self.assertEqual(fold["scale_pos_weight"], 1.0)
         self.assertEqual(
             train_sample_ids | test_sample_ids,
             {sample["sample_id"] for sample in job.training_manifest["samples"]},
@@ -811,7 +813,7 @@ class DBAndAPITests(APITestCase):
         run_training_job(
             job,
             dataset_ids=[self.dataset.pk],
-            hyperparameters={"n_estimators": 5},
+            hyperparameters={"n_estimators": 10},
             view_angle="diagonal",
         )
         job.refresh_from_db()

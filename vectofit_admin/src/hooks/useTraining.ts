@@ -27,8 +27,6 @@ const selectedViewAngle = ref<ViewAngle | null>("frontal");
 const selectedAlgorithmId = ref<string>("xgboost");
 
 const hyperparameters = ref<Record<string, unknown>>({});
-const testSize = ref<number>(0.3);
-const randomSeed = ref<number>(42);
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
@@ -290,13 +288,6 @@ const setHyperparameter = (name: string, value: unknown) => {
   hyperparameters.value[name] = value;
 };
 
-const setTestSize = (value: number) => {
-  testSize.value = value;
-};
-
-const setRandomSeed = (value: number) => {
-  randomSeed.value = value;
-};
 
 const startTraining = async () => {
   if (!canStartTraining.value || !selectedAlgorithm.value) {
@@ -314,8 +305,6 @@ const startTraining = async () => {
       prediction_target: "knee_alignment",
       feature_selection: selectedFeatures.value.map((feature) => feature.id),
       hyperparameters: hyperparameters.value,
-      test_size: testSize.value,
-      random_seed: randomSeed.value,
     });
 
     trainingJobs.value.unshift(job);
@@ -383,8 +372,6 @@ export function useTraining() {
     selectedFeatures,
     selectedFeaturesCount,
     hyperparameters,
-    testSize,
-    randomSeed,
     availableDatasets,
     filteredDatasets,
     activeJobs,
@@ -403,8 +390,6 @@ export function useTraining() {
     refreshTrainingJobs,
     toggleDataset,
     setHyperparameter,
-    setTestSize,
-    setRandomSeed,
     startTraining,
   };
 }
