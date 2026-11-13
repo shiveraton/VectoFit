@@ -188,42 +188,33 @@ def _passes_excursion_checks(
 
 def _find_repetition_candidates(
     signal,
-    bottom,
+    bottoms,
     tops,
     min_rep_frames,
     min_phase_frames,
 ):
-    """Build complete repetition candidates around valid squat bottoms."""
     repetitions = []
     rejection_counts = Counter()
     candidate_events = []
     seen_bottoms = set()
-    start, end = _find_cycle_bounds(tops, bottom)
 
-    if start is None or end is None:
-        rejection_counts["missing_boundary"] += 1
-        candidate_events.append({
-            "bottom": int(bottom),
-            "status": "rejeted",
-            "reason": "missing_boundary",
-        })
-        continue
+    for bottom in bottoms:
+        if bottom in seen_bottoms:
+            continue
 
-    if (
-        bottom - start < min_phase_frames
-        or end - bottom < min_phase_frames
-    ):
-        rejection_counts["phase_duration"]
-        candidate_events.append({
-            "bottom": int(bottom),
-            "start": int(start),
-            "end": int(end),
-            "status": "rejected",
-            "reason": "phase_duration"
-        })
-        continue
+        seen_bottoms.add(bottom)
+        start, end = _find_cycle_bounds(tops, bottom)
 
-        if not _passes_excursion_checks(
+        if start is None or end is None:
+            reason = "missing_boundary"
+        elif (
+            bottom - start < min_phase_frames
+            or end - bottom < min_phase_frames
+        ):
+            reason = "phase_duration"
+        elif end - start < min_rep_frames:
+            reason = "duration"
+        elif not _passes_excursion_checks(
             signal,
             bottom,
             min_rep_frames,
@@ -231,33 +222,23 @@ def _find_repetition_candidates(
             start=start,
             end=end,
         ):
-            rejection_counts["excursion"] += 1
-            candidate_events.append(
-                {
-                    "bottom": int(bottom),
-                    "status": "rejected",
-                    "reason": "excursion",
-                    "start": int(start),
-                    "end": int(end),
-                }
-            )
+            reason = "excursion"
+        else:
+            reason = None
+
+        event = {
+            "bottom": int(bottom),
+            "start": int(start) if start is not None else None,
+            "end": int(end) if end is not None else None,
+        }
+
+        if reason is not None:
+            rejection_counts[reason] += 1
+            candidate_events.append({**event, "status": "rejected", "reason": reason})
             continue
 
-        repetitions.append(
-            {
-                "start": int(start),
-                "bottom": int(bottom),
-                "end": int(end),
-            }
-        )
-        candidate_events.append(
-            {
-                "bottom": int(bottom),
-                "status": "accepted",
-                "start": int(start),
-                "end": int(end),
-            }
-        )
+        repetitions.append({"start": int(start), "bottom": int(bottom), "end": int(end)})
+        candidate_events.append({**event, "status": "accepted"})
 
     return repetitions, rejection_counts, candidate_events
 
