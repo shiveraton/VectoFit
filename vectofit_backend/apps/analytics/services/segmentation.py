@@ -145,42 +145,10 @@ def _has_minimum_amplitude(signal, start, end, bottom, threshold):
     return signal[bottom] - signal[start] >= threshold
 
 
-def _find_valid_starts(signal, tops, bottom, min_phase_frames):
-    """Find valid top positions preceding a candidate squat bottom."""
-    return [
-        top
-        for top in tops
-        if (
-            top < bottom
-            and bottom - top >= min_phase_frames
-            and _has_minimum_amplitude(
-                signal,
-                top,
-                bottom,
-                bottom,
-                MIN_DESCENT_AMPLITUDE,
-            )
-        )
-    ]
-
-
-def _find_valid_ends(signal, tops, bottom, min_phase_frames):
-    """Find valid top positions following a candidate squat bottom."""
-    return [
-        top
-        for top in tops
-        if (
-            top > bottom
-            and top - bottom >= min_phase_frames
-            and _has_minimum_amplitude(
-                signal,
-                top,
-                bottom,
-                bottom,
-                MIN_RECOVERY_AMPLITUDE,
-            )
-        )
-    ]
+def _find_cycle_bounds(tops, bottom):
+    start = next((top for top in reversed(tops) if top < bottom), None)
+    end = next((top for top in tops if top > bottom), None)
+    return start, end
 
 
 def _passes_excursion_checks(
@@ -220,7 +188,7 @@ def _passes_excursion_checks(
 
 def _find_repetition_candidates(
     signal,
-    bottoms,
+    bottom,
     tops,
     min_rep_frames,
     min_phase_frames,
@@ -230,56 +198,30 @@ def _find_repetition_candidates(
     rejection_counts = Counter()
     candidate_events = []
     seen_bottoms = set()
+    start, end = _find_cycle_bounds(tops, bottom)
 
-    for bottom in bottoms:
-        if bottom in seen_bottoms:
-            continue
+    if start is None or end is None:
+        rejection_counts["missing_boundary"] += 1
+        candidate_events.append({
+            "bottom": int(bottom),
+            "status": "rejeted",
+            "reason": "missing_boundary",
+        })
+        continue
 
-        seen_bottoms.add(bottom)
-
-        valid_starts = _find_valid_starts(
-            signal,
-            tops,
-            bottom,
-            min_phase_frames,
-        )
-
-        valid_ends = _find_valid_ends(
-            signal,
-            tops,
-            bottom,
-            min_phase_frames,
-        )
-
-        if not valid_starts or not valid_ends:
-            rejection_counts["missing_phase_or_amplitude"] += 1
-            candidate_events.append(
-                {
-                    "bottom": int(bottom),
-                    "status": "rejected",
-                    "reason": "missing_phase_or_amplitude",
-                    "valid_starts": len(valid_starts),
-                    "valid_ends": len(valid_ends),
-                }
-            )
-            continue
-
-        start = max(valid_starts)
-        end = min(valid_ends)
-
-        if end - start < min_rep_frames:
-            rejection_counts["duration"] += 1
-            candidate_events.append(
-                {
-                    "bottom": int(bottom),
-                    "status": "rejected",
-                    "reason": "duration",
-                    "start": int(start),
-                    "end": int(end),
-                    "duration_frames": int(end - start),
-                }
-            )
-            continue
+    if (
+        bottom - start < min_phase_frames
+        or end - bottom < min_phase_frames
+    ):
+        rejection_counts["phase_duration"]
+        candidate_events.append({
+            "bottom": int(bottom),
+            "start": int(start),
+            "end": int(end),
+            "status": "rejected",
+            "reason": "phase_duration"
+        })
+        continue
 
         if not _passes_excursion_checks(
             signal,

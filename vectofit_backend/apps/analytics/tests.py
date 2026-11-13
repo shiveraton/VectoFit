@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+import numpy as np
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
@@ -81,6 +83,22 @@ class RepetitionSegmentationRegressionTests(APITestCase):
             repetitions[0]["end"] - repetitions[0]["bottom"],
             10,
         )
+
+    def test_fast_cycles_are_rejected_instead_of_merged(self):
+        signal = np.interp(
+            np.arange(85),
+            np.arange(0, 85, 7),
+            [0, 100, 0, 100, 0, 100, 0, 100, 0, 100, 0, 100, 0],
+        )
+        frames = [_hip_frame(float(y)) for y in signal]
+
+        self.assertEqual(segment_reps(frames), [])
+
+        repetitions = segment_reps(frames, min_phase_frames=5)
+
+        self.assertEqual(len(repetitions), 4)
+        for repetition in repetitions:
+            self.assertEqual(repetition["end"] - repetition["start"], 14)
 
     def test_rejects_sequence_without_squat_movement(self):
         self.assertEqual(segment_reps([_hip_frame(120.0)] * 80), [])
