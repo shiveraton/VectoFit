@@ -58,10 +58,25 @@ class VideoProcessor:
         enable_denoise=False,
         clahe=None,
     ):
+        target_width = int(target_width)
+        target_height = int(target_height)
+        height, width = frame.shape[:2]
+        scale = min(target_width / width, target_height / height)
         resized_frame = cv2.resize(
             frame,
-            (int(target_width), int(target_height)),
+            (max(1, round(width * scale)), max(1, round(height * scale))),
             interpolation=cv2.INTER_AREA,
+        )
+        padding_y = target_height - resized_frame.shape[0]
+        padding_x = target_width - resized_frame.shape[1]
+        resized_frame = cv2.copyMakeBorder(
+            resized_frame,
+            padding_y // 2,
+            padding_y - padding_y // 2,
+            padding_x // 2,
+            padding_x - padding_x // 2,
+            cv2.BORDER_CONSTANT,
+            value=(0, 0, 0),
         )
 
         if enable_denoise:

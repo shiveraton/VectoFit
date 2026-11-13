@@ -31,7 +31,9 @@ from .serializers import (
 )
 from .services.bulk_import import create_archive_preview
 from .services.import_executor import execute_bulk_import
-from .services.tasks import process_dataset_video_task
+from .services.tasks import (
+    process_dataset_video_task, process_dataset_video_item_task, refresh_dataset_collection_status,
+)
 from .permissions import IsAnnotator
 from .services.assignments import assigned_review_samples, assigned_samples, review_samples
 from .services.knee_label import final_knee_target
@@ -40,6 +42,21 @@ logger = logging.getLogger(__name__)
 
 
 def _enqueue_dataset_processing(dataset_id: int, user_id: int) -> None:
+    videos = DatasetVideo.objects.filter(dataset_id=dataset_id)
+    if videos.exists():
+        failed_ids = list(videos.filter(status=DatasetVideo.Status.FAILED).values_list("pk", flat=True))
+        videos.filter(pk__in=failed_ids).update(status=DatasetVideo.Status.PENDING, error_message="")
+        for video_id in failed_ids:
+            try:
+                process_dataset_video_item_task.delay(video_id, user_id)
+            except Exception as exc:
+                logger.exception("Could not retry dataset video=%s", video_id)
+                videos.filter(pk=video_id).update(
+                    status=DatasetVideo.Status.FAILED,
+                    error_message=f"Could not queue processing task: {exc}",
+                )
+        refresh_dataset_collection_status(dataset_id)
+        return
     try:
         process_dataset_video_task.delay(dataset_id, user_id)
     except Exception as exc:
@@ -99,9 +116,9 @@ class DatasetViewSet(viewsets.ModelViewSet):
     def retry(self, request, pk=None):
         dataset = self.get_object()
 
-        if dataset.status not in ["FAILED", "PROCESSING"]:
+        if dataset.status not in ["FAILED", "PROCESSING", "PARTIAL"]:
             return Response(
-                {"detail": ("Only FAILED or PROCESSING datasets can be retried.")},
+                {"detail": ("Only FAILED, PARTIAL, or PROCESSING datasets can be retried.")},
                 status=400,
             )
 

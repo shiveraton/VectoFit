@@ -543,13 +543,15 @@ export default function Datasets(input: {}) {
                               </span>
                             ) : isZipCollection(dataset) &&
                               ["PARTIAL", "FAILED"].includes(dataset.status) ? (
-                              <span
+                              <button
                                 data-v-datasets=""
-                                title={`${dataset.failed_video_count ?? 0} video(s) failed processing`}
-                                className={cx("muted-value")}
+                                type="button"
+                                title={`Retry ${dataset.failed_video_count ?? 0} failed video(s)`}
+                                onClick={() => handleRetryDataset(dataset.id)}
+                                className={cx("action-button retry-button")}
                               >
-                                {" Check videos "}
-                              </span>
+                                {" Retry failed videos "}
+                              </button>
                             ) : dataset.status === "FAILED" &&
                               !isZipCollection(dataset) ? (
                               <button
