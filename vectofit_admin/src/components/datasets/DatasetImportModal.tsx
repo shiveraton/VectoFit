@@ -5,16 +5,9 @@ import type { ChangeEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../query';
 import { useDialogFocus } from "../../composables/useDialogFocus";
-import { datasetService, type DatasetImportPreview, type DatasetImportFile, } from "../../services/datasetService";
+import { datasetService, type DatasetImportPreview, } from "../../services/datasetService";
 import { bindStyles, each, display } from '../../presentation';
 import styles from './DatasetImportModal.module.css';
-function sourceLabel(value: boolean | null): string {
-    if (value === null) return "Unlabelled";
-    return value ? "Good" : "Bad";
-}
-
-type ReviewPolicy = "source" | "all" | "subset";
-type SelectionMethod = "stratified" | "manual";
 type Callbacks = {
     onClose?: () => void;
     onImported?: (datasetName: string, videoCount: number) => void;
@@ -47,7 +40,7 @@ export default function DatasetImportModal(input: {
     const dialogRef = useRef<HTMLElement | null>(null);
     useDialogFocus(() => props.isOpen, dialogRef);
     const DEFAULT_NAME = "VectoFit Bodyweight Squat v1";
-    const DEFAULT_DESCRIPTION = "Labelled bodyweight squat recordings across diagonal, frontal, and sagittal views.";
+    const DEFAULT_DESCRIPTION = "Bodyweight squat recordings for human knee annotation.";
     const zipInput = useRef<HTMLInputElement | null>(null);
     const [zipFile, setZipFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<DatasetImportPreview | null>(null);
@@ -57,30 +50,12 @@ export default function DatasetImportModal(input: {
     const [purpose, setPurpose] = useState("training");
     const [primaryTarget, setPrimaryTarget] = useState("squat_quality");
     const [secondaryTarget, setSecondaryTarget] = useState("biomechanical_errors");
-    const [reviewPolicy, setReviewPolicy] = useState<ReviewPolicy>("subset");
-    const [selectionMethod, setSelectionMethod] = useState<SelectionMethod>("stratified");
-    const [reviewCount, setReviewCount] = useState(10);
-    const [randomSeed, setRandomSeed] = useState(42);
-    const [selectedVideoPaths, setSelectedVideoPaths] = useState<string[]>([]);
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [importCompleted, setImportCompleted] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [outcomeMessage, setOutcomeMessage] = useState("");
     const isBusy = (() => isPreviewing || isImporting)();
-    const manifestFiles = (() => preview?.manifest.files ?? [])();
-    const reviewableFiles = (() => manifestFiles.filter((file) => Boolean(file.archive_path)))();
-    const optionalReviewFiles = reviewableFiles.filter((file) => file.source_label !== null);
-    const requiredVideoPaths = reviewableFiles.filter((file) => file.source_label === null).map((file) => file.archive_path);
-    const selectedReviewPaths = [...new Set([...requiredVideoPaths, ...selectedVideoPaths])];
-    const effectiveReviewCount = reviewableFiles.filter((file) =>
-        file.source_label === null || reviewPolicy === "all" ||
-        (reviewPolicy === "subset" && selectedVideoPaths.includes(file.archive_path))
-    ).length;
-    const untouchedCount = (() => reviewableFiles.length - effectiveReviewCount)();
-    const canGenerateSelection = (() => reviewPolicy === "subset" &&
-        selectionMethod === "stratified" &&
-        optionalReviewFiles.length > 0)();
     const canImportReason = (() => {
         if (isBusy)
             return "Import is in progress.";
@@ -96,9 +71,6 @@ export default function DatasetImportModal(input: {
         if (preview.manifest.errors.length > 0) {
             return "The archive has validation errors.";
         }
-        if (reviewPolicy === "subset" && effectiveReviewCount === 0) {
-            return "Select at least one video for manual review.";
-        }
         return "";
     })();
     const canImport = (() => !canImportReason)();
@@ -110,11 +82,6 @@ export default function DatasetImportModal(input: {
         setIsPreviewing(false);
         setIsImporting(false);
         setImportCompleted(false);
-        setReviewPolicy("subset");
-        setSelectionMethod("stratified");
-        setReviewCount(10);
-        setRandomSeed(42);
-        setSelectedVideoPaths([]);
         setName(DEFAULT_NAME);
         setDescription(DEFAULT_DESCRIPTION);
         setExerciseType("bodyweight_squat");
@@ -137,7 +104,6 @@ export default function DatasetImportModal(input: {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0] ?? null;
         setPreview(null);
-        setSelectedVideoPaths([]);
         setErrorMessage("");
         setOutcomeMessage("");
         setImportCompleted(false);
@@ -181,79 +147,6 @@ export default function DatasetImportModal(input: {
         }
         return typeof candidate.message === "string" ? candidate.message : null;
     }
-    function hashString(value: string): number {
-        let hash = 2166136261;
-        for (let index = 0; index < value.length; index += 1) {
-            hash ^= value.charCodeAt(index);
-            hash = Math.imul(hash, 16777619);
-        }
-        return hash >>> 0;
-    }
-    function generateStratifiedSelection(files: DatasetImportFile[] = optionalReviewFiles): string[] {
-        if (!files.length)
-            return [];
-        const count = Math.max(0, Math.min(files.length, Math.floor(reviewCount)));
-        const groups = new Map<string, typeof files>();
-        for (const file of files) {
-            const label = sourceLabel(file.source_label).toLowerCase();
-            const angle = file.view_angle || "unknown";
-            const key = `${label}:${angle}`;
-            if (!groups.has(key))
-                groups.set(key, []);
-            groups.get(key)!.push(file);
-        }
-        const seed = String(randomSeed);
-        for (const [key, group] of groups) {
-            group.sort((a, b) => hashString(`${seed}:${key}:${a.archive_path}`) -
-                hashString(`${seed}:${key}:${b.archive_path}`));
-        }
-        const orderedGroups = [...groups.entries()]
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([, group]) => group);
-        const selected: string[] = [];
-        let cursor = 0;
-        while (selected.length < count &&
-            orderedGroups.some((group) => group.length > 0)) {
-            const group = orderedGroups[cursor % orderedGroups.length];
-            if (group.length > 0) {
-                selected.push(group.shift()!.archive_path);
-            }
-            cursor += 1;
-        }
-        return selected;
-    }
-    function generateSelection() {
-        if (selectionMethod !== "stratified")
-            return;
-        setSelectedVideoPaths(generateStratifiedSelection());
-    }
-    function toggleVideo(path: string, checked: boolean) {
-        if (checked) {
-            if (!selectedVideoPaths.includes(path)) {
-                setSelectedVideoPaths([...selectedVideoPaths, path]);
-            }
-        }
-        else {
-            setSelectedVideoPaths(selectedVideoPaths.filter((item) => item !== path));
-        }
-    }
-    function toggleAllVideos() {
-        const allPaths = optionalReviewFiles.map((file) => file.archive_path);
-        setSelectedVideoPaths(selectedVideoPaths.length === allPaths.length ? [] : allPaths);
-    }
-    useEffect(() => {
-        const policy = reviewPolicy;
-        const method = selectionMethod;
-        if (policy === "all") {
-            setSelectedVideoPaths(optionalReviewFiles.map((file) => file.archive_path));
-        }
-        else if (policy === "source") {
-            setSelectedVideoPaths([]);
-        }
-        else if (method === "stratified" && preview) {
-            generateSelection();
-        }
-    }, [reviewPolicy, selectionMethod]);
     async function previewArchive() {
         if (isBusy)
             return;
@@ -263,7 +156,6 @@ export default function DatasetImportModal(input: {
         }
         setIsPreviewing(true);
         setPreview(null);
-        setSelectedVideoPaths([]);
         setErrorMessage("");
         setOutcomeMessage("");
         try {
@@ -275,12 +167,7 @@ export default function DatasetImportModal(input: {
             else if (!result.upload_token) {
                 setErrorMessage("The preview did not return an upload token. Please preview again.");
             }
-            else if (reviewPolicy === "subset") {
-                setSelectedVideoPaths(generateStratifiedSelection(result.manifest.files.filter(file => Boolean(file.archive_path) && file.source_label !== null)));
-            }
-            else if (reviewPolicy === "all") {
-                setSelectedVideoPaths(result.manifest.files.filter(file => Boolean(file.archive_path) && file.source_label !== null).map(file => file.archive_path));
-            }
+
         }
         catch (error: unknown) {
             setErrorMessage(getErrorMessage(error) ?? "Could not preview the archive.");
@@ -312,16 +199,7 @@ export default function DatasetImportModal(input: {
                 purpose: purpose,
                 primary_target: primaryTarget.trim(),
                 secondary_target: secondaryTarget.trim(),
-                review_policy: reviewPolicy,
-                selection_method: selectionMethod,
-                review_count: reviewPolicy === "subset"
-                    ? selectedReviewPaths.length
-                    : undefined,
-                random_seed: reviewPolicy === "subset" &&
-                    selectionMethod === "stratified"
-                    ? randomSeed
-                    : undefined,
-                selected_video_paths: reviewPolicy === "subset" ? selectedReviewPaths : [],
+
             });
             setImportCompleted(true);
             emit("imported", result.dataset.name, result.imported_videos);
@@ -357,26 +235,21 @@ export default function DatasetImportModal(input: {
             <label data-v-dataset-import-modal="" className={cx("full-width")}>{" Description "}
             <textarea data-v-dataset-import-modal="" value={description ?? ''} onChange={(event) => setDescription(event.target.value)} rows={2} placeholder="Describe the dataset"></textarea></label></div></section>
             <section data-v-dataset-import-modal="" className={cx("import-section")}><h3 data-v-dataset-import-modal="">{"2. Upload ZIP archive"}</h3>
-            <p data-v-dataset-import-modal="" className={cx("section-hint")}>{" Supported formats: MP4, MOV, M4V, and AVI. Class labels and camera angles must be recognizable from archive folders or filenames. "}</p>
+            <p data-v-dataset-import-modal="" className={cx("section-hint")}>{" Supported formats: MP4, MOV, M4V, and AVI. Participant IDs and camera views come from manifest.csv. "}</p>
             <label data-v-dataset-import-modal="" htmlFor="dataset-archive" className={cx("file-picker")}><span data-v-dataset-import-modal="" aria-hidden="true" className={cx("file-picker-icon")}>{"↑"}</span>
             <strong data-v-dataset-import-modal="">{display(zipFile?.name || "Choose dataset ZIP")}</strong>
             <small data-v-dataset-import-modal="">{display(zipFile
                     ? `${(zipFile.size / 1024 / 1024).toFixed(1)} MB`
                     : "Select a ZIP archive containing your videos")}</small>
             <input data-v-dataset-import-modal="" id="dataset-archive" ref={zipInput} type="file" accept=".zip,application/zip" disabled={isBusy || importCompleted} onChange={handleFileChange}/></label>
-            <p data-v-dataset-import-modal="" className={cx("section-hint")}>{" ZIP labels are source-provided labels. Unlabelled videos always require manual review. "}</p>
+            <p data-v-dataset-import-modal="" className={cx("section-hint")}>{" Include manifest.csv and the videos folder. All videos require annotation; good/bad filename tokens are not training labels. "}</p>
             <button data-v-dataset-import-modal="" type="button" disabled={!zipFile || isBusy || importCompleted} onClick={() => previewArchive()} className={cx("secondary-button preview-button")}>{display(isPreviewing ? "Inspecting archive..." : "Preview archive")}</button></section>
                 {(preview) ? (<><section data-v-dataset-import-modal="" className={cx("import-section")}><h3 data-v-dataset-import-modal="">{"3. Review manifest"}</h3>
                 <div data-v-dataset-import-modal="" className={cx("manifest-summary")}><div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Recognized videos"}</span>
                 <strong data-v-dataset-import-modal="">{display(preview.manifest.file_count)}</strong></div>
                 <div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Participants"}</span>
                 <strong data-v-dataset-import-modal="">{display(preview.manifest.participant_count)}</strong></div>
-                <div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Good videos"}</span>
-                <strong data-v-dataset-import-modal="">{display(preview.manifest.by_label.good)}</strong></div>
-                <div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Bad videos"}</span>
-                <strong data-v-dataset-import-modal="">{display(preview.manifest.by_label.bad)}</strong></div>
-                <div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Unlabelled videos"}</span>
-                <strong data-v-dataset-import-modal="">{display(preview.manifest.by_label.unlabelled)}</strong></div></div>
+                </div>
                 <div data-v-dataset-import-modal="" className={cx("angle-summary")}><span data-v-dataset-import-modal="">{"Diagonal: "}
                 {display(preview.manifest.by_angle.diagonal)}</span>
                 <span data-v-dataset-import-modal="">{"Frontal: "}
@@ -387,53 +260,18 @@ export default function DatasetImportModal(input: {
                     <ul data-v-dataset-import-modal="">{each(preview.manifest.errors).map(([_index, item]) => (<li data-v-dataset-import-modal="" key={item}>{display(item)}</li>))}</ul></div>) : (null)}
                     {(preview.manifest.warnings.length) ? (<div data-v-dataset-import-modal="" role="status" className={cx("message warning")}><strong data-v-dataset-import-modal="">{"Review these warnings"}</strong>
                     <ul data-v-dataset-import-modal="">{each(preview.manifest.warnings).map(([_index, item]) => (<li data-v-dataset-import-modal="" key={item}>{display(item)}</li>))}</ul></div>) : (null)}</section>
-                <section data-v-dataset-import-modal="" className={cx("import-section")}><h3 data-v-dataset-import-modal="">{"4. Labeling & review policy"}</h3>
-                <label data-v-dataset-import-modal="" className={cx("policy-option")}><input data-v-dataset-import-modal="" checked={reviewPolicy === "source"} onChange={() => setReviewPolicy("source")} type="radio" value="source"/>
-                <span data-v-dataset-import-modal=""><strong data-v-dataset-import-modal="">{"Use ZIP labels only"}</strong>
-                <small data-v-dataset-import-modal="">{"Inherit source labels. Unlabelled videos still require review."}</small></span></label>
-                <label data-v-dataset-import-modal="" className={cx("policy-option")}><input data-v-dataset-import-modal="" checked={reviewPolicy === "all"} onChange={() => setReviewPolicy("all")} type="radio" value="all"/>
-                <span data-v-dataset-import-modal=""><strong data-v-dataset-import-modal="">{"Review every video"}</strong>
-                <small data-v-dataset-import-modal="">{"Select all imported videos for manual annotation."}</small></span></label>
-                <label data-v-dataset-import-modal="" className={cx("policy-option")}><input data-v-dataset-import-modal="" checked={reviewPolicy === "subset"} onChange={() => setReviewPolicy("subset")} type="radio" value="subset"/>
-                <span data-v-dataset-import-modal=""><strong data-v-dataset-import-modal="">{"Review a selected subset"}</strong>
-                <small data-v-dataset-import-modal="">{"Select individual videos or sample across labels and views."}</small></span></label>
-                    {(reviewPolicy === 'subset') ? (<div data-v-dataset-import-modal="" className={cx("selection-settings")}><label data-v-dataset-import-modal="">{" Selection method "}
-                    <select data-v-dataset-import-modal="" value={selectionMethod ?? ''} onChange={(event) => setSelectionMethod(event.target.value as SelectionMethod)}><option data-v-dataset-import-modal="" value="stratified">{"Stratified random"}</option>
-                    <option data-v-dataset-import-modal="" value="manual">{"Manual selection"}</option></select></label>
-                        {(selectionMethod === 'stratified') ? (<><label data-v-dataset-import-modal="">{" Additional labelled videos to review "}
-                        <input data-v-dataset-import-modal="" value={reviewCount ?? ''} onChange={(event) => setReviewCount(Number(event.target.value))} type="number" min="0" max={optionalReviewFiles.length}/></label>
-                        <label data-v-dataset-import-modal="">{" Random seed "}
-                        <input data-v-dataset-import-modal="" value={randomSeed ?? ''} onChange={(event) => setRandomSeed(Number(event.target.value))} type="number"/></label>
-                        <button data-v-dataset-import-modal="" type="button" disabled={!canGenerateSelection || isBusy} onClick={() => generateSelection()} className={cx("secondary-button")}>{" Generate selection "}</button></>) : (<button data-v-dataset-import-modal="" type="button" onClick={() => toggleAllVideos()} className={cx("secondary-button")}>{display(selectedVideoPaths.length === optionalReviewFiles.length
-                                ? "Clear optional selection"
-                                : "Select all labelled videos")}</button>)}</div>) : (null)}
-                <div data-v-dataset-import-modal="" className={cx("review-summary")}><div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Selected for review"}</span>
-                <strong data-v-dataset-import-modal="">{display(effectiveReviewCount)}</strong></div>
-                <div data-v-dataset-import-modal=""><span data-v-dataset-import-modal="">{"Left untouched"}</span>
-                <strong data-v-dataset-import-modal="">{display(untouchedCount)}</strong></div></div>
-                <p data-v-dataset-import-modal="" className={cx("section-hint")}>{" Selection is based on whole videos, not individual repetitions. Source labels remain distinct from human annotation status. "}</p>
-                <div data-v-dataset-import-modal="" className={cx("manifest-table-wrapper")}><table data-v-dataset-import-modal="" className={cx("manifest-table")}><thead data-v-dataset-import-modal=""><tr data-v-dataset-import-modal="">{(reviewPolicy === 'subset' &&
-                        selectionMethod === 'manual') ? (<th data-v-dataset-import-modal="">{" Review "}</th>) : (null)}
+                <section data-v-dataset-import-modal="" className={cx("import-section")}><h3 data-v-dataset-import-modal="">{"4. Annotation"}</h3>
+                <p data-v-dataset-import-modal="">{"All videos require annotation."}</p>
+                <p data-v-dataset-import-modal="" className={cx("section-hint")}>{"Each segmented repetition receives human knee ratings. LOPO controls training and evaluation splits separately."}</p>
+                <div data-v-dataset-import-modal="" className={cx("manifest-table-wrapper")}><table data-v-dataset-import-modal="" className={cx("manifest-table")}><thead data-v-dataset-import-modal=""><tr data-v-dataset-import-modal="">
                 <th data-v-dataset-import-modal="">{"Participant"}</th>
                 <th data-v-dataset-import-modal="">{"View"}</th>
-                <th data-v-dataset-import-modal="">{"ZIP label"}</th>
                 <th data-v-dataset-import-modal="">{"Review state"}</th>
                 <th data-v-dataset-import-modal="">{"Archive path"}</th></tr></thead>
-                <tbody data-v-dataset-import-modal="">{each(preview.manifest.files).map(([_index, file]) => (<tr data-v-dataset-import-modal="" key={file.archive_path}>{(reviewPolicy === 'subset' &&
-                            selectionMethod === 'manual') ? (<td data-v-dataset-import-modal=""><input data-v-dataset-import-modal="" type="checkbox" checked={file.source_label === null || selectedVideoPaths.includes(file.archive_path)} disabled={file.source_label === null} aria-label={`Review ${file.archive_path}`} onChange={(event) => {
-                                toggleVideo(file.archive_path, (event.target as HTMLInputElement).checked);
-                            }}/></td>) : (null)}
+                <tbody data-v-dataset-import-modal="">{each(preview.manifest.files).map(([_index, file]) => (<tr data-v-dataset-import-modal="" key={file.archive_path}>
                     <td data-v-dataset-import-modal="">{display(file.participant_code)}</td>
                     <td data-v-dataset-import-modal="">{display(file.view_angle)}</td>
-                    <td data-v-dataset-import-modal=""><span data-v-dataset-import-modal="" className={cx([
-                            'label-chip',
-                            sourceLabel(file.source_label).toLowerCase(),
-                        ])}>{display(sourceLabel(file.source_label))}</span></td>
-                    <td data-v-dataset-import-modal="">{display(file.source_label === null ? "Required review" : reviewPolicy === "all" ||
-                            (reviewPolicy === "subset" &&
-                                selectedVideoPaths.includes(file.archive_path))
-                            ? "Selected for review"
-                            : "Untouched")}</td>
+                    <td data-v-dataset-import-modal="">{"Required annotation"}</td>
                     <td data-v-dataset-import-modal="" className={cx("path-cell")}>{display(file.archive_path)}</td></tr>))}</tbody></table></div></section></>) : (null)}
             {(errorMessage) ? (<div data-v-dataset-import-modal="" role="alert" className={cx("message error")}>{display(errorMessage)}</div>) : (null)}
             {(outcomeMessage) ? (<div data-v-dataset-import-modal="" role="status" className={cx("message warning")}>{display(outcomeMessage)}</div>) : (null)}</div>

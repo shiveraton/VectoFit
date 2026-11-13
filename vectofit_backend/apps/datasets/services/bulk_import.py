@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 import logging
 import re
@@ -162,6 +164,47 @@ def _participant_from_path(parts):
     return _normalize_participant_code("_".join(remaining))
 
 
+
+def _read_video_manifest(archive, entries):
+    manifests = [entry for entry in entries if PurePosixPath(entry.filename).name == "manifest.csv"]
+    if not manifests:
+        return None
+    if len(manifests) != 1:
+        raise ValueError("Include exactly one manifest.csv.")
+    entry = manifests[0]
+    if entry.file_size > 1024 * 1024:
+        raise ValueError("manifest.csv exceeds the 1 MB size limit.")
+    reader = csv.DictReader(io.StringIO(archive.read(entry).decode("utf-8-sig")))
+    headers = reader.fieldnames or []
+    if len(headers) != len(set(headers)):
+        raise ValueError("manifest.csv has duplicate columns.")
+    if not {"video_id", "participant_id", "view", "filename"}.issubset(headers):
+        raise ValueError("manifest.csv requires video_id, participant_id, view, and filename.")
+    videos = {}
+    ids = set()
+    for row in reader:
+        if None in row or any(value is None for value in row.values()):
+            raise ValueError("manifest.csv has a malformed row.")
+        filename = row["filename"]
+        path = PurePosixPath(filename)
+        if not filename or path.is_absolute() or "\\" in filename or ".." in path.parts or ":" in filename:
+            raise ValueError(f"Unsafe manifest filename: {filename}")
+        if path.suffix.lower() not in VIDEO_SUFFIXES:
+            raise ValueError(f"Unsupported manifest video: {filename}")
+        archive_path = str(PurePosixPath(entry.filename).parent / path)
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,32}", row["participant_id"]):
+            raise ValueError(f"Invalid manifest participant: {row['participant_id']}")
+        if row["view"] not in ANGLE_NAMES:
+            raise ValueError(f"Invalid manifest view: {row['view']}")
+        if not row["video_id"].strip() or row["video_id"] in ids or archive_path in videos:
+            raise ValueError("Manifest video IDs and filenames must be nonempty and unique.")
+        ids.add(row["video_id"])
+        videos[archive_path] = row
+    if not videos:
+        raise ValueError("manifest.csv has no videos.")
+    return videos
+
+
 def inspect_archive(archive_path):
     result = empty_manifest()
     seen_paths = set()
@@ -177,6 +220,12 @@ def inspect_archive(archive_path):
 
         if len(archive_entries) > MAX_ARCHIVE_ENTRIES:
             result["errors"].append("The archive contains way too many entries.")
+            return result
+
+        try:
+            video_manifest = _read_video_manifest(archive, archive_entries)
+        except (ValueError, UnicodeError, csv.Error, OSError, zipfile.BadZipFile) as error:
+            result["errors"].append(str(error))
             return result
 
         total_uncompressed = 0
@@ -220,41 +269,50 @@ def inspect_archive(archive_path):
                 result["errors"].append(f"Archive path is too long: {raw_path}")
                 continue
 
-            labels = set()
-            angles = set()
+            if video_manifest is not None:
+                row = video_manifest.get(raw_path)
+                if row is None:
+                    result["errors"].append(f"{raw_path}: not listed in manifest.csv.")
+                    continue
+                participant_code = row["participant_id"]
+                angle = row["view"]
+                label = None
+            else:
+                labels = set()
+                angles = set()
 
-            for component in path.parts:
-                labels.update(_labels_for_component(component))
+                for component in path.parts:
+                    labels.update(_labels_for_component(component))
 
-                angle = _angle_for_component(component)
-                if angle:
-                    angles.add(angle)
+                    angle = _angle_for_component(component)
+                    if angle:
+                        angles.add(angle)
 
-            if len(labels) > 1:
-                result["errors"].append(
-                    f"{raw_path}: conflicting good/bad "
-                    "labels in the folder structure or filename."
-                )
-                continue
+                if len(labels) > 1:
+                    result["errors"].append(
+                        f"{raw_path}: conflicting good/bad "
+                        "labels in the folder structure or filename."
+                    )
+                    continue
 
-            if len(angles) != 1:
-                result["errors"].append(
-                    f"{raw_path}: expected exactly one view angle "
-                    "(diagonal, frontal, or sagittal)."
-                )
-                continue
+                if len(angles) != 1:
+                    result["errors"].append(
+                        f"{raw_path}: expected exactly one view angle "
+                        "(diagonal, frontal, or sagittal)."
+                    )
+                    continue
 
-            participant_code = _participant_from_path(list(path.parts))
+                participant_code = _participant_from_path(list(path.parts))
 
-            if not participant_code:
-                result["errors"].append(
-                    f"{raw_path}: could not identify a participant. "
-                    "Name the file using a participant code such as P01.mp4."
-                )
-                continue
+                if not participant_code:
+                    result["errors"].append(
+                        f"{raw_path}: could not identify a participant. "
+                        "Name the file using a participant code such as P01.mp4."
+                    )
+                    continue
 
-            label = next(iter(labels), None)
-            angle = next(iter(angles))
+                label = next(iter(labels), None)
+                angle = next(iter(angles))
 
             valid_entries.append(
                 {
@@ -266,6 +324,11 @@ def inspect_archive(archive_path):
                     "size_bytes": info.file_size,
                 }
             )
+
+    if video_manifest is not None:
+        missing = set(video_manifest) - {item["archive_path"] for item in valid_entries}
+        for filename in sorted(missing):
+            result["errors"].append(f"Manifest video missing or invalid: {filename}")
 
     valid_entries.sort(
         key=lambda item: (

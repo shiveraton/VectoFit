@@ -192,10 +192,6 @@ function isDatasetImportPreview(value: unknown): value is DatasetImportPreview {
   return true;
 }
 
-export type DatasetReviewPolicy = "source" | "all" | "subset";
-
-export type DatasetSelectionMethod = "stratified" | "manual";
-
 export interface DatasetBulkImportPayload {
   upload_token: string | null;
   name: string;
@@ -204,12 +200,7 @@ export interface DatasetBulkImportPayload {
   purpose: string;
   primary_target: string;
   secondary_target?: string;
-  review_policy: DatasetReviewPolicy;
-  selection_method: DatasetSelectionMethod;
-  review_count?: number;
-  random_seed?: number;
-  selected_video_paths?: string[];
-  files?: DatasetImportFile[];
+
 }
 
 export interface DatasetBulkImportResult {
@@ -279,7 +270,7 @@ export const datasetService = {
   ): Promise<DatasetBulkImportResult> {
     const response = await client.post<DatasetBulkImportResult>(
       "/datasets/import/",
-      payload,
+      { ...payload, review_policy: "all", selection_method: "manual" },
     );
 
     return response.data;

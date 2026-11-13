@@ -386,3 +386,80 @@ class AnnotationCSVHeaderTests(SimpleTestCase):
                 CommandError, "duplicate columns: dataset_video_id"
             ):
                 read_csv(path, {"video_id", "dataset_video_id"})
+
+
+class StandardizedImportTests(SimpleTestCase):
+    def inspect(self, rows, names, root=""):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "dataset.zip"
+            stream = StringIO()
+            writer = csv.DictWriter(
+                stream, fieldnames=["video_id", "participant_id", "view", "filename"]
+            )
+            writer.writeheader()
+            writer.writerows(rows)
+            with zipfile.ZipFile(path, "w") as archive:
+                archive.writestr(root + "manifest.csv", stream.getvalue())
+                for name in names:
+                    archive.writestr(root + name, b"video")
+                archive.writestr(root + "annotations/annotator_01.csv", "")
+            return inspect_archive(path)
+
+    def row(self, name="videos/mdy_P01_front_good_01.mp4", participant="mdy_P01"):
+        return {
+            "video_id": Path(name).stem,
+            "participant_id": participant,
+            "view": "frontal",
+            "filename": name,
+        }
+
+    def test_source_tokens_are_ignored_and_manifest_supplies_view(self):
+        names = [
+            "videos/mdy_P01_front_good_01.mp4",
+            "videos/mdy_P01_front_bad_01.mp4",
+            "videos/zen_P03_squat_07.mp4",
+        ]
+        rows = [self.row(names[0]), self.row(names[1]), self.row(names[2], "zen_P03")]
+        for root in ("", "vectofit_dataset_v2/"):
+            with self.subTest(root=root):
+                result = self.inspect(rows, names, root)
+                self.assertEqual(result["errors"], [])
+                self.assertEqual(result["file_count"], 3)
+                self.assertEqual(result["participant_count"], 2)
+                self.assertEqual(
+                    result["by_label"], {"good": 0, "bad": 0, "unlabelled": 3}
+                )
+                self.assertTrue(
+                    all(item["source_label"] is None for item in result["files"])
+                )
+
+    def test_manifest_metadata_overrides_filename(self):
+        row = self.row("videos/good_bad_side.mp4", "zen_P03")
+        result = self.inspect([row], [row["filename"]])
+        self.assertEqual(result["errors"], [])
+        self.assertEqual(result["files"][0]["view_angle"], "frontal")
+        self.assertEqual(result["files"][0]["participant_code"], "zen_P03")
+
+    def test_missing_or_unlisted_videos_are_rejected(self):
+        row = self.row()
+        self.assertTrue(self.inspect([row], [])["errors"])
+        self.assertTrue(
+            self.inspect([row], [row["filename"], "videos/extra.mp4"])["errors"]
+        )
+
+    def test_duplicate_rows_are_rejected(self):
+        row = self.row()
+        self.assertTrue(self.inspect([row, row], [row["filename"]])["errors"])
+
+    def test_unsafe_paths_and_invalid_metadata_are_rejected(self):
+        for field, value in (
+            ("filename", "../video.mp4"),
+            ("filename", "videos\\bad.mp4"),
+            ("participant_id", ""),
+            ("view", "unknown"),
+            ("video_id", ""),
+        ):
+            with self.subTest(field=field, value=value):
+                self.assertTrue(
+                    self.inspect([{**self.row(), field: value}], [])["errors"]
+                )
