@@ -86,6 +86,7 @@ Thumbs.db
 # Datasets
 data/raw/
 data/processed/
+/vectofit_backend/datasets/bw_dataset_v2/
 
 # Generated outputs
 /outputs/

@@ -1,303 +1,248 @@
-import { computed, ref } from "vue";
+﻿import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   datasetAnnotationService,
   annotationRequestError,
   emptyKneeAnnotation,
-  type DatasetSample,
   type AnnotationSession,
+  type DatasetSample,
   type KneeAnnotation,
   type KneeAlignmentGrade,
   type KneeDeviationDirection,
   type SymmetryObservation,
   type TargetLabel,
 } from "../services/datasetAnnotationService";
+import { queryKeys } from "../query";
+import { frontalAnnotationSession } from "../services/frontalAnnotation";
 
-type SampleAnnotationState = "manual" | "inherited" | "unlabeled";
-
-function isManuallyAnnotated(sample: DatasetSample): boolean {
-  return sample.knee_annotation != null;
-}
-
-function deriveTargetLabel(annotation: KneeAnnotation): TargetLabel | null {
-  const left = annotation.left.grade;
-  const right = annotation.right.grade;
-
-  if (left === null || right === null) {
-    return null;
-  }
-
-  if (left === "deviated" || right === "deviated") {
-    return "bad";
-  }
-
-  if (left === "unassessable" || right === "unassessable") {
+const clone = (value: KneeAnnotation): KneeAnnotation => structuredClone(value);
+export function deriveTargetLabel(
+  annotation: KneeAnnotation,
+): TargetLabel | null {
+  const left = annotation.left.grade,
+    right = annotation.right.grade;
+  if (left === null || right === null) return null;
+  if (left === "deviated" || right === "deviated") return "bad";
+  if (left === "unassessable" || right === "unassessable")
     return "unassessable";
-  }
-
-  if (left === "borderline" || right === "borderline") {
-    return "borderline";
-  }
-
+  if (left === "borderline" || right === "borderline") return "borderline";
   return "good";
 }
-
-function mergeSavedSample(
+export function mergeSavedSample(
   original: DatasetSample,
   saved: DatasetSample,
 ): DatasetSample {
-  const savedVideo = saved.dataset_video;
-
-  const datasetVideo =
-    savedVideo !== null && typeof savedVideo === "object"
-      ? savedVideo
-      : original.dataset_video;
-
   return {
     ...original,
     ...saved,
-    dataset_video: datasetVideo,
+    dataset_video:
+      saved.dataset_video !== null && typeof saved.dataset_video === "object"
+        ? saved.dataset_video
+        : original.dataset_video,
     video_fps: saved.video_fps ?? original.video_fps ?? null,
   };
 }
-
-export function useDatasetAnnotation() {
-  const session = ref<AnnotationSession | null>(null);
-  const currentIndex = ref(0);
-  const annotation = ref<KneeAnnotation>(emptyKneeAnnotation());
-
-  const isLoading = ref(false);
-  const isSaving = ref(false);
-  const error = ref<string | null>(null);
-
-  const currentSample = computed<DatasetSample | null>(
-    () => session.value?.samples[currentIndex.value] ?? null,
-  );
-
-  const samples = computed(() => session.value?.samples ?? []);
-  const fps = computed(() => session.value?.fps ?? 0);
-
-  const targetLabel = computed<TargetLabel | null>(() =>
-    deriveTargetLabel(annotation.value),
-  );
-
-  const currentSampleLabelState = computed<SampleAnnotationState | null>(() => {
-    const sample = currentSample.value;
-
-    if (!sample) return null;
-    if (isManuallyAnnotated(sample)) return "manual";
-
-    if (sample.is_correct != null) return "inherited";
-
-    return "unlabeled";
+export function useDatasetAnnotation(datasetId: number) {
+  const cache = useQueryClient();
+  const lock = useRef(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [annotation, setAnnotation] =
+    useState<KneeAnnotation>(emptyKneeAnnotation);
+  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: queryKeys.annotation(datasetId),
+    queryFn: () => datasetAnnotationService.getSession(datasetId),
+    select: frontalAnnotationSession,
+    enabled: Number.isInteger(datasetId) && datasetId > 0,
+    refetchOnMount: "always",
   });
-
-  const labelledCount = computed(
-    () => samples.value.filter(isManuallyAnnotated).length,
-  );
-
-  const inheritedLabelCount = computed(
-    () =>
-      samples.value.filter(
-        (sample) => !isManuallyAnnotated(sample) && sample.is_correct != null,
-      ).length,
-  );
-
-  const pendingReviewCount = computed(
-    () => samples.value.length - labelledCount.value,
-  );
-
-  const isReviewComplete = computed(
-    () => samples.value.length > 0 && pendingReviewCount.value === 0,
-  );
-
-  const loadCurrentSample = () => {
-    const sample = currentSample.value;
-
-    annotation.value =
-      sample?.knee_annotation != null
-        ? JSON.parse(JSON.stringify(sample.knee_annotation))
-        : emptyKneeAnnotation();
-  };
-
-  const load = async (datasetId: number) => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      session.value = await datasetAnnotationService.getSession(datasetId);
-      currentIndex.value = Math.max(0, session.value.samples.findIndex(sample => sample.knee_annotation == null));
-      loadCurrentSample();
-    } catch (err) {
-      console.error(err);
-      error.value = "Unable to load annotation data.";
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const setKneeGrade = (
-    side: "left" | "right",
-    grade: KneeAlignmentGrade | null,
-  ) => {
-    annotation.value[side].grade = grade;
-
-    if (grade === null || grade === "unassessable") {
-      annotation.value[side].direction = null;
-    } else if (grade === "aligned") {
-      annotation.value[side].direction = "none";
-    } else if (
-      annotation.value[side].direction === null ||
-      annotation.value[side].direction === "none"
-    ) {
-      annotation.value[side].direction = "uncertain";
-    }
-  };
-
-  const setKneeDirection = (
-    side: "left" | "right",
-    direction: KneeDeviationDirection,
-  ) => {
-    annotation.value[side].direction = direction;
-  };
-
-  const setSymmetryObservation = (value: SymmetryObservation) => {
-    annotation.value.symmetry_observation = value;
-  };
-
-  const setNotes = (value: string) => {
-    annotation.value.notes = value;
-  };
-
-  const save = async (): Promise<boolean> => {
-    const sample = currentSample.value;
-
-    if (isSaving.value) return false;
-    if (!sample || targetLabel.value === null) {
-      error.value = "Assess both knees before saving.";
-      return false;
-    }
-
-    isSaving.value = true;
-    error.value = null;
-
-    try {
-      const payload: KneeAnnotation = JSON.parse(JSON.stringify(annotation.value));
-      const saved = await datasetAnnotationService.save(sample.id, {
-        knee_annotation: payload,
-      });
-
-      if (session.value) {
-        session.value.samples[currentIndex.value] = mergeSavedSample(sample, {
-          ...saved,
-          knee_annotation: saved.knee_annotation ?? payload,
-          target_label: saved.target_label ?? targetLabel.value,
-        });
-      }
-
-      return true;
-    } catch (err) {
-      console.error(err);
-      error.value = annotationRequestError(err, "Failed to save knee annotation.");
-      return false;
-    } finally {
-      isSaving.value = false;
-    }
-  };
-
-  const findPendingIndex = (start: number, end: number) => {
-    for (let index = start; index < end; index += 1) {
-      const sample = samples.value[index];
-      if (sample && !isManuallyAnnotated(sample)) return index;
-    }
-    return -1;
-  };
-
-  const saveAndNext = async () => {
-    if (!(await save())) return false;
-
-    if (isReviewComplete.value) return true;
-
-    let nextIndex = findPendingIndex(
-      currentIndex.value + 1,
-      samples.value.length,
+  const initialSession = useRef<AnnotationSession | null>(null);
+  const session = query.data ?? null,
+    samples = session?.samples ?? [];
+  const currentSample = samples[currentIndex] ?? null;
+  useEffect(() => {
+    setCurrentIndex((index) =>
+      Math.min(index, Math.max(0, samples.length - 1)),
     );
-
-    if (nextIndex === -1) {
-      nextIndex = findPendingIndex(0, currentIndex.value + 1);
+  }, [samples.length]);
+  useEffect(() => {
+    initialSession.current = null;
+    setCurrentIndex(0);
+    setAnnotation(emptyKneeAnnotation());
+    setError(null);
+  }, [datasetId]);
+  useEffect(() => {
+    if (query.data && !query.isFetching && initialSession.current === null) {
+      initialSession.current = query.data;
+      setCurrentIndex(
+        Math.max(
+          0,
+          query.data.samples.findIndex(
+            (sample) => sample.knee_annotation == null,
+          ),
+        ),
+      );
     }
-
-    if (nextIndex !== -1) {
-      currentIndex.value = nextIndex;
-      loadCurrentSample();
+  }, [query.data, query.isFetching]);
+  useEffect(() => {
+    setAnnotation(
+      currentSample?.knee_annotation
+        ? clone(currentSample.knee_annotation)
+        : emptyKneeAnnotation(),
+    );
+  }, [currentSample?.id]);
+  const targetLabel = deriveTargetLabel(annotation);
+  const labelledCount = samples.filter(
+    (sample) => sample.knee_annotation != null,
+  ).length;
+  const pendingReviewCount = samples.length - labelledCount;
+  const isReviewComplete = samples.length > 0 && pendingReviewCount === 0;
+  const saveRequest = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: KneeAnnotation }) =>
+      datasetAnnotationService.save(id, { knee_annotation: payload }),
+  });
+  const clearRequest = useMutation({
+    mutationFn: datasetAnnotationService.clear,
+  });
+  const isSaving = saveRequest.isPending || clearRequest.isPending;
+  function updateSample(original: DatasetSample, saved: DatasetSample) {
+    const updated = mergeSavedSample(original, saved);
+    cache.setQueryData<AnnotationSession>(
+      queryKeys.annotation(datasetId),
+      (previous) =>
+        previous
+          ? {
+              ...previous,
+              samples: previous.samples.map((sample) =>
+                sample.id === original.id ? updated : sample,
+              ),
+            }
+          : previous,
+    );
+    void cache.invalidateQueries({ queryKey: queryKeys.datasets });
+    void cache.invalidateQueries({ queryKey: queryKeys.annotationPool });
+    return updated;
+  }
+  async function saveAndNext() {
+    if (lock.current) return false;
+    if (!currentSample || targetLabel === null) {
+      setError("Assess both knees before saving.");
+      return false;
     }
-
-    return true;
-  };
-
-  const clear = async () => {
-    const sample = currentSample.value;
-    if (!sample || isSaving.value) return;
-
-    isSaving.value = true;
-    error.value = null;
-
+    lock.current = true;
+    setError(null);
     try {
-      const cleared = await datasetAnnotationService.clear(sample.id);
-
-      if (session.value) {
-        session.value.samples[currentIndex.value] = mergeSavedSample(sample, {
-          ...cleared,
-          knee_annotation: null,
-          target_label: null,
-        });
+      const payload = clone(annotation);
+      const saved = await saveRequest.mutateAsync({
+        id: currentSample.id,
+        payload,
+      });
+      const updated = updateSample(currentSample, {
+        ...saved,
+        knee_annotation: saved.knee_annotation ?? payload,
+        target_label: saved.target_label ?? targetLabel,
+      });
+      const nextSamples = samples.map((sample) =>
+        sample.id === updated.id ? updated : sample,
+      );
+      const later = nextSamples.findIndex(
+        (sample, index) =>
+          index > currentIndex && sample.knee_annotation == null,
+      );
+      const next =
+        later >= 0
+          ? later
+          : nextSamples.findIndex((sample) => sample.knee_annotation == null);
+      if (next >= 0) {
+        setCurrentIndex(next);
+        setAnnotation(
+          nextSamples[next].knee_annotation
+            ? clone(nextSamples[next].knee_annotation!)
+            : emptyKneeAnnotation(),
+        );
       }
-
-      loadCurrentSample();
-    } catch (err) {
-      console.error(err);
-      error.value = annotationRequestError(err, "Failed to clear knee annotation.");
+      return true;
+    } catch (error) {
+      setError(annotationRequestError(error, "Failed to save knee annotation."));
+      return false;
     } finally {
-      isSaving.value = false;
+      lock.current = false;
     }
-  };
-
-  const previous = () => {
-    if (isSaving.value || currentIndex.value <= 0) return;
-    currentIndex.value -= 1;
-    loadCurrentSample();
-  };
-
-  const next = () => {
-    if (isSaving.value || currentIndex.value >= samples.value.length - 1) return;
-    currentIndex.value += 1;
-    loadCurrentSample();
-  };
-
+  }
+  async function clear() {
+    if (!currentSample || lock.current) return;
+    lock.current = true;
+    setError(null);
+    try {
+      const saved = await clearRequest.mutateAsync(currentSample.id);
+      updateSample(currentSample, {
+        ...saved,
+        knee_annotation: null,
+        target_label: null,
+      });
+      setAnnotation(emptyKneeAnnotation());
+    } catch (error) {
+      setError(annotationRequestError(error, "Failed to clear knee annotation."));
+    } finally {
+      lock.current = false;
+    }
+  }
   return {
     session,
     samples,
     currentSample,
     currentIndex,
-    fps,
+    fps: session?.fps ?? 0,
     annotation,
     targetLabel,
     labelledCount,
-    inheritedLabelCount,
     pendingReviewCount,
     isReviewComplete,
-    currentSampleLabelState,
-    isLoading,
+    inheritedLabelCount: samples.filter(
+      (sample) => sample.knee_annotation == null && sample.is_correct != null,
+    ).length,
+    currentSampleLabelState: currentSample
+      ? currentSample.knee_annotation != null
+        ? "manual"
+        : currentSample.is_correct != null
+          ? "inherited"
+          : "unlabeled"
+      : null,
+    isLoading: query.isFetching,
     isSaving,
-    error,
-    load,
-    setKneeGrade,
-    setKneeDirection,
-    setSymmetryObservation,
-    setNotes,
-    save,
+    error: error || (query.error ? "Unable to load annotation data." : null),
+    setKneeGrade: (side: "left" | "right", grade: KneeAlignmentGrade | null) =>
+      setAnnotation((previous) => {
+        let direction = previous[side].direction;
+        if (grade === null || grade === "unassessable") direction = null;
+        else if (grade === "aligned") direction = "none";
+        else if (direction === null || direction === "none")
+          direction = "uncertain";
+        return { ...previous, [side]: { grade, direction } };
+      }),
+    setKneeDirection: (
+      side: "left" | "right",
+      direction: KneeDeviationDirection,
+    ) =>
+      setAnnotation((previous) => ({
+        ...previous,
+        [side]: { ...previous[side], direction },
+      })),
+    setSymmetryObservation: (value: SymmetryObservation) =>
+      setAnnotation((previous) => ({
+        ...previous,
+        symmetry_observation: value,
+      })),
+    setNotes: (value: string) =>
+      setAnnotation((previous) => ({ ...previous, notes: value })),
     saveAndNext,
     clear,
-    previous,
-    next,
+    previous: () => {
+      if (!lock.current && currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    },
+    next: () => {
+      if (!lock.current && currentIndex < samples.length - 1)
+        setCurrentIndex(currentIndex + 1);
+    },
   };
 }

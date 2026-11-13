@@ -67,7 +67,7 @@ def empty_manifest():
         "file_count": 0,
         "participant_count": 0,
         "by_angle": {name: 0 for name in ANGLE_NAMES},
-        "by_label": {"good": 0, "bad": 0},
+        "by_label": {"good": 0, "bad": 0, "unlabelled": 0},
         "files": [],
         "warnings": [],
         "errors": [],
@@ -135,7 +135,7 @@ def _normalize_participant_code(value):
 
 def _participant_from_path(parts):
     participant_folder_pattern = re.compile(
-        r"(?i)^(?:participant|subject|sub|p)?[\s_-]*0*\d{1,3}$"
+        r"(?i)^(?:(?:mdy|zen)_p\d{1,3}|(?:participant|subject|sub|p)?[\s_-]*0*\d{1,3})$"
     )
 
     for part in reversed(parts[:-1]):
@@ -145,6 +145,9 @@ def _participant_from_path(parts):
                 return code
 
     stem = PurePosixPath(parts[-1]).stem
+    source_participant = re.match(r"(?i)^((?:mdy|zen)_p\d{1,3})(?:_|$)", stem)
+    if source_participant:
+        return _normalize_participant_code(source_participant[1])
     tokens = _tokens(stem)
 
     remaining = [token for token in tokens if token not in METADATA_TOKENS]
@@ -227,10 +230,10 @@ def inspect_archive(archive_path):
                 if angle:
                     angles.add(angle)
 
-            if len(labels) != 1:
+            if len(labels) > 1:
                 result["errors"].append(
-                    f"{raw_path}: expected exactly one good/bad "
-                    "label in the folder structure or filename."
+                    f"{raw_path}: conflicting good/bad "
+                    "labels in the folder structure or filename."
                 )
                 continue
 
@@ -250,7 +253,7 @@ def inspect_archive(archive_path):
                 )
                 continue
 
-            label = next(iter(labels))
+            label = next(iter(labels), None)
             angle = next(iter(angles))
 
             valid_entries.append(
@@ -283,7 +286,7 @@ def inspect_archive(archive_path):
     for item in valid_entries:
         result["by_angle"][item["view_angle"]] += 1
 
-        label_key = "good" if item["source_label"] else "bad"
+        label_key = {True: "good", False: "bad", None: "unlabelled"}[item["source_label"]]
         result["by_label"][label_key] += 1
 
     if not valid_entries:
@@ -298,9 +301,10 @@ def inspect_archive(archive_path):
         for item in valid_entries
     }
 
+    labelled_participants = {item["participant_code"] for item in valid_entries if item["source_label"] is not None}
     missing = sum(
         1
-        for participant in participants
+        for participant in labelled_participants
         for angle in ANGLE_NAMES
         for label in (True, False)
         if (participant, angle, label) not in observed
@@ -318,8 +322,8 @@ def inspect_archive(archive_path):
             f"{result['ignored_file_count']} non-video file(s) will be ignored."
         )
 
-    if not any(result["by_label"].values()):
-        result["errors"].append("No labelled video files could be identified.")
+    if result["by_label"]["unlabelled"]:
+        result["warnings"].append(f'{result["by_label"]["unlabelled"]} unlabelled video(s) require manual review.')
 
     return result
 

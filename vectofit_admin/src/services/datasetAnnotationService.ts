@@ -53,6 +53,7 @@ export interface DatasetSample {
   id: number;
   dataset: number;
   dataset_video: DatasetVideoPlayback | number | null;
+  view_angle_name?: string | null;
   video_fps?: number | null;
   is_manually_annotated?: boolean;
   rep_assessment: RepAssessment;
@@ -68,6 +69,7 @@ export interface DatasetSample {
 }
 
 export interface AnnotationSession {
+  excluded_view_sample_count?: number;
   dataset: {
     id: number;
     name: string;
@@ -145,10 +147,7 @@ export const datasetAnnotationService = {
   },
 };
 
-export function annotationRequestError(
-  error: unknown,
-  fallback: string,
-): string {
+export function annotationRequestError(error: unknown, fallback: string): string {
   if (!axios.isAxiosError(error)) {
     return error instanceof Error ? error.message : fallback;
   }
@@ -166,11 +165,8 @@ export function annotationRequestError(
     );
     if (messages.length) return messages.join(" ");
   }
-  if (status === 401)
-    return "Your session expired. Sign in again before saving.";
-  if (status === 403)
-    return "Saving was denied. Reload the page and check your annotation access.";
-  if (status === 404)
-    return "This repetition is no longer available for your account. Reload the dataset.";
+  if (status === 401) return "Your session expired. Sign in again before saving.";
+  if (status === 403) return "Saving was denied. Reload the page and check your annotation access.";
+  if (status === 404) return "This repetition is no longer available for your account. Reload the dataset.";
   return `${fallback} The server returned HTTP ${status}.`;
 }

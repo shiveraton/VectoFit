@@ -86,7 +86,7 @@ export interface DatasetImportFile {
   filename: string;
   participant_code: string;
   view_angle: ViewAngle;
-  source_label: boolean;
+  source_label: boolean | null;
   size_bytes: number;
 }
 
@@ -103,6 +103,7 @@ export interface DatasetImportManifest {
   by_label: {
     good: number;
     bad: number;
+    unlabelled: number;
   };
   files: DatasetImportFile[];
   warnings: string[];
@@ -153,6 +154,7 @@ function isDatasetImportPreview(value: unknown): value is DatasetImportPreview {
   if (
     !isNumber(byLabel.good) ||
     !isNumber(byLabel.bad) ||
+    !isNumber(byLabel.unlabelled) ||
     !isNumber(byAngle.diagonal) ||
     !isNumber(byAngle.frontal) ||
     !isNumber(byAngle.sagittal)
@@ -169,7 +171,7 @@ function isDatasetImportPreview(value: unknown): value is DatasetImportPreview {
         typeof file.filename === "string" &&
         typeof file.participant_code === "string" &&
         isViewAngle(file.view_angle) &&
-        typeof file.source_label == "boolean" &&
+        (typeof file.source_label === "boolean" || file.source_label === null) &&
         isNumber(file.size_bytes),
     )
   ) {

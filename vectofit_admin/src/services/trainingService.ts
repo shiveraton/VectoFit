@@ -144,5 +144,4 @@ export const trainingService = {
       },
     ];
   },
-
 };

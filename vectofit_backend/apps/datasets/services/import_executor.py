@@ -7,12 +7,12 @@ from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 from django.core.files import File
-from ..storage import dataset_video_storage
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, ValidationError
 
 from ..models import Dataset, DatasetVideo, Participant, ViewAngle
+from ..storage import dataset_video_storage
 
 logger = logging.getLogger(__name__)
 
@@ -307,7 +307,8 @@ def _create_dataset_records(
 
             member_name = item["archive_path"]
             requires_manual_review = (
-                dataset.review_policy == Dataset.ReviewPolicy.ALL
+                item["source_label"] is None
+                or dataset.review_policy == Dataset.ReviewPolicy.ALL
                 or (
                     dataset.review_policy == Dataset.ReviewPolicy.SUBSET
                     and member_name in selected_paths

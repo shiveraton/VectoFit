@@ -1,78 +1,43 @@
-import { computed, ref } from "vue";
+﻿import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   annotationPoolService,
   type AnnotationPoolJob,
 } from "../services/annotationPoolService";
-
-export function useAnnotationPool() {
-  const jobs = ref<AnnotationPoolJob[]>([]);
-  const selectedJobId = ref<number | null>(null);
-  const search = ref("");
-  const statusFilter = ref("ALL");
-  const isLoading = ref(false);
-  const error = ref("");
-
-  const selectedJob = computed(
-    () => jobs.value.find((job) => job.id === selectedJobId.value) ?? null,
-  );
-
-  const filteredJobs = computed(() => {
-    const query = search.value.trim().toLowerCase();
-
-    return jobs.value.filter((job) => {
-      const matchesSearch =
-        !query ||
-        job.name.toLowerCase().includes(query) ||
-        job.annotators.some((summary) =>
-          summary.annotator?.username.toLowerCase().includes(query),
-        );
-      const matchesStatus =
-        statusFilter.value === "ALL" ||
-        job.job_status === statusFilter.value;
-
-      return matchesSearch && matchesStatus;
-    });
+import { queryKeys } from "../query";
+export function useAnnotationPool(enabled = true) {
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const query = useQuery({
+    queryKey: queryKeys.annotationPool,
+    queryFn: annotationPoolService.getJobs,
+    enabled,
+    staleTime: 30_000,
   });
-
-  const fetchJobs = async () => {
-    isLoading.value = true;
-    error.value = "";
-
-    try {
-      jobs.value = await annotationPoolService.getJobs();
-
-      if (
-        selectedJobId.value !== null &&
-        !jobs.value.some((job) => job.id === selectedJobId.value)
-      ) {
-        selectedJobId.value = null;
-      }
-    } catch (requestError) {
-      console.error("Failed to load annotation pool:", requestError);
-      error.value = "Unable to load annotation activity.";
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const selectJob = (job: AnnotationPoolJob) => {
-    selectedJobId.value = job.id;
-  };
-
-  const clearSelection = () => {
-    selectedJobId.value = null;
-  };
-
+  const jobs = query.data ?? [];
+  const term = search.trim().toLowerCase();
+  const filteredJobs = jobs.filter(
+    (job) =>
+      (!term ||
+        job.name.toLowerCase().includes(term) ||
+        job.annotators.some((summary) =>
+          summary.annotator?.username.toLowerCase().includes(term),
+        )) &&
+      (statusFilter === "ALL" || job.job_status === statusFilter),
+  );
   return {
     jobs,
     filteredJobs,
-    selectedJob,
+    selectedJob: jobs.find((job) => job.id === selectedJobId) ?? null,
     search,
+    setSearch,
     statusFilter,
-    isLoading,
-    error,
-    fetchJobs,
-    selectJob,
-    clearSelection,
+    setStatusFilter,
+    isLoading: query.isFetching,
+    error: query.error ? "Unable to load annotation activity." : "",
+    fetchJobs: () => query.refetch(),
+    selectJob: (job: AnnotationPoolJob) => setSelectedJobId(job.id),
+    clearSelection: () => setSelectedJobId(null),
   };
 }

@@ -1,66 +1,18 @@
-import { ref } from "vue";
-import {
-  participantService,
-  type Participant,
-} from "../services/participantService";
-
+﻿import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { participantService } from '../services/participantService';
+import { queryKeys } from '../query';
+import { messageFromError } from './errors';
 export function useParticipants() {
-  const participants = ref<Participant[]>([]);
-
-  const isLoading = ref(false);
-  const isCreating = ref(false);
-
-  const errorMessage = ref("");
-  const successMessage = ref("");
-
-  const fetchParticipants = async () => {
-    isLoading.value = true;
-    errorMessage.value = "";
-
-    try {
-      participants.value = await participantService.getParticipants();
-    } catch (error) {
-      console.error("Failed to load participants:", error);
-      errorMessage.value = "Unable to load participants.";
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const createParticipant = async () => {
-    isCreating.value = true;
-    errorMessage.value = "";
-    successMessage.value = "";
-
-    try {
-      const participant = await participantService.createParticipant();
-
-      participants.value.push(participant);
-
-      successMessage.value = `Participant ${participant.participant_code} created.`;
-
-      return participant;
-    } catch (error: any) {
-      console.error("Failed to create participant:", error);
-
-      errorMessage.value =
-        error?.response?.data?.detail ||
-        error?.response?.data?.participant_code?.[0] ||
-        "Failed to create participant.";
-
-      return null;
-    } finally {
-      isCreating.value = false;
-    }
-  };
-
-  return {
-    participants,
-    isLoading,
-    isCreating,
-    errorMessage,
-    successMessage,
-    fetchParticipants,
-    createParticipant,
-  };
+  const cache = useQueryClient();
+  const [successMessage, setSuccessMessage] = useState('');
+  const query = useQuery({ queryKey: queryKeys.participants, queryFn: participantService.getParticipants });
+  const create = useMutation({ mutationFn: participantService.createParticipant, onSuccess: async participant => {
+    setSuccessMessage(`Participant ${participant.participant_code} created.`);
+    await cache.invalidateQueries({ queryKey: queryKeys.participants });
+  } });
+  async function createParticipant() { setSuccessMessage(''); try { return await create.mutateAsync(); } catch { return null; } }
+  return { participants: query.data ?? [], isLoading: query.isPending, isCreating: create.isPending,
+    errorMessage: create.error ? messageFromError(create.error, 'Failed to create participant.') : query.error ? 'Unable to load participants.' : '', successMessage,
+    fetchParticipants: () => query.refetch(), createParticipant };
 }
