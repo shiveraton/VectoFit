@@ -100,7 +100,6 @@ class AnnotationExportTests(TestCase):
             else {
                 "left": {"grade": value, "direction": "none"},
                 "right": {"grade": "aligned", "direction": None},
-                "symmetry_observation": "symmetric",
                 "notes": 'Comma, newline\nand "quotes": café',
             }
         )

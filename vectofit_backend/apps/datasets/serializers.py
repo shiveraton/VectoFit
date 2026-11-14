@@ -66,15 +66,24 @@ class KneeAnnotationField(serializers.Field):
         return latest_annotation(instance, user)
 
     def to_representation(self, record):
-        return record.annotation if record else None
+        if not record or record.annotation is None:
+            return None
+        if not isinstance(record.annotation, dict):
+            return record.annotation
+        return {
+            key: value
+            for key, value in record.annotation.items()
+            if key != "symmetry_observation"
+        }
 
     def to_internal_value(self, value):
         if value is None:
             return None
         if not isinstance(value, dict):
             raise serializers.ValidationError("Expected an annotation object or null.")
-        required = {"left", "right", "symmetry_observation", "notes"}
-        if set(value) != required:
+        required = {"left", "right", "notes"}
+        allowed = required | {"symmetry_observation"}
+        if not required.issubset(value) or set(value) - allowed:
             raise serializers.ValidationError(
                 "Annotation fields are incomplete or unexpected."
             )
@@ -91,16 +100,9 @@ class KneeAnnotationField(serializers.Field):
                 and (not isinstance(item["direction"], str) or item["direction"] not in allowed_directions)
             ):
                 raise serializers.ValidationError(f"Invalid {side} knee direction.")
-        if not isinstance(value["symmetry_observation"], str) or value["symmetry_observation"] not in {
-            "symmetric",
-            "asymmetric",
-            "uncertain",
-            "not_recorded",
-        }:
-            raise serializers.ValidationError("Invalid symmetry observation.")
         if not isinstance(value["notes"], str):
             raise serializers.ValidationError("Notes must be text.")
-        return value
+        return {key: value[key] for key in required}
 
 
 class DatasetSampleSerializer(serializers.ModelSerializer):

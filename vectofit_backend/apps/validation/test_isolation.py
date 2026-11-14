@@ -18,7 +18,7 @@ class ValidationIsolationTests(APITestCase):
         KneeAnnotation.objects.create(sample=self.sample, annotator=self.user, annotation={
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "aligned", "direction": "none"},
-            "symmetry_observation": "uncertain", "notes": "",
+            "notes": "",
         })
         rep = self.sample.rep_assessment
         rep.landmark_series = [{"left_knee": [1, 2]}] * 3

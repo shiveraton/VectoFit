@@ -367,7 +367,6 @@ class DBAndAPITests(APITestCase):
                 annotation={
                     "left": {"grade": "aligned" if sample.is_correct else "deviated", "direction": "uncertain"},
                     "right": {"grade": "aligned", "direction": "none"},
-                    "symmetry_observation": "not_recorded",
                     "notes": "",
                 },
             )
@@ -462,7 +461,6 @@ class DBAndAPITests(APITestCase):
                 annotation={
                     "left": {"grade": grade, "direction": "uncertain"},
                     "right": {"grade": "aligned", "direction": "none"},
-                    "symmetry_observation": "not_recorded",
                     "notes": "",
                 },
                 annotator=self.admin,

@@ -19,7 +19,7 @@ from apps.training.services.run_training_job import _build_manifest
 def rating(left="aligned", right="aligned"):
     return {"left": {"grade": left, "direction": "uncertain"},
             "right": {"grade": right, "direction": "uncertain"},
-            "symmetry_observation": "uncertain", "notes": ""}
+            "notes": ""}
 
 
 class FrontalProtocolTests(APITestCase):

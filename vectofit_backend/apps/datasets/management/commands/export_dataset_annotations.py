@@ -36,7 +36,6 @@ RATING_FIELDS = REP_FIELDS + [
     "left_direction",
     "right_grade",
     "right_direction",
-    "symmetry_observation",
     "notes",
     "target",
     "annotation_json",
@@ -73,7 +72,17 @@ def write_csv(path, fields, rows):
 
 def rating_row(rep, pseudonym, record):
     annotation = record.annotation if record else None
-    payload = annotation if isinstance(annotation, dict) else {}
+    payload = (
+        {
+            key: value
+            for key, value in annotation.items()
+            if key != "symmetry_observation"
+        }
+        if isinstance(annotation, dict)
+        else {}
+    )
+    if isinstance(annotation, dict) and len(payload) != len(annotation):
+        annotation = payload
     status = "missing"
     if record is not None:
         status = "cleared" if annotation is None else "rated"
@@ -84,7 +93,6 @@ def rating_row(rep, pseudonym, record):
         "created_at": record.created_at.isoformat() if record else "",
         "rubric_version": record.rubric_version if record else "",
         "rating_status": status,
-        "symmetry_observation": payload.get("symmetry_observation", ""),
         "notes": payload.get("notes", ""),
         "target": knee_target(annotation) if annotation is not None else "",
         "annotation_json": json.dumps(annotation, ensure_ascii=False, sort_keys=True)

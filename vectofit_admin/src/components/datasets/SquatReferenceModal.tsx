@@ -121,13 +121,6 @@ export default function SquatReferenceModal({
             Choose <strong>Direction uncertain</strong> when the direction
             cannot be judged reliably.
           </p>
-          <h3>Symmetry observation</h3>
-          <p>
-            <strong>Symmetric:</strong> similar visible movement on both sides.{" "}
-            <strong>Asymmetric:</strong> a visible difference between sides.{" "}
-            <strong>Uncertain:</strong> cannot judge reliably.{" "}
-            <strong>Not recorded:</strong> no symmetry observation entered.
-          </p>
         </section>
       </div>
     </dialog>

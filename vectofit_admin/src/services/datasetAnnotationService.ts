@@ -11,12 +11,6 @@ export type KneeAlignmentGrade =
 
 export type KneeDeviationDirection = "valgus" | "varus" | "none" | "uncertain";
 
-export type SymmetryObservation =
-  | "symmetric"
-  | "asymmetric"
-  | "uncertain"
-  | "not_recorded";
-
 export type TargetLabel = "good" | "bad" | "borderline" | "unassessable";
 
 export interface KneeSideAnnotation {
@@ -27,7 +21,6 @@ export interface KneeSideAnnotation {
 export interface KneeAnnotation {
   left: KneeSideAnnotation;
   right: KneeSideAnnotation;
-  symmetry_observation: SymmetryObservation;
   notes: string;
 }
 
@@ -97,7 +90,6 @@ export interface SaveAnnotationPayload {
 export const emptyKneeAnnotation = (): KneeAnnotation => ({
   left: { grade: null, direction: null },
   right: { grade: null, direction: null },
-  symmetry_observation: "not_recorded",
   notes: "",
 });
 

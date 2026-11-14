@@ -83,7 +83,6 @@ class AssignmentAccessTests(APITestCase):
         annotation = {
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "aligned", "direction": "none"},
-            "symmetry_observation": "not_recorded",
             "notes": "",
         }
         url = self.base + f"samples/{self.sample.pk}/rating/"

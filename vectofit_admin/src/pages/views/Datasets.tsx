@@ -889,11 +889,6 @@ export default function Datasets(input: {}) {
                                 ) : null}
                                 {activity.annotation ? (
                                   <span data-v-datasets="">
-                                    {"Symmetry: "}
-                                    {display(
-                                      activity.annotation.symmetry_observation,
-                                    )}
-                                    {" / "}
                                     {display(activity.annotation.notes)}
                                   </span>
                                 ) : (

@@ -9,7 +9,6 @@ import {
   type KneeAnnotation,
   type KneeAlignmentGrade,
   type KneeDeviationDirection,
-  type SymmetryObservation,
   type TargetLabel,
 } from "../services/datasetAnnotationService";
 import { queryKeys } from "../query";
@@ -227,11 +226,6 @@ export function useDatasetAnnotation(datasetId: number) {
       setAnnotation((previous) => ({
         ...previous,
         [side]: { ...previous[side], direction },
-      })),
-    setSymmetryObservation: (value: SymmetryObservation) =>
-      setAnnotation((previous) => ({
-        ...previous,
-        symmetry_observation: value,
       })),
     setNotes: (value: string) =>
       setAnnotation((previous) => ({ ...previous, notes: value })),

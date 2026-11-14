@@ -140,7 +140,6 @@ class KneeAnnotationAPITests(APITestCase):
         annotation = {
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "deviated", "direction": "valgus"},
-            "symmetry_observation": "asymmetric",
             "notes": "Round-trip annotation",
         }
 
@@ -175,7 +174,6 @@ class KneeAnnotationAPITests(APITestCase):
         annotation = {
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "aligned", "direction": "none"},
-            "symmetry_observation": "symmetric",
             "notes": "Pool activity",
         }
         save_response = self.client.patch(
@@ -212,7 +210,6 @@ class KneeAnnotationAPITests(APITestCase):
         annotation = {
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "aligned", "direction": "none"},
-            "symmetry_observation": "symmetric",
             "notes": "Public annotator answer",
         }
         response = self.client.patch(
@@ -253,7 +250,6 @@ class KneeAnnotationAPITests(APITestCase):
         first = {
             "left": {"grade": "aligned", "direction": "none"},
             "right": {"grade": "aligned", "direction": "none"},
-            "symmetry_observation": "symmetric",
             "notes": "First",
         }
         second = {**first, "notes": "Second"}

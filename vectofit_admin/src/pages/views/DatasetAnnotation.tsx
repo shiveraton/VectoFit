@@ -6,7 +6,6 @@ import { useDatasetAnnotation } from "../../hooks/useDatasetAnnotation";
 import type {
   KneeAlignmentGrade,
   KneeDeviationDirection,
-  SymmetryObservation,
 } from "../../services/datasetAnnotationService";
 import { bindStyles, each, display, scopeAttributes } from "../../presentation";
 import styles from "./DatasetAnnotation.module.css";
@@ -42,11 +41,6 @@ export default function DatasetAnnotation(input: {}) {
       (event.target as HTMLSelectElement).value as KneeDeviationDirection,
     );
   }
-  function handleSymmetryChange(event: ChangeEvent<HTMLSelectElement>) {
-    setSymmetryObservation(
-      (event.target as HTMLSelectElement).value as SymmetryObservation,
-    );
-  }
   function handleNotesInput(event: ChangeEvent<HTMLTextAreaElement>) {
     setNotes((event.target as HTMLTextAreaElement).value);
   }
@@ -67,7 +61,6 @@ export default function DatasetAnnotation(input: {}) {
     error,
     setKneeGrade,
     setKneeDirection,
-    setSymmetryObservation,
     setNotes,
     saveAndNext,
     clear,
@@ -573,32 +566,6 @@ export default function DatasetAnnotation(input: {}) {
                       </div>
                     ))}
                   </div>
-                  <label
-                    data-v-dataset-annotation=""
-                    className={cx("error-label-field")}
-                  >
-                    <span data-v-dataset-annotation="">
-                      {"Symmetry observation"}
-                    </span>
-                    <select
-                      data-v-dataset-annotation=""
-                      value={annotation.symmetry_observation}
-                      onChange={handleSymmetryChange}
-                    >
-                      <option data-v-dataset-annotation="" value="not_recorded">
-                        {"Not recorded"}
-                      </option>
-                      <option data-v-dataset-annotation="" value="symmetric">
-                        {"Symmetric"}
-                      </option>
-                      <option data-v-dataset-annotation="" value="asymmetric">
-                        {"Asymmetric"}
-                      </option>
-                      <option data-v-dataset-annotation="" value="uncertain">
-                        {"Uncertain"}
-                      </option>
-                    </select>
-                  </label>
                   <label
                     data-v-dataset-annotation=""
                     className={cx("error-label-field")}
