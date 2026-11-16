@@ -161,6 +161,73 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
 endif()
 
+# LIB_CUSTOM_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:23 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/rnscreens.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
+# LIB_CUSTOM_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:23 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSFormSheetHostShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSFormSheetHostState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSFullWindowOverlayShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSModalScreenShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSafeAreaViewShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSafeAreaViewState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenShadowNodeCommitHook.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderConfigShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderConfigState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderSubviewShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderSubviewState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSplitScreenShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderConfigShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderConfigState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderItemShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderItemState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderSubviewShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackHeaderSubviewState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackScreenShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSStackScreenState.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSTabsBottomAccessoryShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSTabsHostShadowNode.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSTabsHostState.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
+# LIB_CUSTOM_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:23 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/utils/*.cpp")
+set(OLD_GLOB
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
+# LIB_CODEGEN_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:24 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/ComponentDescriptors.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/EventEmitters.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/Props.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/ShadowNodes.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/States.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
 # rnsvg_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:10 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-svg/android/src/main/jni/*.cpp")
 set(OLD_GLOB
@@ -250,6 +317,31 @@ endif()
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/*.cpp")
 set(OLD_GLOB
   "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/OnLoad.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rn_gesture_handler_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/CMakeLists.txt:7 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/../shared/shadowNodes/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/../shared/shadowNodes/react/renderer/components/rngesturehandler_codegen/RNGestureHandlerDetectorShadowNode.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rn_gesture_handler_codegen_SRCS at D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/CMakeLists.txt:8 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/*.cpp")
+set(OLD_GLOB
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/ComponentDescriptors.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/EventEmitters.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/Props.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/ShadowNodes.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/States.cpp"
+  "D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android/./build/generated/source/codegen/jni/rngesturehandler_codegen-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

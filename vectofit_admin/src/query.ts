@@ -1,4 +1,4 @@
-﻿import { QueryClient } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 export const queryKeys = {
   session: ["auth", "session"] as const,
   publicSession: ["auth", "public-session"] as const,
@@ -10,7 +10,7 @@ export const queryKeys = {
   models: ["models"] as const,
   model: (id: number) => ["models", id] as const,
   training: ["training"] as const,
-  pilot: ["pilot"] as const,
+  evaluationResults: ["evaluation-results"] as const,
 };
 export const queryClient = new QueryClient({
   defaultOptions: {

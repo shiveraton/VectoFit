@@ -1,0 +1,21 @@
+
+h1[data-v-evaluation-results] { margin: 8px 0;
+}
+h2[data-v-evaluation-results] { margin-top: 0; font-size: 1rem;
+}
+p[data-v-evaluation-results] { color: var(--vf-muted);
+}
+.panel[data-v-evaluation-results] { margin-bottom: 18px; padding: 20px; background: #fff; border: 1px solid var(--vf-border); border-radius: 10px; overflow-x: auto;
+}
+.metadata[data-v-evaluation-results] { display: flex; flex-wrap: wrap; gap: 20px;
+}
+.message[data-v-evaluation-results] { color: #b42318;
+}
+table[data-v-evaluation-results] { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;
+}
+th[data-v-evaluation-results], td[data-v-evaluation-results] { padding: 10px; border-bottom: 1px solid var(--vf-border); vertical-align: top;
+}
+th[data-v-evaluation-results] { color: var(--vf-muted); font-size: 0.72rem; text-transform: uppercase;
+}
+
+

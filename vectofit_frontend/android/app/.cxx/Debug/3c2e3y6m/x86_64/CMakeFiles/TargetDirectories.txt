@@ -8,6 +8,9 @@ D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnas
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/VectorIconsIonicons_autolinked_build/CMakeFiles/react_codegen_VectorIconsIonicons.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/VectorIconsIonicons_autolinked_build/CMakeFiles/edit_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/VectorIconsIonicons_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/react_codegen_rngesturehandler_codegen.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/edit_cache.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/rebuild_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/NitroModulesSpec_autolinked_build/CMakeFiles/edit_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/NitroModulesSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
@@ -17,6 +20,9 @@ D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/RNPe
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
+D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnsvg_autolinked_build/CMakeFiles/react_codegen_rnsvg.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnsvg_autolinked_build/CMakeFiles/edit_cache.dir
 D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86_64/rnsvg_autolinked_build/CMakeFiles/rebuild_cache.dir

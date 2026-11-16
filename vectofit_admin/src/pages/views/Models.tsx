@@ -1,7 +1,6 @@
+import { Link } from "react-router";
 import { useModels } from "../../hooks/useModels";
 import ModelCard from "../../components/models/ModelCard";
-import ModelEvaluationState from "../../components/models/ModelEvaluationState";
-import ModelFeatureState from "../../components/models/ModelFeatureState";
 import ModelRegistryTable from "../../components/models/ModelRegistryTable";
 import { bindStyles, each, display, scopeAttributes } from "../../presentation";
 import styles from "./Models.module.css";
@@ -11,7 +10,6 @@ export default function Models(input: {}) {
     models,
     modelState,
     selectedModelId,
-    summaryCards,
     isLoading,
     isStateLoading,
     error,
@@ -40,40 +38,6 @@ export default function Models(input: {}) {
   })();
   const activationBlockers = (() =>
     modelState?.model_card?.activation.blockers ?? [])();
-  const predictionTargetLabel = (() => {
-    return modelState?.prediction_target === "knee_alignment"
-      ? "Frontal-plane knee alignment"
-      : "Unsupported model setup";
-  })();
-  const cameraAngleLabel = (() => {
-    const angle = modelState?.view_angle;
-    if (!angle) return "Unspecified";
-    return angle.charAt(0).toUpperCase() + angle.slice(1);
-  })();
-  const selectedDatasetText = (() => {
-    const datasetNames = modelState?.training.dataset_names ?? [];
-    return datasetNames.length
-      ? datasetNames.join(", ")
-      : "No dataset recorded";
-  })();
-  const evaluationAvailable = (() => {
-    const model = modelState;
-    if (
-      !model ||
-      model.training.status !== "COMPLETED" ||
-      model.training.test_count <= 0
-    ) {
-      return false;
-    }
-    const evaluation = model.evaluation;
-    return [
-      evaluation.accuracy,
-      evaluation.balanced_accuracy,
-      evaluation.precision,
-      evaluation.recall,
-      evaluation.f1,
-    ].some((metric) => metric != null);
-  })();
   const formatDate = (value: string | null | undefined): string => {
     if (!value) return "—";
     const date = new Date(value);
@@ -96,10 +60,10 @@ export default function Models(input: {}) {
               <span data-v-models="" className={cx("eyebrow-dot")}></span>
               {" VECTOFIT MODEL STATE "}
             </div>
-            <h1 data-v-models="">{"Models"}</h1>
+            <h1 data-v-models="">{"Model Registry"}</h1>
             <p data-v-models="">
               {
-                " Inspect FPPA M1 provenance and held-out performance, then activate a validated version for frontal-plane knee-alignment inference. "
+                " Select a model version, review activation readiness, and manage frontal-plane knee-alignment inference. "
               }
             </p>
           </div>
@@ -170,6 +134,9 @@ export default function Models(input: {}) {
                     </p>
                   </div>
                   <div data-v-models="" className={cx("hero-actions")}>
+                    <Link data-v-models="" to={`/training?job=${modelState.training.job_id}#training-result`} className={cx("secondary-button")}>
+                      View training results
+                    </Link>
                     <span
                       data-v-models=""
                       className={cx("state-badge", {
@@ -205,232 +172,12 @@ export default function Models(input: {}) {
                     ) : null}
                   </div>
                 </section>
-                <section
-                  data-v-models=""
-                  aria-label="Model summary"
-                  className={cx("summary-grid")}
-                >
-                  {each(summaryCards).map(([_index, card]) => (
-                    <div
-                      data-v-models=""
-                      key={card.label}
-                      className={cx("summary-card")}
-                    >
-                      <span data-v-models="">{display(card.label)}</span>
-                      <strong data-v-models="">{display(card.value)}</strong>
-                      <small data-v-models="">
-                        {display(card.description)}
-                      </small>
-                    </div>
-                  ))}
-                </section>
                 {modelState.model_card ? (
                   <ModelCard
                     data-v-models=""
                     card={modelState.model_card}
                   ></ModelCard>
                 ) : null}
-                <section data-v-models="" className={cx("content-card")}>
-                  <div data-v-models="" className={cx("section-header")}>
-                    <div data-v-models="" className={cx("section-title-row")}>
-                      <div
-                        data-v-models=""
-                        className={cx("section-marker")}
-                      ></div>
-                      <div data-v-models="">
-                        <h2 data-v-models="">
-                          {"Model & Training Provenance"}
-                        </h2>
-                        <p data-v-models="">
-                          {
-                            "Where this version came from and how it was trained."
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div data-v-models="" className={cx("provenance-grid")}>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Algorithm"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.algorithm)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Camera angle"}</span>
-                      <strong data-v-models="">
-                        {display(cameraAngleLabel)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Prediction target"}</span>
-                      <strong data-v-models="">
-                        {display(predictionTargetLabel)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Feature schema"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.feature_schema_version || "—")}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Training status"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.training.status)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Dataset"}</span>
-                      <strong data-v-models="">
-                        {display(selectedDatasetText)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Total samples"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.training.sample_count)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Train / test samples"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.training.train_count)}
-                        {" / "}
-                        {display(modelState.training.test_count)}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Split strategy"}</span>
-                      <strong data-v-models="">
-                        {display(modelState.training.split_strategy || "—")}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Training started"}</span>
-                      <strong data-v-models="">
-                        {display(formatDate(modelState.training.started_at))}
-                      </strong>
-                    </div>
-                    <div data-v-models="">
-                      <span data-v-models="">{"Training completed"}</span>
-                      <strong data-v-models="">
-                        {display(formatDate(modelState.training.completed_at))}
-                      </strong>
-                    </div>
-                  </div>
-                </section>
-                <section data-v-models="" className={cx("content-card")}>
-                  <div data-v-models="" className={cx("section-header")}>
-                    <div data-v-models="" className={cx("section-title-row")}>
-                      <div
-                        data-v-models=""
-                        className={cx("section-marker")}
-                      ></div>
-                      <div data-v-models="">
-                        <h2 data-v-models="">{"Feature Set"}</h2>
-                        <p data-v-models="">
-                          {
-                            " Fixed inputs recorded for this FPPA M1 training run. "
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <span data-v-models="" className={cx("section-badge")}>
-                      {display(modelState.features.selected.length)}
-                      {" FEATURES "}
-                    </span>
-                  </div>
-                  <ModelFeatureState
-                    data-v-models=""
-                    features={modelState.features}
-                  ></ModelFeatureState>
-                </section>
-                <section
-                  data-v-models=""
-                  className={cx("content-card evaluation-card")}
-                >
-                  <div data-v-models="" className={cx("section-header")}>
-                    <div data-v-models="" className={cx("section-title-row")}>
-                      <div
-                        data-v-models=""
-                        className={cx("section-marker")}
-                      ></div>
-                      <div data-v-models="">
-                        <h2 data-v-models="">{"Evaluation Results"}</h2>
-                        <p data-v-models="">
-                          {
-                            " FPPA good-versus-bad performance on the held-out test samples. "
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      data-v-models=""
-                      className={cx("section-badge", {
-                        ready: evaluationAvailable,
-                      })}
-                    >
-                      {display(
-                        evaluationAvailable ? "EVALUATED" : "NO RESULTS",
-                      )}
-                    </span>
-                  </div>
-                  {evaluationAvailable ? (
-                    <>
-                      <div
-                        data-v-models=""
-                        className={cx("evaluation-context")}
-                      >
-                        <div data-v-models="">
-                          <span data-v-models="">{"Training job"}</span>
-                          <strong data-v-models="">
-                            {"#"}
-                            {display(modelState.training.job_id)}
-                          </strong>
-                        </div>
-                        <div data-v-models="">
-                          <span data-v-models="">{"Test samples"}</span>
-                          <strong data-v-models="">
-                            {display(modelState.training.test_count)}
-                          </strong>
-                        </div>
-                        <div data-v-models="">
-                          <span data-v-models="">{"Prediction target"}</span>
-                          <strong data-v-models="">
-                            {display(predictionTargetLabel)}
-                          </strong>
-                        </div>
-                        <div data-v-models="">
-                          <span data-v-models="">{"Camera angle"}</span>
-                          <strong data-v-models="">
-                            {display(cameraAngleLabel)}
-                          </strong>
-                        </div>
-                      </div>
-                      <ModelEvaluationState
-                        data-v-models=""
-                        evaluation={modelState.evaluation}
-                      ></ModelEvaluationState>
-                      <p data-v-models="" className={cx("evaluation-note")}>
-                        {
-                          " These are offline evaluation results from the held-out test set. They are not live predictions from the smartphone camera. Selecting another registered version displays that version's saved evaluation. "
-                        }
-                      </p>
-                    </>
-                  ) : (
-                    <div data-v-models="" className={cx("empty-detail")}>
-                      <strong data-v-models="">
-                        {"No evaluation results available"}
-                      </strong>
-                      <p data-v-models="">
-                        {
-                          " This model does not have completed evaluation metrics and a non-empty test set recorded in its saved state. "
-                        }
-                      </p>
-                    </div>
-                  )}
-                </section>
                 {modelState.feature_warnings.length > 0 ? (
                   <section
                     data-v-models=""
@@ -514,7 +261,7 @@ export default function Models(input: {}) {
                     <h2 data-v-models="">{"Model Registry"}</h2>
                     <p data-v-models="">
                       {
-                        " Select a registered version to inspect its provenance, features, and evaluation results. "
+                        " Select a version to review its readiness and activate it for inference. "
                       }
                     </p>
                   </div>

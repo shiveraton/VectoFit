@@ -40,22 +40,62 @@ function formatDate(value?: string | null): string {
 function fppaResult(rep: AssessmentRep) {
   return rep.analysis_result?.fppa;
 }
-function isConfirmedBad(rep: AssessmentRep): boolean {
-  const result = fppaResult(rep);
-  return (
-    result?.status === "assessed" &&
-    Boolean(
-      result.knees &&
-        (result.knees.left.state === "deviation" ||
-          result.knees.right.state === "deviation"),
-    )
-  );
+function getModelResult(rep: AssessmentRep) {
+  const prediction = rep.analysis_result?.model_prediction;
+  const predictedClass = prediction?.predicted_class;
+  const probability = prediction?.probability;
+
+  if (
+    prediction?.status !== "assessed" ||
+    prediction.prediction_target !== "knee_alignment" ||
+    (prediction.view_angle && prediction.view_angle !== "frontal") ||
+    (predictedClass !== "good" && predictedClass !== "bad") ||
+    typeof probability !== "number" ||
+    !Number.isFinite(probability) ||
+    probability < 0 ||
+    probability > 1
+  ) {
+    return null;
+  }
+
+  return {
+    predictedClass,
+    label: predictedClass === "good" ? "Good" : "Bad",
+    confidence: Math.round(probability * 100),
+  };
 }
-function fppaLabel(rep: AssessmentRep): string {
-  const result = fppaResult(rep);
-  if (!result || result.status !== "assessed") return "Can't assess";
-  return isConfirmedBad(rep) ? "Deviation" : "Aligned";
+
+function modelLabel(rep: AssessmentRep): string {
+  return getModelResult(rep)?.label ?? "Unavailable";
 }
+
+function getFppaResult(rep: AssessmentRep) {
+  const result = fppaResult(rep);
+  const knees = result?.knees;
+  if (
+    result?.status !== "assessed" ||
+    !knees ||
+    ![knees.left, knees.right].every(
+      (knee) =>
+        knee &&
+        Number.isFinite(knee.peak_degrees) &&
+        (knee.state === "aligned" || knee.state === "deviation"),
+    ) ||
+    typeof result.cutoff_degrees !== "number" ||
+    !Number.isFinite(result.cutoff_degrees) ||
+    result.cutoff_degrees < 0
+  ) {
+    return null;
+  }
+
+  return {
+    knees,
+    cutoff: result.cutoff_degrees,
+    hasDeviation:
+      knees.left.state === "deviation" || knees.right.state === "deviation",
+  };
+}
+
 function fppaUnavailableText(rep: AssessmentRep): string {
   const reason = fppaResult(rep)?.reason;
   if (reason === "invalid_bottom_frame")
@@ -70,14 +110,56 @@ function fppaUnavailableText(rep: AssessmentRep): string {
 }
 function findingForRep(
   findings: SessionReportFinding[],
-  repNumber: number,
+  rep: AssessmentRep,
 ): SessionReportFinding | undefined {
+  const measurement = getFppaResult(rep);
+  if (!measurement?.hasDeviation) return undefined;
+
+  const { left, right } = measurement.knees;
+  const supportedFindings = {
+    VALGUS_LEFT: left.state === "deviation" && left.direction === "inward",
+    VALGUS_RIGHT: right.state === "deviation" && right.direction === "inward",
+    VARUS:
+      (left.state === "deviation" && left.direction === "outward") ||
+      (right.state === "deviation" && right.direction === "outward"),
+  };
   return findings
-    .filter((finding) => finding.affected_reps.includes(repNumber))
+    .filter(
+      (finding) =>
+        finding.affected_reps.includes(rep.rep_number) &&
+        supportedFindings[finding.code],
+    )
     .sort(
       (a, b) =>
         (a.severity === "major" ? -1 : 1) - (b.severity === "major" ? -1 : 1),
     )[0];
+}
+
+function getRepCoaching(
+  rep: AssessmentRep,
+  finding?: SessionReportFinding,
+) {
+  const model = getModelResult(rep);
+  const measurement = getFppaResult(rep);
+  if (!measurement) {
+    return {
+      label: "Recording guidance",
+      cue: fppaUnavailableText(rep),
+    };
+  }
+  if (model && (model.predictedClass === "bad") !== measurement.hasDeviation) {
+    return {
+      label: "Review conflicting results",
+      cue: "Review the FPPA measurements and snapshot, then repeat the recording from a stable frontal view with both knees visible.",
+    };
+  }
+  if (measurement.hasDeviation && finding?.cue) {
+    return { label: "FPPA-based coaching", cue: finding.cue };
+  }
+  return {
+    label: "Recording guidance",
+    cue: "Keep the camera frontal and repeat the movement with steady control.",
+  };
 }
 
 function RepSnapshot({ rep }: { rep: AssessmentRep }) {
@@ -120,38 +202,82 @@ function RepCoachingCard({
   rep: AssessmentRep;
   finding?: SessionReportFinding;
 }) {
-  const fppa = fppaResult(rep);
-  const prediction = rep.analysis_result?.model_prediction;
-  const confidence =
-    prediction?.status === "assessed" &&
-    typeof prediction.probability === "number" &&
-    Number.isFinite(prediction.probability)
-      ? `Model estimate · ${Math.round(prediction.probability * 100)}%`
-      : null;
+  const modelResult = getModelResult(rep);
+  const fppaMeasurement = getFppaResult(rep);
+  const coaching = getRepCoaching(rep, finding);
+  const resultsDisagree =
+    modelResult &&
+    fppaMeasurement &&
+    (modelResult.predictedClass === "bad") !== fppaMeasurement.hasDeviation;
   return (
     <View style={styles.repCard}>
       <View style={styles.repHeader}>
         <Text style={styles.repTitle}>Rep {rep.rep_number}</Text>
-        <Text style={styles.statusPill}>{fppaLabel(rep)}</Text>
+        <Text style={styles.statusPill}>
+          Model knee alignment · {modelLabel(rep)}
+        </Text>
       </View>
       <RepSnapshot rep={rep} />
-      <Text style={styles.issueLabel}>What we saw</Text>
+      <Text style={styles.issueLabel}>FPPA measurements</Text>
+      {fppaMeasurement ? (
+        <>
+          <Text style={styles.cardText}>
+            FPPA threshold result · {fppaMeasurement.hasDeviation ? "Deviation" : "Aligned"}
+          </Text>
+          <Text style={styles.mutedText}>
+            Deviation cutoff · absolute peak angle greater than {fppaMeasurement.cutoff}°
+          </Text>
+          {(["left", "right"] as const).map((side) => {
+            const knee = fppaMeasurement.knees[side];
+            return (
+              <Text key={side} style={styles.cardText}>
+                {side === "left" ? "Left" : "Right"} knee peak FPPA · {knee.peak_degrees.toFixed(1)}°
+                {" · "}{knee.state === "deviation" ? "Deviation" : "Within cutoff"}
+                {knee.direction === "inward" || knee.direction === "outward"
+                  ? ` (${knee.direction})`
+                  : ""}
+              </Text>
+            );
+          })}
+          <Text style={styles.mutedText}>
+            Positive angles indicate inward alignment; negative angles indicate outward alignment.
+          </Text>
+        </>
+      ) : (
+        <Text style={styles.cardText}>FPPA measurements unavailable. {fppaUnavailableText(rep)}</Text>
+      )}
+      {resultsDisagree ? (
+        <Text style={styles.noticeText}>
+          Results disagree. The model predicts {modelResult.label.toLowerCase()} knee alignment,
+          while FPPA indicates {fppaMeasurement.hasDeviation ? "a deviation" : "alignment within the cutoff"}.
+        </Text>
+      ) : null}
+      <Text style={styles.issueLabel}>FPPA findings</Text>
       <Text style={styles.cardText}>
-        {finding?.summary ??
-          (fppa?.status === "assessed"
-            ? "Both knees were within the predeclared FPPA cutoff."
+        {(fppaMeasurement && finding?.summary) ||
+          (fppaMeasurement
+            ? fppaMeasurement.hasDeviation
+              ? "FPPA measured a knee deviation beyond the cutoff."
+              : "Both knees were within the predeclared FPPA cutoff."
             : fppaUnavailableText(rep))}
       </Text>
-      <Text style={styles.issueLabel}>Try this next</Text>
-      <Text style={styles.cueText}>
-        {finding?.cue ??
-          "Keep the camera frontal and repeat the movement with steady control."}
-      </Text>
+      <Text style={styles.issueLabel}>{coaching.label}</Text>
+      <Text style={styles.cueText}>{coaching.cue}</Text>
       <View style={styles.cardFooter}>
-        {confidence ? <Text style={styles.mutedText}>{confidence}</Text> : null}
-        {prediction?.status !== "assessed" ? (
-          <Text style={styles.mutedText}>Experimental model estimate unavailable</Text>
-        ) : null}
+        {modelResult ? (
+          <>
+            <Text style={styles.mutedText}>
+              Model knee alignment: {modelResult.label}
+            </Text>
+            <Text style={styles.mutedText}>
+              Model confidence: {modelResult.confidence}%
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.mutedText}>
+            Model knee alignment assessment unavailable
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -193,13 +319,23 @@ function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
   const reps = session.reps ?? [];
   const findings = report?.findings ?? [];
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const goodReps = reps.filter((rep) => !isConfirmedBad(rep));
-  const assessedBadCount = reps.filter(isConfirmedBad).length;
+  const modelResults = reps.map(getModelResult);
+  const goodReps = reps.filter(
+    (rep) => getModelResult(rep)?.predictedClass === "good",
+  );
+  const goodCount = goodReps.length;
+  const badCount = modelResults.filter(
+    (result) => result?.predictedClass === "bad",
+  ).length;
+  const assessedCount = goodCount + badCount;
+  const unavailableCount = reps.length - assessedCount;
   if (reps.length === 0)
     return (
       <View style={styles.notice}>
-        <Text style={styles.noticeTitle}>No repetition results</Text>
+        <Text style={styles.noticeTitle}>Assessment unavailable</Text>
         <Text style={styles.noticeText}>
+          0 assessed | 0 unassessed
+          {"\n"}
           No repetition results were returned for this session.
         </Text>
       </View>
@@ -208,14 +344,18 @@ function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
     <>
       <View style={styles.summaryCard}>
         <Text style={styles.summaryHeadline}>
-          {assessedBadCount
-            ? "A few reps need attention."
-            : "Alignment looked good."}
+          {assessedCount === 0
+            ? "Assessment unavailable"
+            : badCount > 0
+              ? "The model flagged knee alignment concerns."
+              : "The model assessed knee alignment as good for assessed reps."}
         </Text>
         <Text style={styles.summaryText}>
-          {assessedBadCount} of {reps.length} repetitions showed FPPA deviation.
-          This is an exploratory pilot result; unassessed repetitions are not
-          counted as aligned or deviated.
+          {assessedCount} assessed | {unavailableCount} unassessed
+          {"\n"}
+          {goodCount} good | {badCount} bad
+          {"\n"}
+          Model knee alignment assessment across {reps.length} repetitions.
         </Text>
       </View>
       <Text style={styles.sectionTitle}>Choose a repetition</Text>
@@ -225,18 +365,17 @@ function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
         contentContainerStyle={styles.repSelector}
       >
         {reps.map((rep, index) => {
-          const prediction = rep.analysis_result?.model_prediction;
-          const statusStyle =
-            prediction?.status !== "assessed"
-              ? styles.repChipUnavailable
-              : isConfirmedBad(rep) || findingForRep(findings, rep.rep_number)
-                ? styles.repChipBad
-                : styles.repChipGood;
+          const modelResult = getModelResult(rep);
+          const statusStyle = !modelResult
+            ? styles.repChipUnavailable
+            : modelResult.predictedClass === "bad"
+              ? styles.repChipBad
+              : styles.repChipGood;
           return (
             <Pressable
               key={rep.id}
               accessibilityRole="button"
-              accessibilityLabel={`Repetition ${rep.rep_number}, ${fppaLabel(rep)}`}
+              accessibilityLabel={`Repetition ${rep.rep_number}, model knee alignment ${modelLabel(rep)}`}
               style={[
                 styles.repChip,
                 statusStyle,
@@ -254,7 +393,7 @@ function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
         rep={reps[Math.min(selectedIndex, reps.length - 1)]}
         finding={findingForRep(
           findings,
-          reps[Math.min(selectedIndex, reps.length - 1)].rep_number,
+          reps[Math.min(selectedIndex, reps.length - 1)],
         )}
       />
       {goodReps.length
@@ -262,11 +401,8 @@ function CoachingContent({ session }: { session: AssessmentSessionDetail }) {
             <View key={rep.id} style={styles.goodRepRow}>
               <Text style={styles.repTitle}>Rep {rep.rep_number}</Text>
               <Text style={styles.mutedText}>
-                {fppaLabel(rep)}
+                Model knee alignment · {modelLabel(rep)}
               </Text>
-              {fppaResult(rep)?.status !== "assessed" ? (
-                <Text style={styles.mutedText}>{fppaUnavailableText(rep)}</Text>
-              ) : null}
             </View>
           ))
         : null}

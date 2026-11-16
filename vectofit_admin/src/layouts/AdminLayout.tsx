@@ -8,7 +8,7 @@ const navigation = [
     { to: '/dataset', label: 'Datasets', path: 'M3 7v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7 M3 7V5a2 2 0 0 1 2-2h5l2 4h9 M3 7h18 M8 12h8 M8 16h5' },
     { to: '/training', label: 'Training', path: 'M4 20V10 M10 20V4 M16 20v-8 M22 20H2' },
     { to: '/models', label: 'Model Registry', path: 'm12 3 9 5-9 5-9-5 9-5z M3 12l9 5 9-5 M3 16l9 5 9-5' },
-    { to: '/pilot-results', label: 'Pilot Results', path: 'M9 3h6 M10 3v7L4 20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1l-6-10V3 M8 15h8' },
+    { to: '/evaluation-results', label: 'Evaluation Results', path: 'M9 3h6 M10 3v7L4 20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1l-6-10V3 M8 15h8' },
 ];
 const cx = (...names: string[]) => names.flatMap((name) => styles[name] ? [name, styles[name]] : [name]).join(' ');
 export default function AdminLayout() {

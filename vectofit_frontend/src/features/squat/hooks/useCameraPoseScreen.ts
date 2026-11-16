@@ -10,8 +10,11 @@ import {
 import type { Recorder } from "react-native-vision-camera";
 
 import {
+  getSquatAssessmentSession,
   getAssessmentUploadErrorMessage,
   uploadSquatAssessmentVideo,
+  type AssessmentSessionDetail,
+  AssessmentUploadUncertainError,
 } from "../services/assessmentSessionService";
 import type {
   AssessmentViewAngle,
@@ -130,7 +133,8 @@ export function useCameraPoseScreen(
 ) {
   const [cameraFacing, setCameraFacing] = useState<"front" | "back">("front");
   const device = useCameraDevice(cameraFacing);
-  const { hasPermission, requestPermission } = useCameraPermission();
+  const { hasPermission, requestPermission, canRequestPermission } =
+    useCameraPermission();
   const isFocused = useIsFocused();
   const isFocusedRef = useRef(isFocused);
   isFocusedRef.current = isFocused;
@@ -152,11 +156,21 @@ export function useCameraPoseScreen(
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [isCameraConfigured, setIsCameraConfigured] = useState(false);
   const [isUploadingAssessment, setIsUploadingAssessment] = useState(false);
+  const [isStartingSession, setIsStartingSession] = useState(false);
+  const [isUploadUncertain, setIsUploadUncertain] = useState(false);
+  const [savedSession, setSavedSession] = useState<AssessmentSessionDetail | null>(
+    null,
+  );
   const [savedAssessmentMessage, setSavedAssessmentMessage] = useState<
     string | null
   >(null);
 
   const sessionActiveRef = useRef(false);
+  const startingSessionRef = useRef(false);
+  const savingAssessmentRef = useRef(false);
+  const assessmentIdRef = useRef<number | null>(null);
+  const uploadUncertainRef = useRef(false);
+  const bodyVisibleRef = useRef(false);
   const sessionStartedAtRef = useRef<number | null>(null);
   const repPhaseRef = useRef<RepPhase>("standing");
   const lastUiUpdateRef = useRef(0);
@@ -196,8 +210,8 @@ export function useCameraPoseScreen(
   }, []);
 
   useEffect(() => {
-    if (!hasPermission) void requestPermission();
-  }, [hasPermission, requestPermission]);
+    if (canRequestPermission) void requestPermission();
+  }, [canRequestPermission, requestPermission]);
 
   const handleCameraConfigured = useCallback(() => {
     cameraConfiguredRef.current = true;
@@ -209,8 +223,10 @@ export function useCameraPoseScreen(
 
     processingErrorRef.current = true;
     setProcessingError(
-      "Pose detection failed. Check the camera frame format and native plugin.",
+      "Movement tracking is unavailable. Return and reopen the camera to try again.",
     );
+    bodyVisibleRef.current = false;
+    setPose(INITIAL_POSE);
   }, []);
 
   const handlePoseFrame = useCallback(
@@ -253,6 +269,7 @@ export function useCameraPoseScreen(
             landmark.y_coordinate <= 0.99
           );
         });
+      bodyVisibleRef.current = bodyVisible;
 
       if (!isPersonDetected) {
         repPhaseRef.current = "standing";
@@ -298,7 +315,10 @@ export function useCameraPoseScreen(
       };
 
       let feedback = "Move through a controlled squat.";
-      if (sessionActiveRef.current && angles.knee !== null) {
+      if (sessionActiveRef.current && !bodyVisible) {
+        repPhaseRef.current = "standing";
+        feedback = "Face the camera and keep your head and feet in frame.";
+      } else if (sessionActiveRef.current && angles.knee !== null) {
         if (angles.knee < SQUAT_BOTTOM_ANGLE) {
           repPhaseRef.current = "bottom";
           feedback = "Bottom position detected. Drive back up.";
@@ -319,7 +339,7 @@ export function useCameraPoseScreen(
           ? "Ready. Stand tall and start your session."
           : "Keep your full body visible before starting.";
       } else {
-        feedback = "Turn sideways and keep your hip, knee, and ankle visible.";
+        feedback = "Face the camera and keep both knees and feet visible.";
       }
 
       if (now - lastUiUpdateRef.current >= UI_UPDATE_INTERVAL_MS) {
@@ -362,7 +382,53 @@ export function useCameraPoseScreen(
     },
   });
 
+  const saveAssessment = useCallback(async (filePath: string) => {
+    try {
+      const session = assessmentIdRef.current !== null
+        ? await getSquatAssessmentSession(assessmentIdRef.current)
+        : await uploadSquatAssessmentVideo(filePath, exercise, viewAngle, (id) => {
+            assessmentIdRef.current = id;
+          });
+      if (!mountedRef.current) return;
+      setSavedSession(session);
+      setRecordingError(null);
+      setSavedAssessmentMessage(
+        session.status === "COMPLETED"
+          ? `Assessment ready. ${session.rep_count} reps detected.`
+          : session.status === "FAILED"
+            ? "Video saved. Assessment processing failed. Open the assessment for details."
+            : "Video saved. Assessment is processing. Check progress in Insights.",
+      );
+    } catch (error) {
+      if (mountedRef.current) {
+        uploadUncertainRef.current = error instanceof AssessmentUploadUncertainError;
+        setIsUploadUncertain(uploadUncertainRef.current);
+        setRecordingError(
+          `Could not save or load the assessment. ${getAssessmentUploadErrorMessage(error)}`,
+        );
+      }
+    }
+  }, [exercise, viewAngle]);
+
+  const retryAssessment = useCallback(async () => {
+    const filePath = recordedVideoPathRef.current;
+    if (
+      !filePath || uploadUncertainRef.current || savingAssessmentRef.current ||
+      startingSessionRef.current || sessionActiveRef.current
+    ) return;
+    savingAssessmentRef.current = true;
+    setIsUploadingAssessment(true);
+    setRecordingError(null);
+    try {
+      await saveAssessment(filePath);
+    } finally {
+      savingAssessmentRef.current = false;
+      if (mountedRef.current) setIsUploadingAssessment(false);
+    }
+  }, [saveAssessment]);
+
   const stopSession = useCallback(async (): Promise<string | null> => {
+    if (savingAssessmentRef.current || startingSessionRef.current) return null;
     sessionActiveRef.current = false;
     repPhaseRef.current = "standing";
 
@@ -382,6 +448,7 @@ export function useCameraPoseScreen(
     }
 
     const finishedPromise = recordingFinishedPromiseRef.current;
+    savingAssessmentRef.current = true;
 
     if (mountedRef.current) {
       setIsUploadingAssessment(true);
@@ -398,38 +465,7 @@ export function useCameraPoseScreen(
         throw new Error("Recording stopped, but no video file was returned.");
       }
 
-      try {
-        const session = await uploadSquatAssessmentVideo(
-          filePath,
-          exercise,
-          viewAngle,
-        );
-
-        const persistedRepCount = session.reps?.length ?? 0;
-
-        console.info("[SquatAssessment] Persisted session:", {
-          sessionId: session.id,
-          status: session.status,
-          persistedRepCount,
-        });
-
-        if (mountedRef.current) {
-          setRecordingError(null);
-          setSavedAssessmentMessage(
-            `Assessment #${session.id} saved. Backend detected ${persistedRepCount} rep(s).`,
-          );
-        }
-      } catch (error) {
-        const message = getAssessmentUploadErrorMessage(error);
-
-        console.error("[SquatAssessment] Upload or processing failed:", error);
-
-        if (mountedRef.current) {
-          setRecordingError(
-            `Video recorded locally, but assessment saving failed: ${message}`,
-          );
-        }
-      }
+      await saveAssessment(filePath);
 
       return filePath;
     } catch (error) {
@@ -443,6 +479,7 @@ export function useCameraPoseScreen(
 
       return null;
     } finally {
+      savingAssessmentRef.current = false;
       if (recorderRef.current === recorder) {
         recorderRef.current = null;
       }
@@ -452,15 +489,30 @@ export function useCameraPoseScreen(
         setIsUploadingAssessment(false);
       }
     }
-  }, [exercise, viewAngle]);
+  }, [saveAssessment]);
 
   const startSession = useCallback(async (): Promise<void> => {
-    if (recorderRef.current || sessionActiveRef.current) return;
+    if (
+      recorderRef.current || sessionActiveRef.current ||
+      startingSessionRef.current || savingAssessmentRef.current
+    ) return;
 
     if (!isFocusedRef.current || !cameraConfiguredRef.current) {
       setRecordingError("Camera is still preparing. Please try again.");
       return;
     }
+    if (!bodyVisibleRef.current || processingErrorRef.current) {
+      setRecordingError("Face the camera and keep your full body visible before starting.");
+      return;
+    }
+
+    startingSessionRef.current = true;
+    setIsStartingSession(true);
+    setSavedSession(null);
+    setSavedAssessmentMessage(null);
+    assessmentIdRef.current = null;
+    uploadUncertainRef.current = false;
+    setIsUploadUncertain(false);
 
     setRecordingError(null);
     setProcessingError(null);
@@ -474,7 +526,7 @@ export function useCameraPoseScreen(
     let recorder: Recorder | null = null;
     try {
       recorder = await videoOutput.createRecorder({});
-      if (!isFocusedRef.current || !cameraConfiguredRef.current) return;
+      if (!mountedRef.current || !isFocusedRef.current || !cameraConfiguredRef.current) return;
 
       recorderRef.current = recorder;
       const finishedPromise = new Promise<string | null>((resolve) => {
@@ -523,7 +575,11 @@ export function useCameraPoseScreen(
         },
       );
 
-      if (recorderRef.current !== recorder || !isFocusedRef.current) return;
+      if (recorderRef.current !== recorder) return;
+      if (!isFocusedRef.current || !mountedRef.current) {
+        await recorder.stopRecording();
+        return;
+      }
 
       sessionStartedAtRef.current = Date.now();
       sessionActiveRef.current = true;
@@ -542,10 +598,14 @@ export function useCameraPoseScreen(
       sessionStartedAtRef.current = null;
       if (recorderRef.current === recorder) recorderRef.current = null;
       resolveRecording(null);
+    } finally {
+      startingSessionRef.current = false;
+      if (mountedRef.current) setIsStartingSession(false);
     }
   }, [resolveRecording, videoOutput]);
 
   const resetSession = useCallback(async (): Promise<void> => {
+    if (startingSessionRef.current || savingAssessmentRef.current) return;
     await stopSession();
 
     sessionActiveRef.current = false;
@@ -560,17 +620,25 @@ export function useCameraPoseScreen(
     recordedVideoPathRef.current = null;
     setRecordedVideoPath(null);
     setRecordingError(null);
+    assessmentIdRef.current = null;
+    uploadUncertainRef.current = false;
+    setIsUploadUncertain(false);
+    setSavedSession(null);
+    setSavedAssessmentMessage(null);
   }, [stopSession]);
 
   const toggleCameraFacing = useCallback(async (): Promise<void> => {
-    if (sessionActiveRef.current || recorderRef.current) {
-      await stopSession();
-    }
+    if (
+      sessionActiveRef.current || recorderRef.current ||
+      startingSessionRef.current || savingAssessmentRef.current
+    ) return;
 
     cameraConfiguredRef.current = false;
     setIsCameraConfigured(false);
+    bodyVisibleRef.current = false;
+    setPose(INITIAL_POSE);
     setCameraFacing((current) => (current === "front" ? "back" : "front"));
-  }, [stopSession]);
+  }, []);
 
   useEffect(() => {
     if (!isSessionActive) return undefined;
@@ -597,12 +665,14 @@ export function useCameraPoseScreen(
     cameraFacing,
     hasPermission,
     requestPermission,
+    canRequestPermission,
     isCameraActive: isFocused && hasPermission && !!device,
     frameOutput,
     videoOutput,
     pose,
     repCount,
     isSessionActive,
+    isStartingSession,
     elapsedSeconds,
     processingError,
     startSession,
@@ -614,6 +684,9 @@ export function useCameraPoseScreen(
     isRecordingVideo,
     isUploadingAssessment,
     savedAssessmentMessage,
+    savedSession,
+    isUploadUncertain,
+    retryAssessment,
     recordedVideoPath,
     recordingError,
   };

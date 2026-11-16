@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import { create } from "zustand";
@@ -23,6 +24,13 @@ const useDraft = create<TrainingDraft>(() => ({
 }));
 export function useTraining() {
   const cache = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const requestedJobId = Number(searchParams.get("job"));
+  useEffect(() => {
+    if (Number.isInteger(requestedJobId) && requestedJobId > 0) {
+      useDraft.setState({ selectedJobId: requestedJobId });
+    }
+  }, [requestedJobId]);
   const draft = useDraft();
   const jobs = useQuery({
     queryKey: queryKeys.training,

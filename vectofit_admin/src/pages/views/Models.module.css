@@ -164,72 +164,9 @@
   opacity: 0.55;
   cursor: wait;
 }
-.section-badge.ready[data-v-models] {
-  background: #f0fdf4;
-  color: #15803d;
-}
 .warning-badge[data-v-models] {
   background: #fff7ed;
   color: #9a3412;
-}
-.provenance-grid[data-v-models] {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.provenance-grid > div[data-v-models] {
-  min-width: 0;
-  padding: 16px 18px;
-  border-right: 1px solid var(--vf-border-light);
-  border-bottom: 1px solid var(--vf-border-light);
-}
-.provenance-grid > div[data-v-models]:nth-child(4n) {
-  border-right: 0;
-}
-.provenance-grid > div span[data-v-models] {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--vf-muted);
-  font-size: 12px;
-}
-.provenance-grid > div strong[data-v-models] {
-  display: block;
-  color: var(--vf-dark);
-  font-size: 13px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-.evaluation-context[data-v-models] {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin: 18px 20px 20px;
-}
-.evaluation-context > div[data-v-models] {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-.evaluation-context span[data-v-models] {
-  color: var(--vf-muted);
-  font-size: 12px;
-}
-.evaluation-context strong[data-v-models] {
-  color: var(--vf-dark);
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-.evaluation-note[data-v-models] {
-  margin: 18px 20px 20px;
-  padding-top: 14px;
-  border-top: 1px solid var(--vf-border-light);
-  color: var(--vf-muted);
-  font-size: 13px;
-  line-height: 1.7;
 }
 .warning-card[data-v-models] {
   border-color: #fed7aa;
@@ -249,20 +186,7 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
-@media (max-width: 1100px) {
-.provenance-grid[data-v-models] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.provenance-grid > div[data-v-models]:nth-child(4n) {
-    border-right: 1px solid var(--vf-border-light);
-}
-.provenance-grid > div[data-v-models]:nth-child(2n) {
-    border-right: 0;
-}
-.evaluation-context[data-v-models] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-}
+
 @media (max-width: 700px) {
 .hero-card[data-v-models] {
     align-items: flex-start;
@@ -271,16 +195,6 @@
 .hero-actions[data-v-models] {
     justify-content: flex-start;
     width: 100%;
-}
-.summary-grid[data-v-models],
-  .provenance-grid[data-v-models],
-  .evaluation-context[data-v-models] {
-    grid-template-columns: 1fr;
-}
-.provenance-grid > div[data-v-models],
-  .provenance-grid > div[data-v-models]:nth-child(4n),
-  .provenance-grid > div[data-v-models]:nth-child(2n) {
-    border-right: 0;
 }
 }
 

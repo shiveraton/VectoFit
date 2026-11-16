@@ -269,6 +269,15 @@ CMAKE_TOOLCHAIN_FILE:FILEPATH=C:/Users/Jhedver/AppData/Local/Android/Sdk/ndk/27.
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Value Computed by CMake
+GestureHandlerCodegen_BINARY_DIR:STATIC=D:/Thesis/VectoFit/vectofit_frontend/android/app/.cxx/Debug/3c2e3y6m/x86/rngesturehandler_codegen_autolinked_build
+
+//Value Computed by CMake
+GestureHandlerCodegen_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+GestureHandlerCodegen_SOURCE_DIR:STATIC=D:/Thesis/VectoFit/vectofit_frontend/node_modules/react-native-gesture-handler/android
+
 //Path to a library.
 LOG_LIB:FILEPATH=C:/Users/Jhedver/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/i686-linux-android/24/liblog.so
 
@@ -407,7 +416,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=11
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

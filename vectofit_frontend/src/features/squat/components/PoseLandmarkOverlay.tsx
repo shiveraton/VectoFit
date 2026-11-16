@@ -56,7 +56,7 @@ export default function PoseLandmarkOverlay({
   const hasSourceSize = sourceFrameWidth > 0 && sourceFrameHeight > 0;
 
   const scale = hasSourceSize
-    ? Math.max(
+    ? Math.min(
         viewportWidth / sourceFrameWidth,
         viewportHeight / sourceFrameHeight,
       )

@@ -1,3 +1,6 @@
+import type { NavigatorScreenParams } from "@react-navigation/native";
+import type { InsightsStackParamList } from "./insightsTypes";
+
 export interface BodyProfileData {
   shoulder_width: number;
   hip_width: number;
@@ -15,7 +18,11 @@ export type SquatExerciseType =
 export type AssessmentViewAngle = "diagonal" | "frontal" | "sagittal";
 
 export type RootStackParamList = {
-  MainTabs: undefined;
+  MainTabs: NavigatorScreenParams<{
+    Home: undefined;
+    Insights: NavigatorScreenParams<InsightsStackParamList>;
+    Profile: undefined;
+  }> | undefined;
   WorkoutSession: undefined;
   Home: undefined;
   Login: undefined;

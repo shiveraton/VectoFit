@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { modelService } from '../services/modelService';
 import { queryClient, queryKeys } from '../query';
@@ -17,14 +17,7 @@ export function useModels() {
     setActivationMessage('Model activated for its camera angle and prediction target.');
   } });
   const modelState = state.data ?? null;
-  const metrics = modelState?.evaluation;
-  const summaryCards = [
-    { label: 'CURRENT VERSION', value: modelState ? `v${modelState.version}` : '—', description: modelState?.name ?? 'No model registered' },
-    { label: 'ACCURACY', value: metrics?.accuracy != null ? `${(metrics.accuracy * 100).toFixed(1)}%` : '—', description: metrics ? 'Held out test set' : 'No evaluation available' },
-    { label: 'F1 SCORE', value: metrics?.f1 != null ? `${(metrics.f1 * 100).toFixed(1)}%` : '—', description: metrics ? 'Macro-averaged F1 across good and bad FPPA labels' : 'No evaluation available' },
-    { label: 'FEATURES', value: modelState?.features.selected.length ?? '—', description: 'Model input features' },
-  ];
-  return { models, modelState, selectedModelId, selectedModel: models.find(model => model.id === selectedModelId) ?? null, summaryCards,
+  return { models, modelState, selectedModelId, selectedModel: models.find(model => model.id === selectedModelId) ?? null,
     isLoading: registry.isPending, isStateLoading: selectedModelId !== null && state.isFetching, isActivatingModel: activate.isPending, activationMessage,
     error: activate.error ? messageFromError(activate.error, 'Failed to activate model.') : state.error ? messageFromError(state.error, 'Failed to load model state.') : registry.error ? messageFromError(registry.error, 'Failed to load model registry.') : null,
     fetchModels: async (_force = false) => { setSelection(null); return registry.refetch(); }, fetchModelState: (id: number) => { setSelection(id); return state.refetch(); },

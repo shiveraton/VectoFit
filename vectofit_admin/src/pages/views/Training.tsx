@@ -210,7 +210,7 @@ export default function Training(input: {}) {
             ></TrainingConfiguration>
           )}
         </section>
-        <section data-v-training="" className={cx("content-card")}>
+        <section id="training-result" data-v-training="" className={cx("content-card")}>
           <div data-v-training="" className={cx("section-header")}>
             <div data-v-training="" className={cx("section-title-row")}>
               <div

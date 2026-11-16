@@ -1,4 +1,5 @@
 import apiClient from "../../../api/client";
+import { isAxiosError } from "axios";
 import type {
   AssessmentViewAngle,
   SquatExerciseType,
@@ -7,6 +8,8 @@ import type { RepAnalysisResult } from "../../assessment/services/sessionStructu
 
 type ExerciseVariantType = "BW" | "GOB" | "BAR";
 type AssessmentStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+
+export class AssessmentUploadUncertainError extends Error {}
 
 interface ExerciseVariant {
   id: number;
@@ -66,6 +69,7 @@ export async function uploadSquatAssessmentVideo(
   videoPath: string,
   exercise: SquatExerciseType,
   viewAngle: AssessmentViewAngle,
+  onCreated?: (sessionId: number) => void,
 ): Promise<AssessmentSessionDetail> {
   if (!videoPath.trim()) {
     throw new Error("No recorded video path was provided.");
@@ -103,31 +107,34 @@ export async function uploadSquatAssessmentVideo(
     type: "video/mp4",
   } as unknown as Blob);
 
-  const createResponse = await apiClient.post<{ id: number }>(
-    "/assessments/sessions/",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    },
-  );
-
-  if (!createResponse.data?.id) {
-    throw new Error(
-      "The server did not return the created assessment session ID.",
+  let sessionId: number;
+  try {
+    const response = await apiClient.post<{ id: number }>(
+      "/assessments/sessions/",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
+    if (!response.data?.id) {
+      throw new AssessmentUploadUncertainError("Check Insights to confirm whether the video was saved.");
+    }
+    sessionId = response.data.id;
+  } catch (error) {
+    if (isAxiosError(error) && (!error.response || error.response.status >= 500)) {
+      throw new AssessmentUploadUncertainError("The upload could not be confirmed. Check Insights before recording again.");
+    }
+    throw error;
   }
 
+  onCreated?.(sessionId);
+  return getSquatAssessmentSession(sessionId);
+}
+
+export async function getSquatAssessmentSession(sessionId: number) {
   const detailResponse = await apiClient.get<AssessmentSessionDetail>(
-    `/assessments/sessions/${createResponse.data.id}/`,
+    `/assessments/sessions/${sessionId}/`,
     { params: { include: "reps" } },
   );
   const session = detailResponse.data;
-
-  if (session.status === "FAILED") {
-    throw new Error(
-      `Video was uploaded, but rep processing failed: ${session.error_message || "No error details were returned."}`,
-    );
-  }
 
   console.info("[RepCount] Session detail received", {
     sessionId: session.id,

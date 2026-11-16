@@ -10,9 +10,11 @@
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\@react-native-async-storage\\async-storage\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\@react-native-vector-icons\\ionicons\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-gesture-handler\\android\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-nitro-modules\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-permissions\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-safe-area-context\\android\\src\\main\\jni\\CMakeLists.txt",
+    "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-screens\\android\\src\\main\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-svg\\android\\src\\main\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-vector-icons\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt",
     "D:\\Thesis\\VectoFit\\vectofit_frontend\\node_modules\\react-native-worklets\\android\\build\\generated\\source\\codegen\\jni\\CMakeLists.txt"
@@ -52,12 +54,34 @@
       "abi": "x86",
       "runtimeFiles": []
     },
+    "react_codegen_rngesturehandler_codegen::@39f233abcd2c728bc6ec": {
+      "artifactName": "react_codegen_rngesturehandler_codegen",
+      "abi": "x86",
+      "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_rngesturehandler_codegen.so",
+      "runtimeFiles": [
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\baa1f82bb769f81803e9f15e07acb5b0\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.x86\\libfbjni.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\4aed5a0460e05adda57e6720298d5e69\\transformed\\react-android-0.88.0-debug\\prefab\\modules\\jsi\\libs\\android.x86\\libjsi.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\4aed5a0460e05adda57e6720298d5e69\\transformed\\react-android-0.88.0-debug\\prefab\\modules\\reactnative\\libs\\android.x86\\libreactnative.so"
+      ]
+    },
+    "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
+      "artifactName": "react_codegen_rnscreens",
+      "abi": "x86",
+      "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_rnscreens.so",
+      "runtimeFiles": [
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\4aed5a0460e05adda57e6720298d5e69\\transformed\\react-android-0.88.0-debug\\prefab\\modules\\reactnative\\libs\\android.x86\\libreactnative.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\4aed5a0460e05adda57e6720298d5e69\\transformed\\react-android-0.88.0-debug\\prefab\\modules\\jsi\\libs\\android.x86\\libjsi.so",
+        "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\baa1f82bb769f81803e9f15e07acb5b0\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.x86\\libfbjni.so"
+      ]
+    },
     "appmodules::@6890427a1f51a3e7e1df": {
       "artifactName": "appmodules",
       "abi": "x86",
       "output": "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libappmodules.so",
       "runtimeFiles": [
+        "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_rngesturehandler_codegen.so",
         "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_safeareacontext.so",
+        "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_rnscreens.so",
         "D:\\Thesis\\VectoFit\\vectofit_frontend\\android\\app\\build\\intermediates\\cxx\\Debug\\3c2e3y6m\\obj\\x86\\libreact_codegen_rnsvg.so",
         "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\baa1f82bb769f81803e9f15e07acb5b0\\transformed\\fbjni-0.7.0\\prefab\\modules\\fbjni\\libs\\android.x86\\libfbjni.so",
         "C:\\Users\\Jhedver\\.gradle\\caches\\9.4.1\\transforms\\4aed5a0460e05adda57e6720298d5e69\\transformed\\react-android-0.88.0-debug\\prefab\\modules\\jsi\\libs\\android.x86\\libjsi.so",
