@@ -1,9 +1,11 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import CurrentUserViewSet, LoginAPIView, ProfileViewSet, RegisterAPIView
+from .views import ActivityLogViewSet, AdminUserViewSet, CurrentUserViewSet, LoginAPIView, ProfileViewSet, RegisterAPIView
 
 router = DefaultRouter()
+router.register(r"users", AdminUserViewSet, basename="admin-users")
+router.register(r"activity-logs", ActivityLogViewSet, basename="activity-logs")
 router.register(r"profile", ProfileViewSet, basename="profile")
 router.register(r"me", CurrentUserViewSet, basename="me")
 

@@ -9,6 +9,12 @@ import RegisterScreen from "../screens/RegisterScreen";
 import MorphologicalCalibrationScreen from "../screens/MorphologicalCalibrationScreen";
 import CameraPoseScreen from "../screens/CameraPoseScreen";
 
+import EditProfileScreen from "../screens/EditProfileScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
+import PrivacySecurityScreen from "../screens/PrivacySecurityScreen";
+import HelpSupportScreen from "../screens/HelpSupportScreen";
+import { COLORS } from "../styles/designTokens";
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const AppNavigator = () => {
@@ -32,6 +38,12 @@ export const AppNavigator = () => {
               component={MainTabNavigator}
               options={{ headerShown: false }}
             />
+            <Stack.Group screenOptions={{ headerStyle: { backgroundColor: COLORS.cardBg }, headerTintColor: COLORS.textPrimary, contentStyle: { backgroundColor: COLORS.bgDark } }}>
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: "Edit Profile" }} />
+              <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: "Notifications" }} />
+              <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} options={{ title: "Privacy & Security" }} />
+              <Stack.Screen name="HelpSupport" component={HelpSupportScreen} options={{ title: "Help & Support" }} />
+            </Stack.Group>
             <Stack.Screen
               name="MorphologicalCalibration"
               component={MorphologicalCalibrationScreen}

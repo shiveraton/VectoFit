@@ -23,3 +23,19 @@ class Profile(models.Model):
     weight_kg = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True
     )
+
+
+class ActivityLog(models.Model):
+    class Action(models.TextChoices):
+        SIGN_IN = "sign_in", "Signed in"
+        REGISTERED = "registered", "Account registered"
+        ACCOUNT_UPDATED = "account_updated", "Account updated"
+
+    actor = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    actor_username = models.CharField(max_length=150)
+    action = models.CharField(max_length=32, choices=Action.choices)
+    details = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]

@@ -13,6 +13,11 @@ export const accountService = {
     return response.data;
   },
 
+  async updateCurrentUser(id: number, changes: Pick<CurrentUser, "username" | "email">): Promise<CurrentUser> {
+    const response = await client.patch<CurrentUser>(`/accounts/me/${id}/`, changes);
+    return response.data;
+  },
+
   async register(payload: {
     username: string;
     email: string;

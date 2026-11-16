@@ -1,5 +1,8 @@
 import { QueryClient } from "@tanstack/react-query";
 export const queryKeys = {
+  users: ["users"] as const,
+  activityLogs: ["activity-logs"] as const,
+  currentUser: ["current-user"] as const,
   session: ["auth", "session"] as const,
   publicSession: ["auth", "public-session"] as const,
   datasets: ["datasets"] as const,

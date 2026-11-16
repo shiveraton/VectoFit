@@ -23,6 +23,10 @@ export type RootStackParamList = {
     Insights: NavigatorScreenParams<InsightsStackParamList>;
     Profile: undefined;
   }> | undefined;
+  EditProfile: undefined;
+  Notifications: undefined;
+  PrivacySecurity: undefined;
+  HelpSupport: undefined;
   WorkoutSession: undefined;
   Home: undefined;
   Login: undefined;

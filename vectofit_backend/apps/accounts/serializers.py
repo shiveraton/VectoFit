@@ -3,7 +3,7 @@ from typing import ClassVar
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from .models import Profile, User
+from .models import ActivityLog, Profile, User
 from .roles import is_annotator
 
 
@@ -143,3 +143,20 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = authenticated_user
         return attrs
+
+
+class AdminUserSerializer(UserSerializer):
+    is_staff = serializers.BooleanField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = [*UserSerializer.Meta.fields, "is_staff", "is_active", "date_joined", "last_login"]
+        read_only_fields = fields
+
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    action_label = serializers.CharField(source="get_action_display", read_only=True)
+
+    class Meta:
+        model = ActivityLog
+        fields = ["id", "actor_username", "action", "action_label", "details", "created_at"]
+        read_only_fields = fields

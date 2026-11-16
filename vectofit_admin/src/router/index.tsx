@@ -12,9 +12,15 @@ import Training from '../pages/views/Training';
 import Models from '../pages/views/Models';
 import EvaluationResults from '../pages/views/EvaluationResults';
 import AnnotatorHome from '../pages/views/AnnotatorHome';
+import Users from '../pages/views/Users';
+import ActivityLogs from '../pages/views/ActivityLogs';
+import Settings from '../pages/views/Settings';
 export default createBrowserRouter([
   { element: <PrivateGuard role="admin" />, children: [
     { path: '/', element: <AdminLayout />, children: [
+      { path: 'users', element: <Users /> },
+      { path: 'activity-logs', element: <ActivityLogs /> },
+      { path: 'settings', element: <Settings /> },
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'dataset', element: <Datasets /> },
       { path: 'dataset/:id/annotate', element: <DatasetAnnotation /> },

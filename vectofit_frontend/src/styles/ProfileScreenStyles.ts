@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   menuItem: {
+    minHeight: 48,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   menuItemContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -82,7 +84,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginLeft: SPACING.md,
   },
   logoutButton: {
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
