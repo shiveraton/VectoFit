@@ -53,7 +53,7 @@ class ValidationWorkflowTests(APITestCase):
         self.assertEqual(response.data["overall"], "good")
         self.assertEqual(response.data["protocol_version"], "v0.1")
         response = self.client.put(self.url, {**self.payload, "left_knee": "deviated",
-                                             "right_knee": "unassessable"}, format="json")
+                                             "right_knee": "aligned"}, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["overall"], "bad")
         self.assertEqual(ValidationAnnotation.objects.count(), 1)

@@ -23,21 +23,11 @@ User = get_user_model()
 
 KNEE_TARGET_CASES = [
     ("aligned", "aligned", "good"),
-    ("aligned", "borderline", "borderline"),
     ("aligned", "deviated", "bad"),
-    ("aligned", "unassessable", "unassessable"),
-    ("borderline", "aligned", "borderline"),
-    ("borderline", "borderline", "borderline"),
-    ("borderline", "deviated", "bad"),
-    ("borderline", "unassessable", "unassessable"),
     ("deviated", "aligned", "bad"),
-    ("deviated", "borderline", "bad"),
     ("deviated", "deviated", "bad"),
-    ("deviated", "unassessable", "bad"),
-    ("unassessable", "aligned", "unassessable"),
-    ("unassessable", "borderline", "unassessable"),
-    ("unassessable", "deviated", "bad"),
-    ("unassessable", "unassessable", "unassessable"),
+    ("aligned", "borderline", "incomplete"),
+    ("deviated", "unassessable", "incomplete"),
 ]
 
 

@@ -9,15 +9,11 @@ def knee_target(annotation: Mapping[str, Mapping[str, str | None]]) -> str:
         if not isinstance(knee, Mapping):
             return "incomplete"
         grade = knee.get("grade")
-        if not isinstance(grade, str) or grade not in {"aligned", "borderline", "deviated", "unassessable"}:
+        if not isinstance(grade, str) or grade not in {"aligned", "deviated"}:
             return "incomplete"
         grades.append(grade)
     if "deviated" in grades:
         return "bad"
-    if "unassessable" in grades:
-        return "unassessable"
-    if "borderline" in grades:
-        return "borderline"
     return "good"
 
 

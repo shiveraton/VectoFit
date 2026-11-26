@@ -183,11 +183,6 @@
   background: var(--vf-red-soft);
   color: var(--vf-red);
 }
-.verdict.borderline[data-v-dataset-annotation],
-.verdict.unassessable[data-v-dataset-annotation] {
-  background: var(--vf-warning-soft);
-  color: var(--vf-warning);
-}
 .criterion[data-v-dataset-annotation] {
   display: flex;
   flex-direction: column;

@@ -87,7 +87,7 @@ class KneeAnnotationField(serializers.Field):
             raise serializers.ValidationError(
                 "Annotation fields are incomplete or unexpected."
             )
-        allowed_grades = {"aligned", "borderline", "deviated", "unassessable"}
+        allowed_grades = {"aligned", "deviated"}
         allowed_directions = {"valgus", "varus", "none", "uncertain"}
         for side in ("left", "right"):
             item = value[side]
@@ -446,8 +446,6 @@ class DatasetSerializer(serializers.ModelSerializer):
             knee_counts = {
                 "good": 0,
                 "bad": 0,
-                "borderline": 0,
-                "unassessable": 0,
                 "disputed": 0,
                 "missing": 0,
             }
@@ -505,8 +503,8 @@ class DatasetSerializer(serializers.ModelSerializer):
                 if label and label != "correct_form":
                     error_labels[label] = error_labels.get(label, 0) + 1
             knee_counts = {
-                "good": 0, "bad": 0, "borderline": 0,
-                "unassessable": 0, "disputed": 0, "missing": 0,
+                "good": 0, "bad": 0,
+                "disputed": 0, "missing": 0,
             }
             for sample in angle_samples:
                 target = final_knee_target(sample)

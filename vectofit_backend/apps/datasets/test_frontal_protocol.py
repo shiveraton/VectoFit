@@ -42,8 +42,8 @@ class FrontalProtocolTests(APITestCase):
         for value in ({}, None, rating(None), rating("deviated", None), rating([], "aligned")):
             with self.subTest(value=value):
                 self.assertEqual(knee_target(value), "incomplete")
-        self.assertEqual(knee_target(rating("deviated", "unassessable")), "bad")
-        self.assertEqual(knee_target(rating("borderline", "unassessable")), "unassessable")
+        self.assertEqual(knee_target(rating("deviated", "unassessable")), "incomplete")
+        self.assertEqual(knee_target(rating("borderline", "unassessable")), "incomplete")
 
     @patch("apps.datasets.views.cv2.VideoCapture")
     def test_non_frontal_queues_counts_and_writes(self, capture):
@@ -110,12 +110,6 @@ class FrontalProtocolTests(APITestCase):
 
     def test_diagnostic_precedence_and_zero_eligible_report(self):
         self.assert_exclusion("missing_annotation")
-        self.annotate(rating(None))
-        self.assert_exclusion("incomplete_annotation")
-        self.annotate(rating("borderline"))
-        self.assert_exclusion("borderline")
-        self.annotate(rating("unassessable"))
-        self.assert_exclusion("unassessable")
         self.annotate()
         self.annotate(rating("deviated"), self.other)
         self.assert_exclusion("disputed")

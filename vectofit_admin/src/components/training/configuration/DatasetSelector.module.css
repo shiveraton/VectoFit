@@ -1,4 +1,3 @@
-
 .configuration-section[data-v-dataset-selector] {
   padding: 24px 22px;
   border-bottom: 1px solid var(--vf-border-light);
@@ -162,12 +161,11 @@
   line-height: 1.5;
 }
 @media (max-width: 800px) {
-.dataset-selection[data-v-dataset-selector] {
+  .dataset-selection[data-v-dataset-selector] {
     grid-template-columns: 1fr;
-}
-.selection-summary[data-v-dataset-selector] {
+  }
+  .selection-summary[data-v-dataset-selector] {
     align-items: flex-start;
     flex-direction: column;
+  }
 }
-}
-

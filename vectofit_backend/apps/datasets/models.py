@@ -246,7 +246,7 @@ class KneeAnnotation(models.Model):
         blank=True,
         related_name="knee_annotations",
     )
-    rubric_version = models.CharField(max_length=32, default="knee_v1")
+    rubric_version = models.CharField(max_length=32, default="knee_binary_v1")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -255,6 +255,19 @@ class KneeAnnotation(models.Model):
                 fields=["sample"],
                 condition=Q(annotator__isnull=True),
                 name="unique_unowned_knee_annotation_per_sample",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(annotation__isnull=True)
+                    | (
+                        Q(annotation__has_keys=["left", "right"])
+                        & Q(annotation__left__has_key="grade")
+                        & Q(annotation__right__has_key="grade")
+                        & Q(annotation__left__grade__in=["aligned", "deviated"])
+                        & Q(annotation__right__grade__in=["aligned", "deviated"])
+                    )
+                ),
+                name="binary_knee_annotation_grades",
             ),
         ]
 

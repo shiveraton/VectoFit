@@ -22,9 +22,6 @@ export function deriveTargetLabel(
     right = annotation.right.grade;
   if (left === null || right === null) return null;
   if (left === "deviated" || right === "deviated") return "bad";
-  if (left === "unassessable" || right === "unassessable")
-    return "unassessable";
-  if (left === "borderline" || right === "borderline") return "borderline";
   return "good";
 }
 export function mergeSavedSample(
@@ -213,7 +210,7 @@ export function useDatasetAnnotation(datasetId: number) {
     setKneeGrade: (side: "left" | "right", grade: KneeAlignmentGrade | null) =>
       setAnnotation((previous) => {
         let direction = previous[side].direction;
-        if (grade === null || grade === "unassessable") direction = null;
+        if (grade === null) direction = null;
         else if (grade === "aligned") direction = "none";
         else if (direction === null || direction === "none")
           direction = "uncertain";

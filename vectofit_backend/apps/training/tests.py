@@ -11,8 +11,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from apps.analytics.services.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
-from apps.analytics.services.features import FeatureExtractionError
+from apps.analytics.services.schemav1.features import FEATURE_ORDER, FEATURE_SCHEMA_VERSION
+from apps.analytics.services.schemav1.features import FeatureExtractionError
 from apps.analytics.services.fppa import M1_FEATURES
 from apps.assessments.models import AssessmentSession, RepAssessment
 from apps.datasets.models import (
@@ -393,7 +393,7 @@ class DBAndAPITests(APITestCase):
         self.assertTrue(all(len(row["features"]) == 6 and row["knee_annotations"] for row in result["samples"]))
         self.assertIn("xgboost", result["environment"])
 
-    def test_m1_request_enforces_frontal_view_and_complete_ordered_schema(self):
+    def test_fppa_request_enforces_frontal_view_and_valid_ordered_subset(self):
         from .serializers import TrainingJobRequestSerializer
         self.annotate_frontal_samples()
         payload = {
@@ -401,13 +401,55 @@ class DBAndAPITests(APITestCase):
             "view_angle": "frontal", "prediction_target": "knee_alignment",
         }
         for changes, field in (({"view_angle": "diagonal"}, "view_angle"),
-                               ({"feature_selection": list(M1_FEATURES[:4])}, "feature_selection")):
+                               ({"feature_selection": []}, "feature_selection"),
+                               ({"feature_selection": ["unknown"]}, "feature_selection")):
             serializer = TrainingJobRequestSerializer(data={**payload, **changes})
             self.assertFalse(serializer.is_valid())
             self.assertIn(field, serializer.errors)
         serializer = TrainingJobRequestSerializer(data={**payload, "feature_selection": list(reversed(M1_FEATURES))})
         self.assertTrue(serializer.is_valid(), serializer.errors)
         self.assertEqual(serializer.validated_data["feature_selection"], list(M1_FEATURES))
+        for selected in (None, list(reversed(M1_FEATURES[:4])), [M1_FEATURES[0]] * 2):
+            with self.subTest(selected=selected):
+                data = dict(payload)
+                if selected is not None:
+                    data["feature_selection"] = selected
+                serializer = TrainingJobRequestSerializer(data=data)
+                self.assertTrue(serializer.is_valid(), serializer.errors)
+                expected = list(M1_FEATURES) if selected is None else [
+                    name for name in M1_FEATURES if name in selected
+                ]
+                self.assertEqual(serializer.validated_data["feature_selection"], expected)
+
+    @override_settings(MEDIA_ROOT=TEMP)
+    def test_fppa_subset_training_records_inputs_and_supports_inference(self):
+        from .services.model_card import build_model_card
+        from .services.model_inference import predict_with_active_model
+        self.annotate_frontal_samples()
+        selected = list(M1_FEATURES[:2])
+        job = TrainingJob.objects.create(
+            view_angle="frontal", prediction_target="knee_alignment",
+            feature_selection=selected, split_strategy="leave_one_participant_out",
+        )
+        run_training_job(
+            job, dataset_ids=[self.dataset.pk], prediction_target="knee_alignment",
+            hyperparameters={"n_estimators": 10},
+        )
+        self.assertEqual(job.status, TrainingJob.Status.COMPLETED, job.error_message)
+        self.assertEqual(job.feature_selection, selected)
+        self.assertEqual(job.metrics["feature_names"], selected)
+        self.assertTrue(all(list(row["features"]) == selected for row in job.training_manifest["samples"]))
+        entry = ModelRegistry.objects.get(training_job=job)
+        card = build_model_card(entry)
+        self.assertTrue(card["activation"]["allowed"], card["activation"]["blockers"])
+        entry.is_active = True
+        entry.save(update_fields=["is_active"])
+        prediction = predict_with_active_model(
+            view_angle="frontal", prediction_target="knee_alignment",
+            feature_schema_version="fppa_v2",
+            features={name: 1.0 for name in M1_FEATURES},
+        )
+        self.assertIsNotNone(prediction)
 
     @override_settings(MEDIA_ROOT=TEMP)
     def test_new_knee_annotations_support_m1_activation_and_pilot_loading(self):
@@ -417,7 +459,7 @@ class DBAndAPITests(APITestCase):
         sample_set = _load_samples([self.dataset.pk], 1280, 720)
         self.assertEqual(len(sample_set), 8)
         self.assertTrue(all(row["label_origin"] == "human" for row in sample_set.sample_metadata))
-        self.assertTrue(all(row["knee_annotations"][0]["rubric_version"] == "knee_v1" for row in sample_set.sample_metadata))
+        self.assertTrue(all(row["knee_annotations"][0]["rubric_version"] == "knee_binary_v1" for row in sample_set.sample_metadata))
         job = TrainingJob.objects.create(view_angle="frontal", prediction_target="knee_alignment")
         run_training_job(job, dataset_ids=[self.dataset.pk], view_angle="frontal",
                          prediction_target="knee_alignment", hyperparameters={"n_estimators": 10})

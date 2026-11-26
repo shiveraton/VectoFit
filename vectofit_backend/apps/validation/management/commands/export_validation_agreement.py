@@ -30,7 +30,7 @@ class Command(BaseCommand):
         scopes = {
             "left_knee": ValidationAnnotation.Knee.values,
             "right_knee": ValidationAnnotation.Knee.values,
-            "overall": {"good", "bad", "borderline", "unassessable"},
+            "overall": {"good", "bad"},
             "overall_good_bad": {"good", "bad"},
         }
         details = []

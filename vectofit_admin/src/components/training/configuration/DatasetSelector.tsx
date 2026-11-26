@@ -39,8 +39,6 @@ export default function DatasetSelector(
       ? dataset.angle_training_stats?.[props.selectedViewAngle]
       : undefined;
   const kneeExcludedLabels = [
-    "borderline",
-    "unassessable",
     "disputed",
     "missing",
   ] as const;
@@ -190,7 +188,7 @@ export default function DatasetSelector(
           {" and "}
           <strong data-v-dataset-selector="">{"bad"}</strong>
           {
-            " knee-alignment labels are trainable; borderline, unassessable, disputed, and missing labels are reported but excluded. "
+            " knee-alignment labels are trainable; disputed and missing labels are reported but excluded. "
           }
         </p>
         {props.selectedDatasets.map((dataset) => (

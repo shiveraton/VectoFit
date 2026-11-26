@@ -28,9 +28,7 @@ export default function DatasetAnnotation(input: {}) {
   const kneeSides = ["left", "right"] as const;
   const kneeGrades: KneeAlignmentGrade[] = [
     "aligned",
-    "borderline",
     "deviated",
-    "unassessable",
   ];
   function handleDirectionChange(
     side: "left" | "right",
@@ -543,7 +541,6 @@ export default function DatasetAnnotation(input: {}) {
                           value={annotation[side].direction ?? ""}
                           disabled={
                             annotation[side].grade === null ||
-                            annotation[side].grade === "unassessable" ||
                             annotation[side].grade === "aligned"
                           }
                           onChange={(event) => {

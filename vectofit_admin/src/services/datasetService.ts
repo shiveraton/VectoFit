@@ -35,7 +35,7 @@ export interface AngleTrainingStats {
   error_label_counts: Record<string, number>;
   knee_target_sample_count: number;
   knee_label_counts: Record<
-    "good" | "bad" | "borderline" | "unassessable" | "disputed" | "missing",
+    "good" | "bad" | "disputed" | "missing",
     number
   >;
   participant_count: number;

@@ -3,12 +3,7 @@ import styles from "./SquatReferenceModal.module.css";
 
 const grades = [
   ["Aligned", "No clear inward or outward knee deviation is visible."],
-  [
-    "Borderline",
-    "Alignment is near the boundary between aligned and deviated.",
-  ],
   ["Deviated", "Clear inward or outward knee deviation is visible."],
-  ["Unassessable", "Visibility or video quality prevents a reliable judgment."],
 ];
 
 export default function SquatReferenceModal({

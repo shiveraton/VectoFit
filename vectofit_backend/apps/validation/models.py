@@ -29,9 +29,7 @@ class AuditedAnnotationQuerySet(models.QuerySet):
 class ValidationAnnotation(models.Model):
     class Knee(models.TextChoices):
         ALIGNED = "aligned", "Aligned"
-        BORDERLINE = "borderline", "Borderline"
         DEVIATED = "deviated", "Deviated"
-        UNASSESSABLE = "unassessable", "Unassessable"
 
     repetition = models.ForeignKey("datasets.DatasetSample", on_delete=models.PROTECT)
     validator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)

@@ -3,15 +3,11 @@ import client from "../config/client";
 import { initializeCsrf, publicClient } from "../config/publicAuth";
 const isPublic = import.meta.env.MODE === "public";
 
-export type KneeAlignmentGrade =
-  | "aligned"
-  | "borderline"
-  | "deviated"
-  | "unassessable";
+export type KneeAlignmentGrade = "aligned" | "deviated";
 
 export type KneeDeviationDirection = "valgus" | "varus" | "none" | "uncertain";
 
-export type TargetLabel = "good" | "bad" | "borderline" | "unassessable";
+export type TargetLabel = "good" | "bad";
 
 export interface KneeSideAnnotation {
   grade: KneeAlignmentGrade | null;
