@@ -13,19 +13,25 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from sklearn.model_selection import GroupShuffleSplit
 from xgboost import DMatrix, XGBClassifier, train
 
 from ..config import (
-    TARGET_TASK_PROFILES, locked_hyperparameters,
+    TARGET_TASK_PROFILES,
+    locked_hyperparameters,
     validate_hyperparameters,
 )
 from .data_loader import SampleSet
+from ..models import TrainingJob
 
 
 def training_environment():
     return {
         "python": platform.python_version(),
-        **{package: version(package) for package in ("xgboost", "scikit-learn", "numpy", "scipy")},
+        **{
+            package: version(package)
+            for package in ("xgboost", "scikit-learn", "numpy", "scipy")
+        },
     }
 
 
@@ -47,7 +53,25 @@ def scale_pos_weight(labels):
     return float(np.sum(labels == 0) / positive_count) if positive_count else 1.0
 
 
-def train_and_evaluate(sample_set, hyperparameters=None):
+def make_folds(split_strategy, groups, test_size, seed):
+    if split_strategy == TrainingJob.TrainingSplit.HOLDOUT:
+        splitter = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)
+        train, test = next(splitter.split(np.zeros(len(groups)), groups=groups))
+        return [("holdout", train, test)]
+    if split_strategy != TrainingJob.TrainingSplit.LOPO:
+        raise ValueError(f"Unsupported split strategy {split_strategy!r}.")
+    return [
+        (str(p), np.flatnonzero(groups != p), np.flatnonzero(groups == p))
+        for p in sorted(set(groups))
+    ]
+
+
+def train_and_evaluate(
+    sample_set,
+    hyperparameters=None,
+    split_strategy=TrainingJob.TrainingSplit.HOLDOUT,
+    test_size=0.3,
+):
     if not isinstance(sample_set, SampleSet):
         raise TypeError("train_and_evaluate expects a SampleSet.")
 
@@ -104,43 +128,50 @@ def train_and_evaluate(sample_set, hyperparameters=None):
 
     groups = np.asarray(sample_set.groups)
     if len(set(groups)) < 2:
-        raise InsufficientDataError("LOPO requires at least two distinct participants.")
+        raise InsufficientDataError(
+            "Training requires at least two distinct participants."
+        )
     params = resolve_hyperparameters(
         hyperparameters,
         prediction_target=sample_set.prediction_target,
         class_count=len(target_names),
     )
     task_profile = TARGET_TASK_PROFILES[sample_set.prediction_target]
-    y_pred = np.full(len(y), -1, dtype=int)
+    y_hat = np.full(len(y), -1, dtype=int)
     probabilities = np.zeros((len(y), len(target_names)), dtype=float)
     folds = []
-    for participant in sorted(set(groups)):
-        test_indices = np.flatnonzero(groups == participant)
-        train_indices = np.flatnonzero(groups != participant)
+    for participant, train_indices, test_indices in make_folds(
+        split_strategy, groups, test_size, params["seed"]
+    ):
         fold = {
-            "participant": str(participant),
+            "participant": participant,
             "train_idx": train_indices.tolist(),
             "test_idx": test_indices.tolist(),
         }
+
+        if len(np.unique(y[train_indices])) != len(target_names):
+            raise InsufficientDataError(
+                f"Fold {participant!r} leaves one class out of training."
+            )
+
         if task_profile == "quality":
-            if set(y[train_indices]) != {0, 1}:
-                raise InsufficientDataError(
-                    f"LOPO participant {participant!r} leaves one class out of training."
-                )
             weight = scale_pos_weight(y[train_indices])
             fold_model = XGBClassifier(**params, scale_pos_weight=weight)
             fold_model.fit(X[train_indices], y[train_indices])
             probabilities[test_indices] = fold_model.predict_proba(X[test_indices])
             fold["scale_pos_weight"] = weight
         else:
-            native_params = {name: value for name, value in params.items() if name != "n_estimators"}
+            native_params = {
+                name: value for name, value in params.items() if name != "n_estimators"
+            }
             fold_model = train(
                 native_params,
                 DMatrix(X[train_indices], label=y[train_indices]),
                 num_boost_round=params["n_estimators"],
             )
             probabilities[test_indices] = fold_model.predict(DMatrix(X[test_indices]))
-        y_pred[test_indices] = probabilities[test_indices].argmax(axis=1)
+
+        y_hat[test_indices] = probabilities[test_indices].argmax(axis=1)
         folds.append(fold)
 
     final_params = dict(params)
@@ -148,30 +179,38 @@ def train_and_evaluate(sample_set, hyperparameters=None):
         final_params["scale_pos_weight"] = scale_pos_weight(y)
     model = XGBClassifier(**final_params)
     model.fit(X, y)
-    train_idx = test_idx = list(range(len(y)))
+
+    if split_strategy == TrainingJob.TrainingSplit.HOLDOUT:
+        train_idx = folds[0]["train_idx"]
+        test_idx = folds[0]["test_idx"]
+    else:
+        train_idx = test_idx = list(range(len(y)))
+    y_true = y[test_idx]
+    y_hat = y_hat[test_idx]
+
     class_indices = list(range(len(target_names)))
     averaging = "binary" if sample_set.prediction_target == "binary_form" else "macro"
     metrics = {
-        "evaluation_method": "leave_one_participant_out",
+        "evaluation_method": split_strategy,
         "fold_count": len(folds),
         "averaging": averaging,
-        "train_participant_count": len(set(groups)) - 1,
-        "test_participant_count": 1,
-        "accuracy": float(accuracy_score(y[test_idx], y_pred)),
-        "balanced_accuracy": float(balanced_accuracy_score(y[test_idx], y_pred)),
-        "f1": float(f1_score(y[test_idx], y_pred, average=averaging, zero_division=0)),
+        "train_participant_count": len(set(groups[folds[0]["train_idx"]])),
+        "test_participant_count": len(set(groups[folds[0]["test_idx"]])),
+        "accuracy": float(accuracy_score(y_true, y_hat)),
+        "balanced_accuracy": float(balanced_accuracy_score(y_true, y_hat)),
+        "f1": float(f1_score(y_true, y_hat, average=averaging, zero_division=0)),
         "precision": float(
-            precision_score(y[test_idx], y_pred, average=averaging, zero_division=0)
+            precision_score(y_true, y_hat, average=averaging, zero_division=0)
         ),
         "recall": float(
-            recall_score(y[test_idx], y_pred, average=averaging, zero_division=0)
+            recall_score(y_true, y_hat, average=averaging, zero_division=0)
         ),
         "confusion_matrix": confusion_matrix(
-            y[test_idx], y_pred, labels=class_indices
+            y_true, y_hat, labels=class_indices
         ).tolist(),
         "classification_report": classification_report(
-            y[test_idx],
-            y_pred,
+            y_true,
+            y_hat,
             labels=class_indices,
             target_names=target_names,
             zero_division=0,
@@ -189,12 +228,13 @@ def train_and_evaluate(sample_set, hyperparameters=None):
         },
         "held_out_probabilities": [
             {target_names[i]: float(prob) for i, prob in enumerate(row)}
-            for row in probabilities
+            for row in probabilities[test_idx]
         ],
     }
-    metrics.update(_lopo_metrics(y, y_pred, groups, class_indices))
-    for row, sample_id in zip(metrics["oof_predictions"], sample_set.sample_ids):
-        row["sample_id"] = sample_id
+    if split_strategy == TrainingJob.TrainingSplit.LOPO:
+        metrics.update(_lopo_metrics(y_true, y_hat, groups[test_idx], class_indices))
+        for row, index in zip(metrics["oof_predictions"], test_idx):
+            row["sample_id"] = sample_set.sample_ids[index]
     return {
         "model": model,
         "metrics": metrics,
@@ -212,13 +252,17 @@ def train_and_evaluate(sample_set, hyperparameters=None):
 
 
 def lopo_evaluate(sample_set, hyperparameters=None):
-    result = train_and_evaluate(sample_set, hyperparameters)
+    result = train_and_evaluate(
+        sample_set, hyperparameters, split_strategy=TrainingJob.TrainingSplit.LOPO
+    )
     metrics = result["metrics"]
-    metrics.update({
-        "hyperparameters": result["hyperparameters"],
-        "seed": result["seed"],
-        "folds": result["folds"],
-    })
+    metrics.update(
+        {
+            "hyperparameters": result["hyperparameters"],
+            "seed": result["seed"],
+            "folds": result["folds"],
+        }
+    )
     return metrics
 
 
@@ -243,9 +287,17 @@ def _lopo_metrics(labels, predictions, groups, class_indices):
         )
     return {
         "macro_f1": float(
-            f1_score(labels, predictions, labels=class_indices, average="macro", zero_division=0)
+            f1_score(
+                labels,
+                predictions,
+                labels=class_indices,
+                average="macro",
+                zero_division=0,
+            )
         ),
-        "confusion_matrix": confusion_matrix(labels, predictions, labels=class_indices).tolist(),
+        "confusion_matrix": confusion_matrix(
+            labels, predictions, labels=class_indices
+        ).tolist(),
         "per_participant": per_participant,
         "oof_predictions": [
             {

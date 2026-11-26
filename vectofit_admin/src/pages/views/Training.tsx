@@ -9,6 +9,10 @@ export default function Training(input: {}) {
   const cx = bindStyles(styles);
   const configurationSection = useRef<HTMLElement | null>(null);
   const {
+    trainingSplit,
+    setTrainingSplit,
+    testSize,
+    setTestSize,
     features,
     selectedDatasets,
     selectedDatasetIds,
@@ -21,6 +25,7 @@ export default function Training(input: {}) {
     isTraining,
     error,
     toggleDataset,
+    toggleFeature,
     setHyperparameter,
     startTraining,
     availableDatasets,
@@ -95,7 +100,7 @@ export default function Training(input: {}) {
           className={cx("content-card history-card")}
         >
           <div data-v-training="" className={cx("section-header")}>
-            <h2 data-v-training="">{"FPPA Training History"}</h2>
+            <h2 data-v-training="">{"Model Artifacts"}</h2>
             {trainingJobs.length ? (
               <select
                 data-v-training=""
@@ -121,7 +126,7 @@ export default function Training(input: {}) {
           {!trainingJobs.length ? (
             <p data-v-training="" className={cx("history-empty")}>
               {
-                " No FPPA v2 runs recorded yet. Start a run to create the first M1 model. "
+                " No FPPA v2 runs recorded yet. Start a run to create the first FPPA model. "
               }
             </p>
           ) : null}
@@ -155,7 +160,7 @@ export default function Training(input: {}) {
                 <h2 data-v-training="">{"Training Configuration"}</h2>
                 <p data-v-training="">
                   {
-                    " Configure an FPPA v2 M1 training experiment for the frontal view. "
+                    " Configure an FPPA v2 training experiment for the frontal view. "
                   }
                 </p>
               </div>
@@ -192,25 +197,34 @@ export default function Training(input: {}) {
               {" Loading training configuration... "}
             </div>
           ) : (
-            <TrainingConfiguration
-              data-v-training=""
-              availableDatasets={availableDatasets}
-              filteredDatasets={filteredDatasets}
-              selectedDatasetIds={selectedDatasetIds}
-              selectedDatasets={selectedDatasets}
-              selectedViewAngle={selectedViewAngle}
-              features={features}
-              hyperparameters={hyperparameters}
-              summaryText={configSummaryText}
-              canStartTraining={canStartTraining}
-              isTraining={isTraining}
-              onToggleDataset={toggleDataset}
-              onSetHyperparameter={setHyperparameter}
-              onStartTraining={handleStartTraining}
-            ></TrainingConfiguration>
+              <TrainingConfiguration
+                trainingSplit={trainingSplit}
+                onSplitChange={setTrainingSplit}
+                testSize={testSize}
+                onTestSizeChange={setTestSize}
+                data-v-training=""
+                availableDatasets={availableDatasets}
+                filteredDatasets={filteredDatasets}
+                selectedDatasetIds={selectedDatasetIds}
+                selectedDatasets={selectedDatasets}
+                selectedViewAngle={selectedViewAngle}
+                features={features}
+                hyperparameters={hyperparameters}
+                summaryText={configSummaryText}
+                canStartTraining={canStartTraining}
+                isTraining={isTraining}
+                onToggleFeature={toggleFeature}
+                onToggleDataset={toggleDataset}
+                onSetHyperparameter={setHyperparameter}
+                onStartTraining={handleStartTraining}
+              ></TrainingConfiguration>
           )}
         </section>
-        <section id="training-result" data-v-training="" className={cx("content-card")}>
+        <section
+          id="training-result"
+          data-v-training=""
+          className={cx("content-card")}
+        >
           <div data-v-training="" className={cx("section-header")}>
             <div data-v-training="" className={cx("section-title-row")}>
               <div

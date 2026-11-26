@@ -1,5 +1,5 @@
 from typing import ClassVar
-
+from django.conf import settings
 from django.db import models
 
 
@@ -12,6 +12,10 @@ class TrainingJob(models.Model):
 
     class Algorithm(models.TextChoices):
         XGBOOST = "xgboost", "XGBoost"
+
+    class TrainingSplit(models.TextChoices):
+        HOLDOUT = "holdout", "Hold-out by participant"
+        LOPO = "leave_one_participant_out", "Leave-One-Participant-Out"
 
     class PredictionTarget(models.TextChoices):
         BINARY_FORM = "binary_form", "Correct vs incorrect form"
@@ -92,11 +96,10 @@ class TrainingJob(models.Model):
 
     split_strategy = models.CharField(
         max_length=32,
-        default="group_by_participant",
+        choices=TrainingSplit.choices,
+        default=TrainingSplit.HOLDOUT,
         help_text=(
-            "How the held-out test set was formed. 'group_by_participant' keeps "
-            "all repetitions from the same research participant on one side of "
-            "the split to avoid subject-level data leakage."
+            "How train/test sets are formed. Both keep each participant on one side."
         ),
     )
 
@@ -158,3 +161,77 @@ class ModelRegistry(models.Model):
 
     def __str__(self):
         return f"{self.name} v{self.version} ({self.algorithm})"
+
+
+class InferenceStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    PROCESSING = "PROCESSING", "Processing"
+    COMPLETED = "COMPLETED", "Completed"
+    FAILED = "FAILED", "Failed"
+
+
+class InferenceSimulation(models.Model):
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="inference_simulations",
+    )
+    video_file = models.FileField(
+        upload_to="inference_videos/%Y/%m/%d/",
+    )
+    original_filename = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=12,
+        choices=InferenceStatus.choices,
+        default=InferenceStatus.PENDING,
+    )
+    error_message = models.TextField(blank=True)
+    feature_schema_version = models.CharField(max_length=48, blank=True)
+    repetitions = models.JSONField(default=list, blank=True)
+    preprocessing_ms = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Simulation {self.pk}: {self.original_filename}"
+
+
+class InferenceRun(models.Model):
+    simulation = models.ForeignKey(
+        InferenceSimulation,
+        on_delete=models.CASCADE,
+        related_name="runs",
+    )
+    model = models.ForeignKey(
+        "ModelRegistry",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="inference_runs",
+    )
+    model_snapshot = models.JSONField(default=dict)
+    status = models.CharField(
+        max_length=12,
+        choices=InferenceStatus.choices,
+        default=InferenceStatus.PENDING,
+    )
+    error_message = models.TextField(blank=True)
+    predictions = models.JSONField(default=list, blank=True)
+    model_loading_ms = models.FloatField(null=True, blank=True)
+    inference_ms = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["simulation", "model"],
+                name="unique_simulation_model_run",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Run {self.pk}: simulation {self.simulation_id}"

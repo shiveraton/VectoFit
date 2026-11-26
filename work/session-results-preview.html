@@ -1,0 +1,109 @@
+<style>
+#vf-results-preview{display:flex;justify-content:center;padding:24px 8px;color-scheme:dark;font-family:Inter,"Segoe UI",sans-serif}
+#vf-results-preview .phone{--bg:#0e1116;--surface:#141820;--line:rgba(255,255,255,.1);--text:#f1f5f9;--muted:#94a3b8;--accent:#2dd4bf;--good:#34d399;--warn:#fbbf24;--bad:#fb7185;width:min(100%,390px);box-sizing:border-box;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:24px;padding:24px}
+#vf-results-preview *{box-sizing:border-box}
+#vf-results-preview h2,#vf-results-preview h3,#vf-results-preview p{margin:0}
+#vf-results-preview h2{font-size:22px;font-weight:650;line-height:1.3}
+#vf-results-preview h3{font-size:17px;font-weight:600}
+#vf-results-preview .sub{font-size:12px;line-height:1.6;color:var(--muted)}
+#vf-results-preview .head{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+#vf-results-preview .hero{padding-bottom:24px;border-bottom:1px solid var(--line)}
+#vf-results-preview .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--good)}
+#vf-results-preview .count{font-size:58px;line-height:1.2;font-weight:650;letter-spacing:-3px;margin:10px 0 0;font-variant-numeric:tabular-nums}
+#vf-results-preview .count span{font-size:24px;letter-spacing:-1px;color:var(--muted)}
+#vf-results-preview .headline{font-size:19px;line-height:1.45;margin-top:12px;font-weight:500}
+#vf-results-preview .comparison{font-size:12px;color:var(--good);margin-top:12px}
+#vf-results-preview .segments{display:flex;gap:4px;margin:18px 0 0}
+#vf-results-preview .segments span{flex:1;height:5px;border-radius:3px}
+#vf-results-preview .rep-section{padding:24px 0}
+#vf-results-preview .pills{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:16px}
+#vf-results-preview .pill{min-height:55px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:15px}
+#vf-results-preview .pill .mark{font-size:12px}
+#vf-results-preview .pill[aria-pressed=true]{border:2px solid var(--accent);background:#16302f}
+#vf-results-preview .legend{display:flex;flex-wrap:wrap;gap:8px 12px;font-size:12px;color:var(--muted);margin:12px 0 20px}
+#vf-results-preview .selected{background:var(--surface);padding:18px;border-radius:12px;border:1px solid var(--line)}
+#vf-results-preview .selected-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+#vf-results-preview .insight{font-size:16px;line-height:1.55}
+#vf-results-preview .peak{margin-top:12px;color:var(--muted);font-size:13px}
+#vf-results-preview details{border-top:1px solid var(--line);padding:18px 0}
+#vf-results-preview summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;list-style:none}
+#vf-results-preview summary::-webkit-details-marker{display:none}
+#vf-results-preview .metrics{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:8px 0 20px}
+#vf-results-preview .metric-value{font-size:24px;font-variant-numeric:tabular-nums;margin:6px 0}
+#vf-results-preview .cue{border-top:1px solid var(--line);padding-top:20px}
+#vf-results-preview .cue p{font-size:15px;line-height:1.55;margin-top:10px;color:var(--muted)}
+#vf-results-preview .footer{margin:24px 0;font-size:12px;line-height:1.6;color:var(--muted)}
+#vf-results-preview button.primary,#vf-results-preview button.secondary{width:100%;min-height:48px;font:inherit;font-size:14px;font-weight:600;border-radius:12px;padding:12px;border:0}
+#vf-results-preview button.primary{background:var(--accent);color:var(--bg)}
+#vf-results-preview button.secondary{margin-top:6px;background:transparent;color:var(--muted)}
+#vf-results-preview button:active{opacity:.7}
+#vf-results-preview button:focus-visible,#vf-results-preview summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#vf-results-preview .preview-note{color:var(--muted);font-size:12px;margin-top:14px;text-align:center}
+</style>
+<div id="vf-results-preview" class="viz-dotted-background">
+ <article class="phone" aria-label="Simplified session results concept, using sample data">
+  <header class="head"><i data-lucide="arrow-left" aria-hidden="true"></i><div><h2>Session Results</h2><p class="sub">TODAY · 10 REPS · FRONT VIEW</p></div></header>
+  <section class="hero" aria-label="Set summary">
+   <div class="badge"><i data-lucide="check" aria-hidden="true"></i>Mostly aligned</div>
+   <div class="count">6<span>/10 Reps</span></div>
+   <p class="headline">Mostly solid. Right knee drifted inward on 3 reps.</p>
+   <p class="comparison">+2 aligned vs last set</p>
+   <div class="segments" aria-hidden="true"></div>
+  </section>
+  <section class="rep-section" aria-label="Repetition review">
+   <h3>Review your reps</h3>
+   <div class="pills" role="group" aria-label="Select a repetition"></div>
+   <div class="legend"><span>✓ Aligned · 6</span><span>– Borderline · 1</span><span>↙ Deviated · 3</span></div>
+   <section class="selected" aria-live="polite" aria-atomic="true">
+    <div class="selected-header"><h3 class="rep-title">Rep 7</h3><span class="rep-status badge" style="color:var(--bad)">Deviated</span></div>
+    <p class="insight">Your right knee moved inward most during the ascent.</p>
+    <p class="peak">Peak inward angle · 11°</p>
+   </section>
+  </section>
+  <!-- TODO(decision-10): Proposed labels: Review your reps, Measurements, Next set. -->
+  <details><summary>Measurements <i data-lucide="chevron-down" aria-hidden="true"></i></summary>
+   <div class="metrics">
+    <div><p class="sub">Left Knee · Aligned</p><div class="metric-value">3°</div><p class="sub">Peak inward angle, worst rep</p></div>
+    <div><p class="sub">Right Knee · Deviated</p><div class="metric-value">11°</div><p class="sub">Peak inward angle, worst rep</p></div>
+    <div><p class="sub">L/R Balance</p><div class="metric-value">8°</div><p class="sub">Right knee drifts 8° more</p></div>
+    <div><p class="sub">Tracking</p><div class="metric-value">Good</div><p class="sub">All reps clearly visible</p></div>
+   </div>
+  </details>
+  <section class="cue"><h3>Next set</h3><p>Push your knees out over your toes on the way up.</p></section>
+  <p class="footer">Movement-quality estimate from camera analysis. Not medical advice.</p>
+  <button class="primary cursor-interaction" type="button" data-action="record">Record next set</button>
+  <button class="secondary cursor-interaction" type="button" data-action="history">View session history</button>
+  <p class="preview-note" role="status">Sample data · interactive preview</p>
+ </article>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('vf-results-preview');
+ const peaks=[3,2,3,4,6,4,11,8,7,3];
+ const statuses=['aligned','aligned','aligned','aligned','borderline','aligned','deviated','deviated','deviated','aligned'];
+ const presentation={aligned:{label:'Aligned',mark:'✓',color:'var(--good)'},borderline:{label:'Borderline',mark:'–',color:'var(--warn)'},deviated:{label:'Deviated',mark:'↙',color:'var(--bad)'}};
+ const saved=window.openai?.widgetState?.privateContent;
+ let selected=Number.isInteger(saved?.selected)&&saved.selected>=0&&saved.selected<10?saved.selected:6;
+ const pills=root.querySelector('.pills');
+ statuses.forEach((status,index)=>{
+  const info=presentation[status];
+  const segment=document.createElement('span');segment.style.background=info.color;root.querySelector('.segments').append(segment);
+  const button=document.createElement('button');button.type='button';button.className='pill cursor-interaction';
+  button.innerHTML=`<span>${index+1}</span><span class="mark" style="color:${info.color}">${info.mark}</span>`;
+  button.addEventListener('click',()=>{selected=index;render();window.openai?.setWidgetState?.({modelContent:{selectedRep:selected+1,sampleData:true},privateContent:{selected}})?.catch(()=>{});});
+  pills.append(button);
+ });
+ function render(){
+  [...pills.children].forEach((button,index)=>{const chosen=selected===index;button.setAttribute('aria-pressed',String(chosen));button.setAttribute('aria-label',`Rep ${index+1}, ${statuses[index]}, ${peaks[index]} degrees peak${chosen?', selected':''}`);});
+  const info=presentation[statuses[selected]];
+  root.querySelector('.rep-title').textContent=`Rep ${selected+1}`;
+  root.querySelector('.rep-status').textContent=info.label;
+  root.querySelector('.rep-status').style.color=info.color;
+  root.querySelector('.peak').textContent=`Peak inward angle · ${peaks[selected]}°`;
+  root.querySelector('.insight').textContent=statuses[selected]==='aligned'?'Both knees stayed in line through this rep.':selected===6?'Your right knee moved inward most during the ascent.':info.label;
+ }
+ render();
+ root.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>{root.querySelector('.preview-note').textContent='Preview only · navigation is not connected';}));
+ window.addEventListener('openai:set_globals',event=>{const value=event.detail?.globals?.widgetState?.privateContent?.selected;if(Number.isInteger(value)&&value>=0&&value<10){selected=value;render();}});
+})();
+</script>

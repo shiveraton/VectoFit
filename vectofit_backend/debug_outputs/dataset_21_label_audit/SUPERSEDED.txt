@@ -1,0 +1,6 @@
+This review packet belongs to the old annotation round.
+
+Dataset 21 was reset on November 26, 2026 for full re-annotation under knee_binary_v1, with only aligned and deviated knee grades.
+The private manifest, provenance, and previous model evaluations are historical evidence, not current training labels.
+Do not use the old review files or compare new ratings against their frozen labels as an inter-annotator agreement result for the new rubric.
+Compute agreement from independent new-round ratings by annotators 1 and 2 after re-annotation.

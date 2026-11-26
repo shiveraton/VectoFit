@@ -198,17 +198,20 @@ def build_model_card(entry):
         m1_contract_ok = (
             job.view_angle == "frontal"
             and schema is not None
-            and list(job.feature_selection) == list(schema.feature_order)
+            and bool(job.feature_selection)
+            and list(job.feature_selection) == [
+                name for name in schema.feature_order if name in job.feature_selection
+            ]
         )
         checks.append(
             _check(
                 "m1_contract",
-                "Frontal M1 configuration",
+                "Frontal FPPA configuration",
                 STATUS_PASS if m1_contract_ok else STATUS_FAIL,
-                "Registered M1 models require the frontal view and six FPPA features in schema order.",
+                "FPPA models require the frontal view and a non-empty feature subset in schema order.",
                 None
                 if m1_contract_ok
-                else "Retrain using the frontal M1 configuration.",
+                else "Retrain using frontal FPPA inputs in schema order.",
             )
         )
 

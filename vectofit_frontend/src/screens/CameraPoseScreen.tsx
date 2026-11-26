@@ -208,6 +208,7 @@ export default function CameraPoseScreen({ route, navigation }: Props) {
           style={StyleSheet.absoluteFill}
           resizeMode="contain"
           implementationMode="compatible"
+          mirrorMode="auto"
           device={camera.device}
           isActive={camera.isCameraActive}
           outputs={cameraOutputs}

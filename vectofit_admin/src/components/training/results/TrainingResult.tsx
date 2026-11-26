@@ -1,12 +1,7 @@
 import ConfusionMatrix from "./ConfusionMatrix";
 import FeatureImportance from "./FeatureImportance";
 import TrainingMetricInfo from "./TrainingMetricInfo";
-import {
-  bindStyles,
-  each,
-  display,
-  scopeAttributes,
-} from "../../../presentation";
+import { bindStyles, display, scopeAttributes } from "../../../presentation";
 import styles from "./TrainingResult.module.css";
 interface TrainingMetrics {
   accuracy?: number;
@@ -47,29 +42,6 @@ export default function TrainingResult(input: {
   const formatMetric = (value: unknown) => {
     if (typeof value !== "number" || !Number.isFinite(value)) return "--";
     return `${(value * 100).toFixed(1)}%`;
-  };
-  const formatDate = (value: string | null | undefined) => {
-    if (!value) return "--";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "--";
-    return date.toLocaleString("en-PH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  };
-  const formatValue = (value: unknown) => {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return Number.isInteger(value)
-        ? String(value)
-        : value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
-    }
-    if (typeof value === "string" || typeof value === "boolean") {
-      return String(value);
-    }
-    return "--";
   };
   const featureImportance = (() => {
     const raw = props.job?.metrics?.feature_importances;
@@ -119,44 +91,13 @@ export default function TrainingResult(input: {
       "Each knee-alignment class contributes equally, so poor recall on either label lowers this score.",
     f1Title: "Macro F1",
   };
-  const usedParameters = (() => {
-    const parameters: Array<{
-      label: string;
-      value: string;
-    }> = [];
-    const raw = props.job?.hyperparameters;
-    if (raw && typeof raw === "object") {
-      Object.entries(raw).forEach(([key, value]) => {
-        if (
-          typeof value === "number" ||
-          typeof value === "string" ||
-          typeof value === "boolean"
-        ) {
-          parameters.push({ label: key, value: formatValue(value) });
-        }
-      });
-    }
-    return parameters;
-  })();
-  const featureLabels: Record<string, string> = {
-    fppa_l_bottom: "Left FPPA at bottom",
-    fppa_r_bottom: "Right FPPA at bottom",
-    fppa_l_peak: "Left peak FPPA",
-    fppa_r_peak: "Right peak FPPA",
-    asym_bottom: "Bottom bilateral asymmetry",
-    asym_peak: "Peak bilateral asymmetry",
-  };
-  const featureList = (() =>
-    (props.job?.feature_selection ?? []).map(
-      (feature) => featureLabels[feature] ?? feature,
-    ))();
   const resultInterpretation = (() => {
     const f1 = props.job?.metrics?.f1;
     const balancedAccuracy = props.job?.metrics?.balanced_accuracy;
     if (typeof f1 !== "number" || typeof balancedAccuracy !== "number") {
       return "Review the available metrics, test-set counts, and confusion matrix before considering activation.";
     }
-    return `The held-out test repetitions produced a macro F1 of ${formatMetric(f1)} and balanced accuracy of ${formatMetric(balancedAccuracy)}. Review both together with the confusion matrix before considering the trained FPPA model for activation.`;
+    return `The held-out test repetitions produced a macro F1 of ${formatMetric(f1)} and balanced accuracy of ${formatMetric(balancedAccuracy)}.`;
   })();
   return (
     <>
@@ -182,37 +123,6 @@ export default function TrainingResult(input: {
           data-v-training-result=""
           className={cx("result-content")}
         >
-          <div data-v-training-result="" className={cx("result-overview")}>
-            <div data-v-training-result="" className={cx("overview-item")}>
-              <span data-v-training-result="">{"Training Job"}</span>
-              <strong data-v-training-result="">
-                {"#"}
-                {display(job.id)}
-              </strong>
-            </div>
-            <div data-v-training-result="" className={cx("overview-item")}>
-              <span data-v-training-result="">{"Samples"}</span>
-              <strong data-v-training-result="">
-                {display(job.sample_count ?? "--")}
-              </strong>
-            </div>
-            <div data-v-training-result="" className={cx("overview-item")}>
-              <span data-v-training-result="">
-                {"Final fit / Out-of-fold repetitions"}
-              </span>
-              <strong data-v-training-result="">
-                {display(job.train_count ?? "--")}
-                {" / "}
-                {display(job.test_count ?? "--")}
-              </strong>
-            </div>
-            <div data-v-training-result="" className={cx("overview-item")}>
-              <span data-v-training-result="">{"Completed"}</span>
-              <strong data-v-training-result="">
-                {display(formatDate(job.completed_at))}
-              </strong>
-            </div>
-          </div>
           {job.status === "RUNNING" || job.status === "PENDING" ? (
             <div
               data-v-training-result=""
@@ -335,82 +245,12 @@ export default function TrainingResult(input: {
                 <FeatureImportance
                   data-v-training-result=""
                   values={featureImportance}
-                ></FeatureImportance>
+                />
                 <ConfusionMatrix
                   data-v-training-result=""
                   matrix={confusionMatrix}
                   labels={targetNames}
                 ></ConfusionMatrix>
-              </div>
-              <div
-                data-v-training-result=""
-                className={cx("parameter-summary")}
-              >
-                <header
-                  data-v-training-result=""
-                  className={cx("subsection-header")}
-                >
-                  <div data-v-training-result="">
-                    <h3 data-v-training-result="">
-                      {"Experiment Configuration Used"}
-                    </h3>
-                    <p data-v-training-result="">
-                      {"The configuration stored with this training run."}
-                    </p>
-                  </div>
-                </header>
-                <div
-                  data-v-training-result=""
-                  className={cx("used-parameters")}
-                >
-                  {each(usedParameters).map(([_index, parameter]) => (
-                    <div
-                      data-v-training-result=""
-                      key={parameter.label}
-                      className={cx("used-parameter")}
-                    >
-                      <span data-v-training-result="">
-                        {display(parameter.label)}
-                      </span>
-                      <strong data-v-training-result="">
-                        {display(parameter.value)}
-                      </strong>
-                    </div>
-                  ))}
-                  <div
-                    data-v-training-result=""
-                    className={cx("used-parameter")}
-                  >
-                    <span data-v-training-result="">{"view_angle"}</span>
-                    <strong data-v-training-result="">
-                      {display(job.view_angle || "--")}
-                    </strong>
-                  </div>
-                  <div
-                    data-v-training-result=""
-                    className={cx("used-parameter")}
-                  >
-                    <span data-v-training-result="">{"split_strategy"}</span>
-                    <strong data-v-training-result="">
-                      {display(
-                        job.split_strategy || "leave_one_participant_out",
-                      )}
-                    </strong>
-                  </div>
-                </div>
-                <div
-                  data-v-training-result=""
-                  className={cx("feature-summary")}
-                >
-                  <span data-v-training-result="">{"Features"}</span>
-                  <strong data-v-training-result="">
-                    {display(
-                      featureList.length
-                        ? featureList.join(" · ")
-                        : "Not recorded",
-                    )}
-                  </strong>
-                </div>
               </div>
             </>
           ) : null}

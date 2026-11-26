@@ -1,0 +1,646 @@
+{
+  "annotator": "A",
+  "instructions": "Independently rate both knees using the current knee rubric. Do not consult previous labels, folder versions, the other reviewer, or model output. Return this file; do not overwrite production annotations.",
+  "samples": [
+    {
+      "audit_id": "R001",
+      "sample_id": 697,
+      "rep_number": 5,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R002",
+      "sample_id": 781,
+      "rep_number": 12,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R003",
+      "sample_id": 679,
+      "rep_number": 9,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R004",
+      "sample_id": 670,
+      "rep_number": 7,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R005",
+      "sample_id": 804,
+      "rep_number": 8,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R006",
+      "sample_id": 761,
+      "rep_number": 6,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R007",
+      "sample_id": 638,
+      "rep_number": 7,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R008",
+      "sample_id": 595,
+      "rep_number": 9,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R009",
+      "sample_id": 742,
+      "rep_number": 14,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R010",
+      "sample_id": 624,
+      "rep_number": 12,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R011",
+      "sample_id": 625,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R012",
+      "sample_id": 527,
+      "rep_number": 3,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R013",
+      "sample_id": 560,
+      "rep_number": 16,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R014",
+      "sample_id": 746,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R015",
+      "sample_id": 693,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R016",
+      "sample_id": 776,
+      "rep_number": 7,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R017",
+      "sample_id": 672,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R018",
+      "sample_id": 659,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R019",
+      "sample_id": 795,
+      "rep_number": 12,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R020",
+      "sample_id": 756,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R021",
+      "sample_id": 823,
+      "rep_number": 5,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R022",
+      "sample_id": 874,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R023",
+      "sample_id": 829,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R024",
+      "sample_id": 852,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R025",
+      "sample_id": 846,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R026",
+      "sample_id": 816,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R027",
+      "sample_id": 834,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R028",
+      "sample_id": 841,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R029",
+      "sample_id": 863,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R030",
+      "sample_id": 813,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R031",
+      "sample_id": 856,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R032",
+      "sample_id": 808,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R033",
+      "sample_id": 886,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R034",
+      "sample_id": 880,
+      "rep_number": 3,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R035",
+      "sample_id": 845,
+      "rep_number": 3,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R036",
+      "sample_id": 883,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R037",
+      "sample_id": 890,
+      "rep_number": 1,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R038",
+      "sample_id": 859,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R039",
+      "sample_id": 869,
+      "rep_number": 2,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    },
+    {
+      "audit_id": "R040",
+      "sample_id": 822,
+      "rep_number": 4,
+      "annotation": {
+        "left": {
+          "grade": null,
+          "direction": null
+        },
+        "right": {
+          "grade": null,
+          "direction": null
+        },
+        "notes": ""
+      }
+    }
+  ]
+}

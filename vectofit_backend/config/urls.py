@@ -19,9 +19,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from apps.training.inference_views import deny_public_inference_video
 from apps.core.views import health_check
 
 urlpatterns = [
+    path(
+        f"{settings.MEDIA_URL.lstrip('/')}inference_videos/<path:path>",
+        deny_public_inference_video,
+    ),
     path("api/validation/", include("apps.validation.urls")),
     path("validation/", include(("apps.validation.urls", "validation"), namespace="validation-short")),
     path("api/annotator/", include("apps.annotator.urls")),

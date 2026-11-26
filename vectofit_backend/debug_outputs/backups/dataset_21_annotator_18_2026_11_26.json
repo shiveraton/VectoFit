@@ -1,0 +1,6776 @@
+{
+  "dataset_id": 21,
+  "dataset_name": "Bodyweight Squat v2",
+  "annotator_id": 18,
+  "knee_annotations": [
+    {
+      "id": 102,
+      "sample_id": 539,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:48:06.910Z"
+    },
+    {
+      "id": 103,
+      "sample_id": 540,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:48:41.226Z"
+    },
+    {
+      "id": 104,
+      "sample_id": 541,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:48:58.553Z"
+    },
+    {
+      "id": 105,
+      "sample_id": 542,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:49:10.925Z"
+    },
+    {
+      "id": 106,
+      "sample_id": 543,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:49:23.723Z"
+    },
+    {
+      "id": 107,
+      "sample_id": 544,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:49:38.771Z"
+    },
+    {
+      "id": 108,
+      "sample_id": 545,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "valgus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:49:59.377Z"
+    },
+    {
+      "id": 109,
+      "sample_id": 546,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:50:25.422Z"
+    },
+    {
+      "id": 110,
+      "sample_id": 546,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "valgus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:50:33.934Z"
+    },
+    {
+      "id": 117,
+      "sample_id": 553,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:59:27.117Z"
+    },
+    {
+      "id": 118,
+      "sample_id": 554,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:59:36.904Z"
+    },
+    {
+      "id": 119,
+      "sample_id": 555,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:59:50.327Z"
+    },
+    {
+      "id": 120,
+      "sample_id": 556,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:59:59.557Z"
+    },
+    {
+      "id": 121,
+      "sample_id": 557,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:00:11.608Z"
+    },
+    {
+      "id": 122,
+      "sample_id": 558,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:00:21.967Z"
+    },
+    {
+      "id": 123,
+      "sample_id": 559,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:01:02.210Z"
+    },
+    {
+      "id": 139,
+      "sample_id": 575,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:08:19.112Z"
+    },
+    {
+      "id": 140,
+      "sample_id": 576,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:08:33.701Z"
+    },
+    {
+      "id": 141,
+      "sample_id": 577,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:08:42.699Z"
+    },
+    {
+      "id": 142,
+      "sample_id": 578,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:08:54.684Z"
+    },
+    {
+      "id": 143,
+      "sample_id": 579,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:03.300Z"
+    },
+    {
+      "id": 144,
+      "sample_id": 580,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:16.469Z"
+    },
+    {
+      "id": 145,
+      "sample_id": 581,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:25.962Z"
+    },
+    {
+      "id": 146,
+      "sample_id": 582,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:33.140Z"
+    },
+    {
+      "id": 147,
+      "sample_id": 583,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:40.417Z"
+    },
+    {
+      "id": 148,
+      "sample_id": 584,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:09:52.400Z"
+    },
+    {
+      "id": 149,
+      "sample_id": 585,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:10:06.027Z"
+    },
+    {
+      "id": 150,
+      "sample_id": 586,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:10:17.401Z"
+    },
+    {
+      "id": 151,
+      "sample_id": 587,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:10:29.052Z"
+    },
+    {
+      "id": 152,
+      "sample_id": 575,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:11:41.311Z"
+    },
+    {
+      "id": 169,
+      "sample_id": 603,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:19:13.151Z"
+    },
+    {
+      "id": 170,
+      "sample_id": 602,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:20:01.060Z"
+    },
+    {
+      "id": 181,
+      "sample_id": 614,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:29:07.981Z"
+    },
+    {
+      "id": 182,
+      "sample_id": 615,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:29:58.784Z"
+    },
+    {
+      "id": 183,
+      "sample_id": 616,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:30:24.367Z"
+    },
+    {
+      "id": 196,
+      "sample_id": 629,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:38:52.515Z"
+    },
+    {
+      "id": 111,
+      "sample_id": 547,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:50:57.946Z"
+    },
+    {
+      "id": 112,
+      "sample_id": 548,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:51:13.507Z"
+    },
+    {
+      "id": 113,
+      "sample_id": 549,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:51:39.746Z"
+    },
+    {
+      "id": 124,
+      "sample_id": 560,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:01:16.150Z"
+    },
+    {
+      "id": 125,
+      "sample_id": 561,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:01:30.175Z"
+    },
+    {
+      "id": 126,
+      "sample_id": 562,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:01:55.879Z"
+    },
+    {
+      "id": 127,
+      "sample_id": 563,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:02:41.277Z"
+    },
+    {
+      "id": 153,
+      "sample_id": 578,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:12:29.075Z"
+    },
+    {
+      "id": 154,
+      "sample_id": 588,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:14:14.514Z"
+    },
+    {
+      "id": 171,
+      "sample_id": 604,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:21:09.960Z"
+    },
+    {
+      "id": 172,
+      "sample_id": 605,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:21:25.178Z"
+    },
+    {
+      "id": 173,
+      "sample_id": 606,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:21:40.563Z"
+    },
+    {
+      "id": 174,
+      "sample_id": 607,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:21:51.357Z"
+    },
+    {
+      "id": 175,
+      "sample_id": 608,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:22:21.403Z"
+    },
+    {
+      "id": 176,
+      "sample_id": 609,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:22:33.849Z"
+    },
+    {
+      "id": 184,
+      "sample_id": 617,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:31:03.907Z"
+    },
+    {
+      "id": 185,
+      "sample_id": 618,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:31:21.935Z"
+    },
+    {
+      "id": 186,
+      "sample_id": 619,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:32:09.589Z"
+    },
+    {
+      "id": 187,
+      "sample_id": 620,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:32:42.050Z"
+    },
+    {
+      "id": 188,
+      "sample_id": 621,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:33:03.798Z"
+    },
+    {
+      "id": 189,
+      "sample_id": 622,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:33:10.150Z"
+    },
+    {
+      "id": 190,
+      "sample_id": 623,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:33:40.770Z"
+    },
+    {
+      "id": 191,
+      "sample_id": 624,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:34:14.943Z"
+    },
+    {
+      "id": 197,
+      "sample_id": 630,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:39:23.125Z"
+    },
+    {
+      "id": 198,
+      "sample_id": 631,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:39:42.671Z"
+    },
+    {
+      "id": 213,
+      "sample_id": 646,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "Right knee has a borderline status. Unsure if it is varus/valgus since it is neither caving in or drifting out.",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:47:19.643Z"
+    },
+    {
+      "id": 216,
+      "sample_id": 649,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "Shaky camera",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:00:34.018Z"
+    },
+    {
+      "id": 217,
+      "sample_id": 650,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:05:16.028Z"
+    },
+    {
+      "id": 218,
+      "sample_id": 651,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:05:29.705Z"
+    },
+    {
+      "id": 219,
+      "sample_id": 652,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:05:55.744Z"
+    },
+    {
+      "id": 220,
+      "sample_id": 653,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:06:25.748Z"
+    },
+    {
+      "id": 221,
+      "sample_id": 654,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:06:40.892Z"
+    },
+    {
+      "id": 222,
+      "sample_id": 655,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:07:02.256Z"
+    },
+    {
+      "id": 223,
+      "sample_id": 656,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:07:14.563Z"
+    },
+    {
+      "id": 114,
+      "sample_id": 550,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:52:28.437Z"
+    },
+    {
+      "id": 128,
+      "sample_id": 564,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:03:53.706Z"
+    },
+    {
+      "id": 129,
+      "sample_id": 565,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:04:20.907Z"
+    },
+    {
+      "id": 130,
+      "sample_id": 566,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:04:31.384Z"
+    },
+    {
+      "id": 131,
+      "sample_id": 567,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:04:47.584Z"
+    },
+    {
+      "id": 132,
+      "sample_id": 568,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:05:36.935Z"
+    },
+    {
+      "id": 133,
+      "sample_id": 569,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:05:49.032Z"
+    },
+    {
+      "id": 155,
+      "sample_id": 589,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:14:57.761Z"
+    },
+    {
+      "id": 156,
+      "sample_id": 590,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:15:59.697Z"
+    },
+    {
+      "id": 157,
+      "sample_id": 591,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:16:08.639Z"
+    },
+    {
+      "id": 158,
+      "sample_id": 592,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:16:16.075Z"
+    },
+    {
+      "id": 159,
+      "sample_id": 593,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:16:27.356Z"
+    },
+    {
+      "id": 160,
+      "sample_id": 594,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:16:43.934Z"
+    },
+    {
+      "id": 161,
+      "sample_id": 595,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:16:51.649Z"
+    },
+    {
+      "id": 177,
+      "sample_id": 610,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:23:12.552Z"
+    },
+    {
+      "id": 178,
+      "sample_id": 611,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:23:26.886Z"
+    },
+    {
+      "id": 179,
+      "sample_id": 612,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:23:57.832Z"
+    },
+    {
+      "id": 192,
+      "sample_id": 625,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:35:32.213Z"
+    },
+    {
+      "id": 193,
+      "sample_id": 626,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:35:55.629Z"
+    },
+    {
+      "id": 194,
+      "sample_id": 627,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:36:53.028Z"
+    },
+    {
+      "id": 199,
+      "sample_id": 632,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:40:08.957Z"
+    },
+    {
+      "id": 200,
+      "sample_id": 633,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:40:25.331Z"
+    },
+    {
+      "id": 201,
+      "sample_id": 634,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:40:34.492Z"
+    },
+    {
+      "id": 202,
+      "sample_id": 635,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:40:41.893Z"
+    },
+    {
+      "id": 203,
+      "sample_id": 636,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:41:14.226Z"
+    },
+    {
+      "id": 204,
+      "sample_id": 637,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:41:37.817Z"
+    },
+    {
+      "id": 205,
+      "sample_id": 638,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:41:51.761Z"
+    },
+    {
+      "id": 206,
+      "sample_id": 639,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:41:57.980Z"
+    },
+    {
+      "id": 207,
+      "sample_id": 640,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:42:05.095Z"
+    },
+    {
+      "id": 208,
+      "sample_id": 641,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:42:19.639Z"
+    },
+    {
+      "id": 209,
+      "sample_id": 642,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:42:44.024Z"
+    },
+    {
+      "id": 210,
+      "sample_id": 643,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:42:53.564Z"
+    },
+    {
+      "id": 211,
+      "sample_id": 644,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:43:51.632Z"
+    },
+    {
+      "id": 212,
+      "sample_id": 645,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:44:07.002Z"
+    },
+    {
+      "id": 214,
+      "sample_id": 647,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:49:50.169Z"
+    },
+    {
+      "id": 215,
+      "sample_id": 648,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:51:31.812Z"
+    },
+    {
+      "id": 87,
+      "sample_id": 525,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:49:36.604Z"
+    },
+    {
+      "id": 88,
+      "sample_id": 526,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:49:54.236Z"
+    },
+    {
+      "id": 89,
+      "sample_id": 527,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:51:29.357Z"
+    },
+    {
+      "id": 90,
+      "sample_id": 528,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:51:46.490Z"
+    },
+    {
+      "id": 91,
+      "sample_id": 529,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:52:21.259Z"
+    },
+    {
+      "id": 92,
+      "sample_id": 530,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:52:43.623Z"
+    },
+    {
+      "id": 93,
+      "sample_id": 531,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "The right knee had a sudden lateral shift which caused a slight lean outward. It is not a guaranteed deviation.",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:57:32.369Z"
+    },
+    {
+      "id": 94,
+      "sample_id": 532,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T17:59:13.768Z"
+    },
+    {
+      "id": 95,
+      "sample_id": 533,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T18:00:08.544Z"
+    },
+    {
+      "id": 96,
+      "sample_id": 534,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T18:00:29.374Z"
+    },
+    {
+      "id": 97,
+      "sample_id": 535,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-13T18:03:19.076Z"
+    },
+    {
+      "id": 98,
+      "sample_id": 536,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T04:53:37.330Z"
+    },
+    {
+      "id": 99,
+      "sample_id": 537,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T04:54:17.994Z"
+    },
+    {
+      "id": 100,
+      "sample_id": 537,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T04:55:00.658Z"
+    },
+    {
+      "id": 101,
+      "sample_id": 538,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T04:55:14.491Z"
+    },
+    {
+      "id": 115,
+      "sample_id": 551,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:52:38.439Z"
+    },
+    {
+      "id": 116,
+      "sample_id": 552,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T05:52:49.444Z"
+    },
+    {
+      "id": 134,
+      "sample_id": 570,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:06:04.591Z"
+    },
+    {
+      "id": 135,
+      "sample_id": 571,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:06:15.293Z"
+    },
+    {
+      "id": 136,
+      "sample_id": 572,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:06:43.898Z"
+    },
+    {
+      "id": 137,
+      "sample_id": 573,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:07:05.905Z"
+    },
+    {
+      "id": 138,
+      "sample_id": 574,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:07:36.040Z"
+    },
+    {
+      "id": 162,
+      "sample_id": 596,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:17:12.818Z"
+    },
+    {
+      "id": 163,
+      "sample_id": 597,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:17:29.676Z"
+    },
+    {
+      "id": 164,
+      "sample_id": 598,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:17:37.491Z"
+    },
+    {
+      "id": 165,
+      "sample_id": 599,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:17:45.178Z"
+    },
+    {
+      "id": 166,
+      "sample_id": 600,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:17:55.625Z"
+    },
+    {
+      "id": 167,
+      "sample_id": 601,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:18:12.576Z"
+    },
+    {
+      "id": 168,
+      "sample_id": 602,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:18:53.906Z"
+    },
+    {
+      "id": 180,
+      "sample_id": 613,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:25:48.504Z"
+    },
+    {
+      "id": 195,
+      "sample_id": 628,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T06:38:22.392Z"
+    },
+    {
+      "id": 224,
+      "sample_id": 657,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:07:25.186Z"
+    },
+    {
+      "id": 225,
+      "sample_id": 664,
+      "annotation": {
+        "left": {
+          "grade": "unassessable",
+          "direction": null
+        },
+        "notes": "Angle is from above so there's difficulty in reviewing",
+        "right": {
+          "grade": "unassessable",
+          "direction": null
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:08:30.085Z"
+    },
+    {
+      "id": 226,
+      "sample_id": 665,
+      "annotation": {
+        "left": {
+          "grade": "unassessable",
+          "direction": null
+        },
+        "notes": "Unclear. Both hands blocking knees",
+        "right": {
+          "grade": "unassessable",
+          "direction": null
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:09:12.417Z"
+    },
+    {
+      "id": 227,
+      "sample_id": 666,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:09:30.943Z"
+    },
+    {
+      "id": 228,
+      "sample_id": 667,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:10:05.771Z"
+    },
+    {
+      "id": 229,
+      "sample_id": 668,
+      "annotation": {
+        "left": {
+          "grade": "unassessable",
+          "direction": null
+        },
+        "notes": "",
+        "right": {
+          "grade": "unassessable",
+          "direction": null
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:11:10.893Z"
+    },
+    {
+      "id": 230,
+      "sample_id": 669,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:11:34.501Z"
+    },
+    {
+      "id": 231,
+      "sample_id": 670,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:12:09.575Z"
+    },
+    {
+      "id": 232,
+      "sample_id": 658,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:12:27.993Z"
+    },
+    {
+      "id": 233,
+      "sample_id": 659,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:12:38.077Z"
+    },
+    {
+      "id": 234,
+      "sample_id": 660,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:13:22.592Z"
+    },
+    {
+      "id": 235,
+      "sample_id": 661,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:13:43.822Z"
+    },
+    {
+      "id": 236,
+      "sample_id": 662,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:13:54.303Z"
+    },
+    {
+      "id": 237,
+      "sample_id": 663,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:14:04.040Z"
+    },
+    {
+      "id": 238,
+      "sample_id": 681,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:15:05.795Z"
+    },
+    {
+      "id": 239,
+      "sample_id": 682,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:15:43.030Z"
+    },
+    {
+      "id": 240,
+      "sample_id": 683,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:16:03.284Z"
+    },
+    {
+      "id": 241,
+      "sample_id": 684,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:16:19.435Z"
+    },
+    {
+      "id": 242,
+      "sample_id": 685,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:16:36.540Z"
+    },
+    {
+      "id": 243,
+      "sample_id": 686,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:17:07.473Z"
+    },
+    {
+      "id": 244,
+      "sample_id": 687,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:17:24.374Z"
+    },
+    {
+      "id": 245,
+      "sample_id": 688,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:17:49.627Z"
+    },
+    {
+      "id": 246,
+      "sample_id": 689,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:18:16.012Z"
+    },
+    {
+      "id": 247,
+      "sample_id": 690,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:18:32.140Z"
+    },
+    {
+      "id": 248,
+      "sample_id": 691,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:19:02.662Z"
+    },
+    {
+      "id": 249,
+      "sample_id": 692,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:19:33.090Z"
+    },
+    {
+      "id": 250,
+      "sample_id": 681,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:21:23.658Z"
+    },
+    {
+      "id": 251,
+      "sample_id": 671,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:21:46.528Z"
+    },
+    {
+      "id": 252,
+      "sample_id": 672,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:22:07.760Z"
+    },
+    {
+      "id": 253,
+      "sample_id": 673,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:22:23.328Z"
+    },
+    {
+      "id": 254,
+      "sample_id": 674,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:22:38.355Z"
+    },
+    {
+      "id": 255,
+      "sample_id": 674,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:24:34.154Z"
+    },
+    {
+      "id": 256,
+      "sample_id": 675,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:24:46.617Z"
+    },
+    {
+      "id": 257,
+      "sample_id": 676,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:24:58.568Z"
+    },
+    {
+      "id": 258,
+      "sample_id": 677,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:25:10.245Z"
+    },
+    {
+      "id": 259,
+      "sample_id": 678,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:25:21.980Z"
+    },
+    {
+      "id": 260,
+      "sample_id": 679,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:25:51.445Z"
+    },
+    {
+      "id": 261,
+      "sample_id": 680,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:26:12.532Z"
+    },
+    {
+      "id": 262,
+      "sample_id": 704,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:26:42.826Z"
+    },
+    {
+      "id": 263,
+      "sample_id": 705,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:26:59.849Z"
+    },
+    {
+      "id": 264,
+      "sample_id": 706,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:27:08.204Z"
+    },
+    {
+      "id": 265,
+      "sample_id": 707,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:27:16.977Z"
+    },
+    {
+      "id": 266,
+      "sample_id": 708,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:28:32.721Z"
+    },
+    {
+      "id": 267,
+      "sample_id": 709,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:29:08.721Z"
+    },
+    {
+      "id": 268,
+      "sample_id": 710,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:29:49.059Z"
+    },
+    {
+      "id": 269,
+      "sample_id": 711,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:30:09.502Z"
+    },
+    {
+      "id": 270,
+      "sample_id": 712,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:30:17.567Z"
+    },
+    {
+      "id": 271,
+      "sample_id": 713,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:30:25.663Z"
+    },
+    {
+      "id": 272,
+      "sample_id": 714,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:30:36.487Z"
+    },
+    {
+      "id": 273,
+      "sample_id": 715,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:30:50.028Z"
+    },
+    {
+      "id": 274,
+      "sample_id": 693,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:31:06.100Z"
+    },
+    {
+      "id": 275,
+      "sample_id": 694,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:32:00.830Z"
+    },
+    {
+      "id": 276,
+      "sample_id": 695,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:32:40.295Z"
+    },
+    {
+      "id": 277,
+      "sample_id": 696,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:32:54.848Z"
+    },
+    {
+      "id": 278,
+      "sample_id": 697,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:33:05.941Z"
+    },
+    {
+      "id": 279,
+      "sample_id": 698,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:33:16.673Z"
+    },
+    {
+      "id": 280,
+      "sample_id": 699,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:33:36.617Z"
+    },
+    {
+      "id": 281,
+      "sample_id": 700,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:33:49.887Z"
+    },
+    {
+      "id": 282,
+      "sample_id": 701,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:34:01.685Z"
+    },
+    {
+      "id": 283,
+      "sample_id": 702,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:34:24.063Z"
+    },
+    {
+      "id": 284,
+      "sample_id": 703,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:34:34.484Z"
+    },
+    {
+      "id": 285,
+      "sample_id": 716,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:34:49.793Z"
+    },
+    {
+      "id": 286,
+      "sample_id": 717,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:35:16.023Z"
+    },
+    {
+      "id": 287,
+      "sample_id": 718,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:35:56.326Z"
+    },
+    {
+      "id": 288,
+      "sample_id": 719,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:36:07.074Z"
+    },
+    {
+      "id": 289,
+      "sample_id": 720,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:36:15.701Z"
+    },
+    {
+      "id": 290,
+      "sample_id": 721,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:36:34.249Z"
+    },
+    {
+      "id": 291,
+      "sample_id": 722,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:36:58.715Z"
+    },
+    {
+      "id": 292,
+      "sample_id": 723,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:37:10.436Z"
+    },
+    {
+      "id": 293,
+      "sample_id": 724,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:37:29.827Z"
+    },
+    {
+      "id": 294,
+      "sample_id": 725,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:38:05.260Z"
+    },
+    {
+      "id": 295,
+      "sample_id": 726,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:38:25.479Z"
+    },
+    {
+      "id": 296,
+      "sample_id": 727,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:38:39.922Z"
+    },
+    {
+      "id": 297,
+      "sample_id": 728,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:38:49.436Z"
+    },
+    {
+      "id": 298,
+      "sample_id": 729,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:39:22.878Z"
+    },
+    {
+      "id": 299,
+      "sample_id": 730,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:39:46.278Z"
+    },
+    {
+      "id": 300,
+      "sample_id": 731,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:39:57.186Z"
+    },
+    {
+      "id": 301,
+      "sample_id": 732,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:40:06.841Z"
+    },
+    {
+      "id": 302,
+      "sample_id": 733,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:40:14.777Z"
+    },
+    {
+      "id": 303,
+      "sample_id": 734,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:40:22.947Z"
+    },
+    {
+      "id": 304,
+      "sample_id": 735,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:40:38.080Z"
+    },
+    {
+      "id": 305,
+      "sample_id": 736,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:40:52.028Z"
+    },
+    {
+      "id": 306,
+      "sample_id": 737,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:41:12.168Z"
+    },
+    {
+      "id": 307,
+      "sample_id": 738,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:41:37.247Z"
+    },
+    {
+      "id": 308,
+      "sample_id": 739,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:43:40.491Z"
+    },
+    {
+      "id": 309,
+      "sample_id": 740,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:43:51.825Z"
+    },
+    {
+      "id": 310,
+      "sample_id": 741,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:44:17.505Z"
+    },
+    {
+      "id": 311,
+      "sample_id": 742,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:44:36.347Z"
+    },
+    {
+      "id": 312,
+      "sample_id": 743,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "There is a lateral balance shift that causes the right knee to drift out and the left knee to follow in that direction while maintaining tracking with foot.",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:46:50.418Z"
+    },
+    {
+      "id": 313,
+      "sample_id": 744,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "This time, the balance shifts left-wise",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:47:25.361Z"
+    },
+    {
+      "id": 314,
+      "sample_id": 745,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:47:35.534Z"
+    },
+    {
+      "id": 315,
+      "sample_id": 746,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:51:45.492Z"
+    },
+    {
+      "id": 316,
+      "sample_id": 747,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:52:00.835Z"
+    },
+    {
+      "id": 317,
+      "sample_id": 748,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:52:23.034Z"
+    },
+    {
+      "id": 318,
+      "sample_id": 749,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:52:40.083Z"
+    },
+    {
+      "id": 319,
+      "sample_id": 750,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:53:09.825Z"
+    },
+    {
+      "id": 320,
+      "sample_id": 751,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:53:21.126Z"
+    },
+    {
+      "id": 321,
+      "sample_id": 752,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:53:34.281Z"
+    },
+    {
+      "id": 322,
+      "sample_id": 753,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:53:57.053Z"
+    },
+    {
+      "id": 323,
+      "sample_id": 754,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:54:07.717Z"
+    },
+    {
+      "id": 324,
+      "sample_id": 755,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:54:58.126Z"
+    },
+    {
+      "id": 325,
+      "sample_id": 756,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:55:25.666Z"
+    },
+    {
+      "id": 326,
+      "sample_id": 757,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:55:35.707Z"
+    },
+    {
+      "id": 327,
+      "sample_id": 758,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:55:58.305Z"
+    },
+    {
+      "id": 328,
+      "sample_id": 759,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:56:09.896Z"
+    },
+    {
+      "id": 329,
+      "sample_id": 760,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:56:26.507Z"
+    },
+    {
+      "id": 330,
+      "sample_id": 761,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:56:39.842Z"
+    },
+    {
+      "id": 331,
+      "sample_id": 762,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:56:58.797Z"
+    },
+    {
+      "id": 332,
+      "sample_id": 763,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:57:18.521Z"
+    },
+    {
+      "id": 333,
+      "sample_id": 764,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:57:34.685Z"
+    },
+    {
+      "id": 334,
+      "sample_id": 765,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:57:46.160Z"
+    },
+    {
+      "id": 335,
+      "sample_id": 766,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:57:56.288Z"
+    },
+    {
+      "id": 336,
+      "sample_id": 767,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:58:27.411Z"
+    },
+    {
+      "id": 337,
+      "sample_id": 768,
+      "annotation": {
+        "left": {
+          "grade": "unassessable",
+          "direction": null
+        },
+        "notes": "Passing object has obstructed the view",
+        "right": {
+          "grade": "unassessable",
+          "direction": null
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:59:12.837Z"
+    },
+    {
+      "id": 338,
+      "sample_id": 769,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:59:38.939Z"
+    },
+    {
+      "id": 339,
+      "sample_id": 770,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T07:59:56.010Z"
+    },
+    {
+      "id": 340,
+      "sample_id": 771,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:00:23.145Z"
+    },
+    {
+      "id": 341,
+      "sample_id": 772,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:00:43.414Z"
+    },
+    {
+      "id": 342,
+      "sample_id": 773,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:01:04.921Z"
+    },
+    {
+      "id": 343,
+      "sample_id": 774,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:01:27.712Z"
+    },
+    {
+      "id": 344,
+      "sample_id": 775,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:01:45.893Z"
+    },
+    {
+      "id": 345,
+      "sample_id": 776,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:01:57.833Z"
+    },
+    {
+      "id": 346,
+      "sample_id": 777,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:02:14.257Z"
+    },
+    {
+      "id": 347,
+      "sample_id": 778,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:02:27.539Z"
+    },
+    {
+      "id": 348,
+      "sample_id": 779,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:02:53.788Z"
+    },
+    {
+      "id": 349,
+      "sample_id": 780,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:03:20.145Z"
+    },
+    {
+      "id": 350,
+      "sample_id": 781,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:03:34.397Z"
+    },
+    {
+      "id": 351,
+      "sample_id": 782,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:03:58.696Z"
+    },
+    {
+      "id": 352,
+      "sample_id": 783,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:04:14.724Z"
+    },
+    {
+      "id": 353,
+      "sample_id": 784,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:04:31.870Z"
+    },
+    {
+      "id": 354,
+      "sample_id": 785,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:04:45.198Z"
+    },
+    {
+      "id": 355,
+      "sample_id": 786,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:04:59.947Z"
+    },
+    {
+      "id": 356,
+      "sample_id": 787,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:05:13.605Z"
+    },
+    {
+      "id": 357,
+      "sample_id": 788,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:05:27.217Z"
+    },
+    {
+      "id": 358,
+      "sample_id": 789,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:05:46.456Z"
+    },
+    {
+      "id": 359,
+      "sample_id": 790,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:05:58.591Z"
+    },
+    {
+      "id": 360,
+      "sample_id": 791,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:06:12.183Z"
+    },
+    {
+      "id": 361,
+      "sample_id": 792,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:06:22.865Z"
+    },
+    {
+      "id": 362,
+      "sample_id": 793,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:06:35.545Z"
+    },
+    {
+      "id": 363,
+      "sample_id": 794,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:07:03.124Z"
+    },
+    {
+      "id": 364,
+      "sample_id": 795,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:07:14.985Z"
+    },
+    {
+      "id": 365,
+      "sample_id": 796,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:07:26.495Z"
+    },
+    {
+      "id": 366,
+      "sample_id": 797,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:07:50.105Z"
+    },
+    {
+      "id": 367,
+      "sample_id": 798,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:08:07.968Z"
+    },
+    {
+      "id": 368,
+      "sample_id": 799,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:08:36.094Z"
+    },
+    {
+      "id": 369,
+      "sample_id": 800,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:08:50.765Z"
+    },
+    {
+      "id": 370,
+      "sample_id": 801,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:09:22.688Z"
+    },
+    {
+      "id": 371,
+      "sample_id": 802,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:09:36.850Z"
+    },
+    {
+      "id": 372,
+      "sample_id": 803,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:09:49.862Z"
+    },
+    {
+      "id": 373,
+      "sample_id": 804,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:10:03.468Z"
+    },
+    {
+      "id": 374,
+      "sample_id": 805,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:10:15.146Z"
+    },
+    {
+      "id": 375,
+      "sample_id": 806,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:10:32.364Z"
+    },
+    {
+      "id": 376,
+      "sample_id": 807,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:50:58.478Z"
+    },
+    {
+      "id": 377,
+      "sample_id": 808,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:51:24.876Z"
+    },
+    {
+      "id": 378,
+      "sample_id": 809,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:51:37.897Z"
+    },
+    {
+      "id": 379,
+      "sample_id": 810,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:51:59.720Z"
+    },
+    {
+      "id": 380,
+      "sample_id": 811,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:52:23.267Z"
+    },
+    {
+      "id": 381,
+      "sample_id": 812,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:52:39.178Z"
+    },
+    {
+      "id": 382,
+      "sample_id": 813,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:52:57.249Z"
+    },
+    {
+      "id": 383,
+      "sample_id": 814,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:53:11.345Z"
+    },
+    {
+      "id": 384,
+      "sample_id": 815,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:54:00.431Z"
+    },
+    {
+      "id": 385,
+      "sample_id": 816,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:54:10.071Z"
+    },
+    {
+      "id": 386,
+      "sample_id": 817,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:54:39.078Z"
+    },
+    {
+      "id": 387,
+      "sample_id": 818,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:56:14.888Z"
+    },
+    {
+      "id": 388,
+      "sample_id": 819,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:56:37.273Z"
+    },
+    {
+      "id": 389,
+      "sample_id": 820,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:56:52.081Z"
+    },
+    {
+      "id": 390,
+      "sample_id": 821,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:57:14.719Z"
+    },
+    {
+      "id": 391,
+      "sample_id": 822,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:57:32.530Z"
+    },
+    {
+      "id": 392,
+      "sample_id": 823,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:57:42.688Z"
+    },
+    {
+      "id": 393,
+      "sample_id": 824,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:58:25.420Z"
+    },
+    {
+      "id": 394,
+      "sample_id": 825,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:58:47.798Z"
+    },
+    {
+      "id": 395,
+      "sample_id": 826,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T08:59:29.647Z"
+    },
+    {
+      "id": 396,
+      "sample_id": 827,
+      "annotation": {
+        "left": {
+          "grade": "borderline",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:00:23.402Z"
+    },
+    {
+      "id": 397,
+      "sample_id": 828,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:01:02.035Z"
+    },
+    {
+      "id": 398,
+      "sample_id": 829,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:01:19.047Z"
+    },
+    {
+      "id": 399,
+      "sample_id": 830,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:01:27.304Z"
+    },
+    {
+      "id": 400,
+      "sample_id": 831,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:01:43.698Z"
+    },
+    {
+      "id": 401,
+      "sample_id": 832,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:01:56.918Z"
+    },
+    {
+      "id": 402,
+      "sample_id": 833,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:02:07.603Z"
+    },
+    {
+      "id": 403,
+      "sample_id": 834,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:02:19.838Z"
+    },
+    {
+      "id": 404,
+      "sample_id": 835,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:02:46.756Z"
+    },
+    {
+      "id": 405,
+      "sample_id": 836,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:03:02.255Z"
+    },
+    {
+      "id": 406,
+      "sample_id": 837,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:03:10.331Z"
+    },
+    {
+      "id": 407,
+      "sample_id": 838,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:04:11.733Z"
+    },
+    {
+      "id": 408,
+      "sample_id": 839,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:04:37.369Z"
+    },
+    {
+      "id": 409,
+      "sample_id": 840,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:04:56.301Z"
+    },
+    {
+      "id": 410,
+      "sample_id": 841,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:05:10.996Z"
+    },
+    {
+      "id": 411,
+      "sample_id": 842,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:05:29.990Z"
+    },
+    {
+      "id": 412,
+      "sample_id": 843,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:05:48.208Z"
+    },
+    {
+      "id": 413,
+      "sample_id": 844,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:06:11.874Z"
+    },
+    {
+      "id": 414,
+      "sample_id": 845,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:06:33.343Z"
+    },
+    {
+      "id": 415,
+      "sample_id": 846,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:07:25.531Z"
+    },
+    {
+      "id": 416,
+      "sample_id": 847,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:07:35.531Z"
+    },
+    {
+      "id": 417,
+      "sample_id": 848,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:07:44.160Z"
+    },
+    {
+      "id": 418,
+      "sample_id": 849,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:08:13.930Z"
+    },
+    {
+      "id": 419,
+      "sample_id": 850,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:08:30.584Z"
+    },
+    {
+      "id": 420,
+      "sample_id": 851,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "uncertain"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:09:22.056Z"
+    },
+    {
+      "id": 421,
+      "sample_id": 852,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:09:32.397Z"
+    },
+    {
+      "id": 422,
+      "sample_id": 853,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:09:43.568Z"
+    },
+    {
+      "id": 423,
+      "sample_id": 854,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:09:51.933Z"
+    },
+    {
+      "id": 424,
+      "sample_id": 855,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:09:59.408Z"
+    },
+    {
+      "id": 425,
+      "sample_id": 856,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:10:08.005Z"
+    },
+    {
+      "id": 426,
+      "sample_id": 857,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:10:17.994Z"
+    },
+    {
+      "id": 427,
+      "sample_id": 858,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:10:28.985Z"
+    },
+    {
+      "id": 428,
+      "sample_id": 859,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:10:39.566Z"
+    },
+    {
+      "id": 429,
+      "sample_id": 860,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:10:47.370Z"
+    },
+    {
+      "id": 430,
+      "sample_id": 861,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:02.328Z"
+    },
+    {
+      "id": 431,
+      "sample_id": 862,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:11.616Z"
+    },
+    {
+      "id": 432,
+      "sample_id": 863,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:28.965Z"
+    },
+    {
+      "id": 433,
+      "sample_id": 864,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:37.252Z"
+    },
+    {
+      "id": 434,
+      "sample_id": 865,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:45.819Z"
+    },
+    {
+      "id": 435,
+      "sample_id": 866,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:11:53.645Z"
+    },
+    {
+      "id": 436,
+      "sample_id": 867,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:12:02.298Z"
+    },
+    {
+      "id": 437,
+      "sample_id": 868,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:12:35.015Z"
+    },
+    {
+      "id": 438,
+      "sample_id": 869,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:12:52.031Z"
+    },
+    {
+      "id": 439,
+      "sample_id": 870,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:13:00.719Z"
+    },
+    {
+      "id": 440,
+      "sample_id": 871,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:13:15.347Z"
+    },
+    {
+      "id": 441,
+      "sample_id": 872,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:13:29.360Z"
+    },
+    {
+      "id": 442,
+      "sample_id": 873,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:13:45.345Z"
+    },
+    {
+      "id": 443,
+      "sample_id": 874,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:13:53.857Z"
+    },
+    {
+      "id": 444,
+      "sample_id": 875,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:14:05.095Z"
+    },
+    {
+      "id": 445,
+      "sample_id": 876,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:14:14.043Z"
+    },
+    {
+      "id": 446,
+      "sample_id": 877,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:14:22.159Z"
+    },
+    {
+      "id": 447,
+      "sample_id": 878,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:14:50.495Z"
+    },
+    {
+      "id": 448,
+      "sample_id": 879,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:15:12.876Z"
+    },
+    {
+      "id": 449,
+      "sample_id": 880,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:15:21.136Z"
+    },
+    {
+      "id": 450,
+      "sample_id": 881,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "deviated",
+          "direction": "varus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:15:34.520Z"
+    },
+    {
+      "id": 451,
+      "sample_id": 882,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:15:46.555Z"
+    },
+    {
+      "id": 452,
+      "sample_id": 883,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:16:04.096Z"
+    },
+    {
+      "id": 453,
+      "sample_id": 884,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:16:16.154Z"
+    },
+    {
+      "id": 454,
+      "sample_id": 885,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:16:30.151Z"
+    },
+    {
+      "id": 455,
+      "sample_id": 886,
+      "annotation": {
+        "left": {
+          "grade": "deviated",
+          "direction": "varus"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:16:59.409Z"
+    },
+    {
+      "id": 456,
+      "sample_id": 887,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:17:13.784Z"
+    },
+    {
+      "id": 457,
+      "sample_id": 888,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:17:21.887Z"
+    },
+    {
+      "id": 458,
+      "sample_id": 889,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:17:28.934Z"
+    },
+    {
+      "id": 459,
+      "sample_id": 890,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "aligned",
+          "direction": "none"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:17:53.750Z"
+    },
+    {
+      "id": 460,
+      "sample_id": 891,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:18:16.239Z"
+    },
+    {
+      "id": 461,
+      "sample_id": 892,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:18:35.190Z"
+    },
+    {
+      "id": 462,
+      "sample_id": 893,
+      "annotation": {
+        "left": {
+          "grade": "aligned",
+          "direction": "none"
+        },
+        "notes": "",
+        "right": {
+          "grade": "borderline",
+          "direction": "valgus"
+        }
+      },
+      "annotator_id": 18,
+      "rubric_version": "knee_v1",
+      "created_at": "2026-11-14T09:18:57.268Z"
+    }
+  ],
+  "sample_labels": []
+}

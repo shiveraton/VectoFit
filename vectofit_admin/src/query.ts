@@ -13,6 +13,8 @@ export const queryKeys = {
   models: ["models"] as const,
   model: (id: number) => ["models", id] as const,
   training: ["training"] as const,
+  inferenceHistory: (page: number) => ["inference-history", page] as const,
+  inferenceSimulation: (id: number) => ["inference-simulation", id] as const,
   evaluationResults: ["evaluation-results"] as const,
 };
 export const queryClient = new QueryClient({

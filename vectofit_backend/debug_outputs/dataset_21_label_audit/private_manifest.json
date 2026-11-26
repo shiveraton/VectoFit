@@ -1,0 +1,1406 @@
+{
+  "dataset_id": 21,
+  "frozen_at": "2026-11-25T12:21:41.122026+00:00",
+  "seed": 42,
+  "selection": "Equal source quotas, randomized participant round-robin, training-eligible binary targets only",
+  "active_assignments": [],
+  "provenance_summary": {
+    "mdy": {
+      "samples": 282,
+      "targets": {
+        "good": 137,
+        "borderline": 44,
+        "bad": 97,
+        "unassessable": 4
+      },
+      "source_labels": {
+        "None": 282
+      },
+      "rubric_versions": {
+        "knee_v1": 282
+      },
+      "annotator_ids": [
+        18
+      ]
+    },
+    "zen": {
+      "samples": 87,
+      "targets": {
+        "bad": 24,
+        "good": 45,
+        "borderline": 18
+      },
+      "source_labels": {
+        "None": 87
+      },
+      "rubric_versions": {
+        "knee_v1": 87
+      },
+      "annotator_ids": [
+        18
+      ]
+    }
+  },
+  "samples": [
+    {
+      "sample_id": 697,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P09_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 19,
+      "dataset_video_id": 77,
+      "rep_number": 5,
+      "start_frame": 169,
+      "end_frame": 201,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 278,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:33:05.941933+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R001"
+    },
+    {
+      "sample_id": 781,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P14_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 24,
+      "dataset_video_id": 83,
+      "rep_number": 12,
+      "start_frame": 336,
+      "end_frame": 365,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 350,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:03:34.397088+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R002"
+    },
+    {
+      "sample_id": 679,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P08_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 18,
+      "dataset_video_id": 75,
+      "rep_number": 9,
+      "start_frame": 365,
+      "end_frame": 404,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 260,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:25:51.445787+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R003"
+    },
+    {
+      "sample_id": 670,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P07_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 17,
+      "dataset_video_id": 72,
+      "rep_number": 7,
+      "start_frame": 268,
+      "end_frame": 294,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 231,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:12:09.575648+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R004"
+    },
+    {
+      "sample_id": 804,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P15_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 25,
+      "dataset_video_id": 85,
+      "rep_number": 8,
+      "start_frame": 293,
+      "end_frame": 327,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 373,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:10:03.468631+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R005"
+    },
+    {
+      "sample_id": 761,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P12_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 22,
+      "dataset_video_id": 81,
+      "rep_number": 6,
+      "start_frame": 223,
+      "end_frame": 253,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 330,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:56:39.842569+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R006"
+    },
+    {
+      "sample_id": 638,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P06_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 16,
+      "dataset_video_id": 70,
+      "rep_number": 7,
+      "start_frame": 277,
+      "end_frame": 308,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 205,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T06:41:51.761244+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R007"
+    },
+    {
+      "sample_id": 595,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P03_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 13,
+      "dataset_video_id": 66,
+      "rep_number": 9,
+      "start_frame": 250,
+      "end_frame": 278,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 161,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T06:16:51.649334+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R008"
+    },
+    {
+      "sample_id": 742,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P10_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 20,
+      "dataset_video_id": 79,
+      "rep_number": 14,
+      "start_frame": 411,
+      "end_frame": 445,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 311,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:44:36.347480+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R009"
+    },
+    {
+      "sample_id": 624,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P04_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 14,
+      "dataset_video_id": 68,
+      "rep_number": 12,
+      "start_frame": 424,
+      "end_frame": 458,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 191,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T06:34:14.943833+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R010"
+    },
+    {
+      "sample_id": 625,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P05_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 15,
+      "dataset_video_id": 69,
+      "rep_number": 1,
+      "start_frame": 24,
+      "end_frame": 63,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 192,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T06:35:32.213238+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R011"
+    },
+    {
+      "sample_id": 527,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P01_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 11,
+      "dataset_video_id": 61,
+      "rep_number": 3,
+      "start_frame": 136,
+      "end_frame": 176,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 89,
+          "annotator_id": 18,
+          "created_at": "2026-11-13T17:51:29.357274+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R012"
+    },
+    {
+      "sample_id": 560,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P02_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 12,
+      "dataset_video_id": 63,
+      "rep_number": 16,
+      "start_frame": 409,
+      "end_frame": 436,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 124,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T06:01:16.150732+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R013"
+    },
+    {
+      "sample_id": 746,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P11_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 21,
+      "dataset_video_id": 80,
+      "rep_number": 4,
+      "start_frame": 114,
+      "end_frame": 144,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 315,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:51:45.492333+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R014"
+    },
+    {
+      "sample_id": 693,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P09_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 19,
+      "dataset_video_id": 77,
+      "rep_number": 1,
+      "start_frame": 15,
+      "end_frame": 56,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 274,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:31:06.100781+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R015"
+    },
+    {
+      "sample_id": 776,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P14_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 24,
+      "dataset_video_id": 83,
+      "rep_number": 7,
+      "start_frame": 195,
+      "end_frame": 224,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 345,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:01:57.833054+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R016"
+    },
+    {
+      "sample_id": 672,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P08_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 18,
+      "dataset_video_id": 75,
+      "rep_number": 2,
+      "start_frame": 101,
+      "end_frame": 128,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 252,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:22:07.760692+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R017"
+    },
+    {
+      "sample_id": 659,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P07_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 17,
+      "dataset_video_id": 73,
+      "rep_number": 2,
+      "start_frame": 165,
+      "end_frame": 193,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 233,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:12:38.077765+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R018"
+    },
+    {
+      "sample_id": 795,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P15_front_v1.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 25,
+      "dataset_video_id": 84,
+      "rep_number": 12,
+      "start_frame": 375,
+      "end_frame": 405,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 364,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:07:14.985847+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R019"
+    },
+    {
+      "sample_id": 756,
+      "source": "mdy",
+      "source_path": "bw_dataset_v2/videos/mdy_P12_front_v2.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 22,
+      "dataset_video_id": 81,
+      "rep_number": 1,
+      "start_frame": 34,
+      "end_frame": 63,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 325,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T07:55:25.666505+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R020"
+    },
+    {
+      "sample_id": 823,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P04_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 29,
+      "dataset_video_id": 89,
+      "rep_number": 5,
+      "start_frame": 652,
+      "end_frame": 782,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 392,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:57:42.688578+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R021"
+    },
+    {
+      "sample_id": 874,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P16_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 41,
+      "dataset_video_id": 101,
+      "rep_number": 2,
+      "start_frame": 170,
+      "end_frame": 260,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 443,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:13:53.857441+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R022"
+    },
+    {
+      "sample_id": 829,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P06_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 31,
+      "dataset_video_id": 91,
+      "rep_number": 1,
+      "start_frame": 308,
+      "end_frame": 476,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 398,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:01:19.047712+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R023"
+    },
+    {
+      "sample_id": 852,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P11_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 36,
+      "dataset_video_id": 96,
+      "rep_number": 4,
+      "start_frame": 534,
+      "end_frame": 670,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 421,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:09:32.397041+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R024"
+    },
+    {
+      "sample_id": 846,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P10_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 35,
+      "dataset_video_id": 95,
+      "rep_number": 1,
+      "start_frame": 258,
+      "end_frame": 452,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 415,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:07:25.531784+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R025"
+    },
+    {
+      "sample_id": 816,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P03_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 28,
+      "dataset_video_id": 88,
+      "rep_number": 2,
+      "start_frame": 222,
+      "end_frame": 380,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 385,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:54:10.071035+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R026"
+    },
+    {
+      "sample_id": 834,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P07_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 32,
+      "dataset_video_id": 92,
+      "rep_number": 2,
+      "start_frame": 332,
+      "end_frame": 548,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 403,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:02:19.838725+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R027"
+    },
+    {
+      "sample_id": 841,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P08_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 33,
+      "dataset_video_id": 93,
+      "rep_number": 4,
+      "start_frame": 542,
+      "end_frame": 670,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 410,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:05:10.996665+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "valgus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R028"
+    },
+    {
+      "sample_id": 863,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P14_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 39,
+      "dataset_video_id": 99,
+      "rep_number": 1,
+      "start_frame": 48,
+      "end_frame": 156,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 432,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:11:28.965050+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R029"
+    },
+    {
+      "sample_id": 813,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P02_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 27,
+      "dataset_video_id": 87,
+      "rep_number": 4,
+      "start_frame": 440,
+      "end_frame": 542,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 382,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:52:57.249745+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R030"
+    },
+    {
+      "sample_id": 856,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P12_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 37,
+      "dataset_video_id": 97,
+      "rep_number": 4,
+      "start_frame": 596,
+      "end_frame": 722,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 425,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:10:08.005660+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R031"
+    },
+    {
+      "sample_id": 808,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P01_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 26,
+      "dataset_video_id": 86,
+      "rep_number": 2,
+      "start_frame": 718,
+      "end_frame": 850,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 377,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:51:24.876895+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R032"
+    },
+    {
+      "sample_id": 886,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P19_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 44,
+      "dataset_video_id": 104,
+      "rep_number": 1,
+      "start_frame": 50,
+      "end_frame": 242,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 455,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:16:59.409185+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R033"
+    },
+    {
+      "sample_id": 880,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P17_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 42,
+      "dataset_video_id": 102,
+      "rep_number": 3,
+      "start_frame": 388,
+      "end_frame": 526,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 449,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:15:21.136926+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R034"
+    },
+    {
+      "sample_id": 845,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P09_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 34,
+      "dataset_video_id": 94,
+      "rep_number": 3,
+      "start_frame": 702,
+      "end_frame": 866,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 414,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:06:33.343082+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R035"
+    },
+    {
+      "sample_id": 883,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P18_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 43,
+      "dataset_video_id": 103,
+      "rep_number": 2,
+      "start_frame": 250,
+      "end_frame": 428,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 452,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:16:04.096820+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R036"
+    },
+    {
+      "sample_id": 890,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P20_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 45,
+      "dataset_video_id": 105,
+      "rep_number": 1,
+      "start_frame": 34,
+      "end_frame": 136,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 459,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:17:53.750667+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R037"
+    },
+    {
+      "sample_id": 859,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P13_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 38,
+      "dataset_video_id": 98,
+      "rep_number": 2,
+      "start_frame": 162,
+      "end_frame": 324,
+      "target": "good",
+      "annotations": [
+        {
+          "id": 428,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:10:39.566072+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R038"
+    },
+    {
+      "sample_id": 869,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P15_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 40,
+      "dataset_video_id": 100,
+      "rep_number": 2,
+      "start_frame": 224,
+      "end_frame": 334,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 438,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T09:12:52.031229+00:00",
+          "annotation": {
+            "left": {
+              "grade": "aligned",
+              "direction": "none"
+            },
+            "notes": "",
+            "right": {
+              "grade": "deviated",
+              "direction": "varus"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R039"
+    },
+    {
+      "sample_id": 822,
+      "source": "zen",
+      "source_path": "bw_dataset_v2/videos/zen_P04_front.mp4",
+      "source_label": null,
+      "is_correct": null,
+      "participant_id": 29,
+      "dataset_video_id": 89,
+      "rep_number": 4,
+      "start_frame": 450,
+      "end_frame": 614,
+      "target": "bad",
+      "annotations": [
+        {
+          "id": 391,
+          "annotator_id": 18,
+          "created_at": "2026-11-14T08:57:32.530478+00:00",
+          "annotation": {
+            "left": {
+              "grade": "deviated",
+              "direction": "varus"
+            },
+            "notes": "",
+            "right": {
+              "grade": "aligned",
+              "direction": "none"
+            }
+          },
+          "rubric_version": "knee_v1"
+        }
+      ],
+      "eligible": true,
+      "audit_id": "R040"
+    }
+  ]
+}

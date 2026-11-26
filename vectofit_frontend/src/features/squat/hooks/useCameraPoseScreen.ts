@@ -177,6 +177,9 @@ export function useCameraPoseScreen(
   const processingErrorRef = useRef(false);
   const mountedRef = useRef(true);
   const recordedVideoPathRef = useRef<string | null>(null);
+  const recordedMirroredRef = useRef<boolean | null>(null);
+  const facingRef = useRef(cameraFacing);
+  facingRef.current = cameraFacing;
   const cameraConfiguredRef = useRef(false);
   const recorderRef = useRef<Recorder | null>(null);
   const recordingFinishedPromiseRef = useRef<Promise<string | null> | null>(
@@ -388,7 +391,7 @@ export function useCameraPoseScreen(
         ? await getSquatAssessmentSession(assessmentIdRef.current)
         : await uploadSquatAssessmentVideo(filePath, exercise, viewAngle, (id) => {
             assessmentIdRef.current = id;
-          });
+          }, recordedMirroredRef.current);
       if (!mountedRef.current) return;
       setSavedSession(session);
       setRecordingError(null);
@@ -525,6 +528,7 @@ export function useCameraPoseScreen(
 
     let recorder: Recorder | null = null;
     try {
+      recordedMirroredRef.current = facingRef.current === "front";
       recorder = await videoOutput.createRecorder({});
       if (!mountedRef.current || !isFocusedRef.current || !cameraConfiguredRef.current) return;
 

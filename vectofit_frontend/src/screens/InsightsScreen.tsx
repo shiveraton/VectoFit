@@ -273,6 +273,13 @@ export default function InsightsScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="light-content" />
+      {__DEV__ ? (
+        <Pressable accessibilityRole="button" style={[styles.retryButton, { minHeight: 48, justifyContent: "center" }]}
+          onPress={() => navigation.navigate("SessionResult", { sessionId: 0, previewFixture: "main" })}>
+          {/* TODO(decision-14): Development entry only; never presented as a saved assessment. */}
+          <Text style={styles.retryButtonText}>Preview session results · Sample data</Text>
+        </Pressable>
+      ) : null}
       {loading ? (
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={COLORS.primaryOrange} />

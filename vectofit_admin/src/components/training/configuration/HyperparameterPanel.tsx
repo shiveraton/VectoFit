@@ -60,8 +60,6 @@ export default function HyperparameterPanel(
       definitions: TRAINING_PARAMETER_DEFINITIONS,
     },
   ];
-  const baselineDescription = (() =>
-    "Use the displayed baseline values as the reproducible starting configuration. Change them when the experiment requires a deliberate comparison.")();
   const emitUpdate = (definitionKey: string, value: number) => {
     const definition = TRAINING_PARAMETER_DEFINITIONS.find(
       (item) => item.key === definitionKey,
@@ -84,31 +82,11 @@ export default function HyperparameterPanel(
             <strong data-v-hyperparameter-panel="">
               {"Training Parameters"}
             </strong>
-            <span data-v-hyperparameter-panel="">
-              {
-                "Configure the XGBoost baseline and reproducible experiment settings."
-              }
-            </span>
           </div>
         </div>
-        <div data-v-hyperparameter-panel="" className={cx("parameter-intro")}>
-          <div data-v-hyperparameter-panel="">
-            <strong data-v-hyperparameter-panel="">
-              {"How to use these controls"}
-            </strong>
-            <p data-v-hyperparameter-panel="">{display(baselineDescription)}</p>
-          </div>
-          <span
-            data-v-hyperparameter-panel=""
-            className={cx("parameter-count")}
-          >
-            {display(TRAINING_PARAMETER_DEFINITIONS.length)}
-            {" settings "}
-          </span>
-        </div>
+        <div className={cx("parameter-intro")}></div>
         {each(parameterGroups).map(([_index, group]) => (
           <section data-v-hyperparameter-panel="" key={group.title}>
-            <h3 data-v-hyperparameter-panel="">{display(group.title)}</h3>
             <div
               data-v-hyperparameter-panel=""
               className={cx("parameter-grid")}

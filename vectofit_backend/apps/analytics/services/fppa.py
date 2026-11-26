@@ -126,7 +126,7 @@ def _smooth_valid_runs(values, window):
 
 
 def extract_fppa_features(
-    landmark_series, *, frame_width, frame_height, native_fps, sample_step=1
+    landmark_series, *, frame_width, frame_height, native_fps, sample_step=1, include_trace=False
 ):
     frames = landmark_series or []
     effective_fps = float(native_fps) / max(1, int(sample_step))
@@ -188,7 +188,10 @@ def extract_fppa_features(
     }
     features["asym_bottom"] = abs(features["fppa_l_bottom"] - features["fppa_r_bottom"])
     features["asym_peak"] = abs(features["fppa_l_peak"] - features["fppa_r_peak"])
-    return features, {"valid": True, "bottom_offset": bottom_i, "filter_window": window}
+    metadata = {"valid": True, "bottom_offset": bottom_i, "filter_window": window}
+    if include_trace:
+        metadata["trace"] = smoothed
+    return features, metadata
 
 
 def evaluate_fppa(features, *, cutoff=FPPA_CUTOFF_DEG):

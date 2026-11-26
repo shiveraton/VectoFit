@@ -74,6 +74,7 @@ class AssessmentSession(models.Model):
         help_text="Camera angle used to record this assessment.",
     )
     video_file = models.FileField(upload_to="assessments_videos/%Y/%m/%d/")
+    capture_mirrored = models.BooleanField(null=True, default=None)
     status = models.CharField(
         max_length=12, choices=Status.choices, default=Status.PENDING
     )

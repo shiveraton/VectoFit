@@ -7,20 +7,28 @@ import { trainingService, type TrainingJob } from "../services/trainingService";
 import { datasetService, type ViewAngle } from "../services/datasetService";
 import { queryKeys } from "../query";
 import { trainingErrorMessage } from "./errors";
+import type { TrainingSplit } from "../services/trainingService";
 export type { ViewAngle } from "../services/datasetService";
+
 interface TrainingDraft {
   selectedDatasetIds: number[];
   selectedViewAngle: ViewAngle | null;
+  selectedFeatureIds: string[];
   selectedAlgorithmId: string;
   hyperparameters: Record<string, unknown>;
   selectedJobId: number | null;
+  trainingSplit: TrainingSplit;
+  testSize: number;
 }
 const useDraft = create<TrainingDraft>(() => ({
   selectedDatasetIds: [],
   selectedViewAngle: "frontal",
+  selectedFeatureIds: trainingService.getAvailableFeatures().map((feature) => feature.id),
   selectedAlgorithmId: "xgboost",
   hyperparameters: {},
   selectedJobId: null,
+  trainingSplit: "holdout",
+  testSize: 0.3,
 }));
 export function useTraining() {
   const cache = useQueryClient();
@@ -96,7 +104,10 @@ export function useTraining() {
     },
   });
   const datasets = data.data ?? [];
-  const features = trainingService.getAvailableFeatures();
+  const features = trainingService.getAvailableFeatures().map((feature) => ({
+    ...feature,
+    selected: draft.selectedFeatureIds.includes(feature.id),
+  }));
   const algorithms = trainingService.getAvailableAlgorithms();
   const selectedDatasets = datasets.filter((dataset) =>
     draft.selectedDatasetIds.includes(dataset.id),
@@ -138,7 +149,7 @@ export function useTraining() {
     {
       label: "Completed Runs",
       value: completedJobs.length,
-      description: "Completed FPPA M1 runs",
+      description: "Completed FPPA runs",
       icon: "C",
       variant: "correct" as const,
     },
@@ -171,7 +182,7 @@ export function useTraining() {
       trainingJobs[0] ??
       null,
     summaryCards,
-    configSummaryText: `${draft.selectedDatasetIds.length ? `${draft.selectedDatasetIds.length} dataset(s)` : "No datasets"} · frontal view · FPPA knee alignment · six fixed FPPA features · XGBoost M1`,
+    configSummaryText: `${draft.selectedDatasetIds.length ? `${draft.selectedDatasetIds.length} dataset(s)` : "No datasets"} · frontal view · FPPA knee alignment · ${selectedFeatures.length} selected FPPA features · XGBoost`,
     canStartTraining,
     isLoading: jobs.isPending || data.isPending,
     isTraining,
@@ -195,10 +206,21 @@ export function useTraining() {
           ? state.selectedDatasetIds.filter((item) => item !== id)
           : [...state.selectedDatasetIds, id],
       })),
+    toggleFeature: (id: string) => {
+      if (isTraining || !features.some((feature) => feature.id === id)) return;
+      useDraft.setState((state) => ({
+        selectedFeatureIds: state.selectedFeatureIds.includes(id)
+          ? state.selectedFeatureIds.filter((item) => item !== id)
+          : [...state.selectedFeatureIds, id],
+      }));
+    },
     setHyperparameter: (name: string, value: unknown) =>
       useDraft.setState((state) => ({
         hyperparameters: { ...state.hyperparameters, [name]: value },
       })),
+    setTrainingSplit: (trainingSplit: TrainingSplit) =>
+      useDraft.setState({ trainingSplit }),
+    setTestSize: (testSize: number) => useDraft.setState({ testSize }),
     startTraining: async () => {
       if (!canStartTraining || !selectedAlgorithm || !draft.selectedViewAngle)
         return null;
@@ -210,6 +232,10 @@ export function useTraining() {
           prediction_target: "knee_alignment",
           feature_selection: selectedFeatures.map((feature) => feature.id),
           hyperparameters: draft.hyperparameters,
+          split_strategy: draft.trainingSplit,
+          ...(draft.trainingSplit === "holdout"
+            ? { test_size: draft.testSize }
+            : {}),
         });
       } catch {
         return null;

@@ -19,6 +19,7 @@ mp_pose = mp.solutions.pose
 
 class PoseEstimator:
     SQUAT_JOINTS: ClassVar[dict[str, int]] = {
+        "nose": 0,
         "left_shoulder": 11,
         "right_shoulder": 12,
         "left_elbow": 13,

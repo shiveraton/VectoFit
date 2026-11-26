@@ -77,7 +77,8 @@ class TrainingJobCreateView(APIView):
             prediction_target=data["prediction_target"],
             feature_selection=feature_selection,
             hyperparameters=data["hyperparameters"],
-            split_strategy="leave_one_participant_out",
+            split_strategy=data["split_strategy"],
+            test_size=data["test_size"],
         )
         job.datasets.set(Dataset.objects.filter(pk__in=data["dataset_ids"]))
         task_kwargs = {
@@ -86,6 +87,7 @@ class TrainingJobCreateView(APIView):
             "hyperparameters": data["hyperparameters"],
             "view_angle": data["view_angle"],
             "prediction_target": data["prediction_target"],
+            "split_strategy": data["split_strategy"],
         }
         transaction.on_commit(
             lambda job_id=job.pk, kwargs=task_kwargs: _enqueue_training_job(
@@ -187,9 +189,13 @@ class PilotResultsView(APIView):
     def get(self, request):
         path = Path(settings.PILOT_RESULTS_PATH)
         if not path.is_file():
-            return Response({"detail": "No pilot results have been generated."}, status=404)
+            return Response(
+                {"detail": "No pilot results have been generated."}, status=404
+            )
         try:
             results = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            return Response({"detail": f"Pilot results cannot be read: {exc}"}, status=500)
+            return Response(
+                {"detail": f"Pilot results cannot be read: {exc}"}, status=500
+            )
         return Response(results)

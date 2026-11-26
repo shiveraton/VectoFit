@@ -1,4 +1,5 @@
 from math import isfinite
+from time import perf_counter
 
 import numpy as np
 from xgboost.core import XGBoostError
@@ -9,6 +10,7 @@ from ..models import ModelRegistry, TrainingJob
 from .trainer import load_model
 
 _MODEL_CACHE = {}
+_MODEL_CACHE_LIMIT = 8
 
 
 class ModelInferenceError(Exception):
@@ -16,6 +18,30 @@ class ModelInferenceError(Exception):
         super().__init__(detail)
         self.status_code = status_code
         self.payload = {"detail": detail, **extra}
+
+
+def _load_cached_model(registry_entry):
+    artifact = registry_entry.artifact
+    cache_key = (
+        registry_entry.pk,
+        artifact.name,
+        artifact.size,
+        artifact.storage.get_modified_time(artifact.name),
+    )
+    estimator = _MODEL_CACHE.get(cache_key)
+    if estimator is not None:
+        return estimator, 0.0
+
+    started = perf_counter()
+    with artifact.open("rb") as model_file:
+        estimator = load_model(model_file.read())
+    loading_ms = (perf_counter() - started) * 1000
+
+    if len(_MODEL_CACHE) >= _MODEL_CACHE_LIMIT:
+        oldest_key = next(iter(_MODEL_CACHE))
+        _MODEL_CACHE.pop(oldest_key)
+    _MODEL_CACHE[cache_key] = estimator
+    return estimator, loading_ms
 
 
 def predict_with_active_model(
@@ -60,8 +86,29 @@ def predict_with_active_model(
             "Deactivate duplicates in the registry."
         )
 
-    registry_entry = candidates[0]
+    return predict_with_model(
+        candidates[0],
+        features=features,
+        feature_schema_version=feature_schema_version,
+    )
+
+
+def predict_with_model(
+    registry_entry, *, features: dict, feature_schema_version: str
+) -> dict:
     job = registry_entry.training_job
+    prediction_target = job.prediction_target
+    schema = schema_for_target(prediction_target)
+
+    if job.status != TrainingJob.Status.COMPLETED:
+        raise ModelInferenceError("The selected model has not completed training.")
+
+    if feature_schema_version != schema.version:
+        raise ModelInferenceError(
+            "Feature schema mismatch.",
+            expected=schema.version,
+            received=feature_schema_version,
+        )
 
     if job.feature_schema_version != feature_schema_version:
         raise ModelInferenceError(
@@ -72,10 +119,17 @@ def predict_with_active_model(
 
     expected_features = list(job.feature_selection or [])
     if not expected_features:
-        raise ModelInferenceError("The active model has no recorded feature schema.")
+        raise ModelInferenceError("The selected model has no recorded features.")
+
+    duplicate_features = len(expected_features) != len(set(expected_features))
+    unknown_features = set(expected_features) - set(schema.feature_order)
+    if duplicate_features or unknown_features:
+        raise ModelInferenceError(
+            "The selected model has an invalid feature selection."
+        )
 
     if not registry_entry.artifact:
-        raise ModelInferenceError("The active registry entry has no model artifact.")
+        raise ModelInferenceError("The selected model has no model artifact.")
 
     missing = [name for name in expected_features if name not in features]
     if missing:
@@ -85,6 +139,8 @@ def predict_with_active_model(
             missing_features=missing,
             expected_features=expected_features,
         )
+
+    vector_started = perf_counter()
 
     try:
         vector = [float(features[name]) for name in expected_features]
@@ -100,25 +156,23 @@ def predict_with_active_model(
             status_code=400,
         )
 
-    try:
-        cache_key = (
-            registry_entry.pk,
-            registry_entry.artifact.name,
-            registry_entry.artifact.size,
-        )
-        estimator = _MODEL_CACHE.get(cache_key)
-        if estimator is None:
-            with registry_entry.artifact.open("rb") as model_file:
-                estimator = load_model(model_file.read())
-            _MODEL_CACHE[cache_key] = estimator
+    vector_ms = (perf_counter() - vector_started) * 1000
 
-        predictions = np.asarray(estimator.predict(np.asarray([vector], dtype=float)))
+    try:
+        estimator, model_loading_ms = _load_cached_model(registry_entry)
+
+        prediction_started = perf_counter()
+        matrix = np.asarray([vector], dtype=float)
+
+        predictions = np.asarray(estimator.predict(matrix))
         probabilities_raw = np.asarray(
-            estimator.predict_proba(np.asarray([vector], dtype=float)),
+            estimator.predict_proba(matrix),
             dtype=float,
         )[0]
-
         predicted_index = int(predictions.reshape(-1)[0])
+
+        inference_ms = vector_ms + (perf_counter() - prediction_started) * 1000
+
     except (OSError, ValueError, AttributeError, IndexError, XGBoostError) as exc:
         raise ModelInferenceError(
             f"Model inference failed: {exc}",
@@ -131,9 +185,21 @@ def predict_with_active_model(
         or {}
     )
 
-    predicted_class = mapping.get(str(predicted_index), str(predicted_index))
+    class_keys = [str(index) for index in range(len(probabilities_raw))]
+    if not isinstance(mapping, dict) or any(
+        not isinstance(mapping.get(key), str) or not mapping[key].strip()
+        for key in class_keys
+    ):
+        raise ModelInferenceError(
+            "The selected model has a missing or incomplete class mapping."
+        )
+
+    if str(predicted_index) not in class_keys:
+        raise ModelInferenceError("The selected model returned an invalid class index.")
+
+    predicted_class = mapping[str(predicted_index)]
     class_probabilities = {
-        mapping.get(str(index), str(index)): float(probability)
+        mapping[str(index)]: float(probability)
         for index, probability in enumerate(probabilities_raw)
     }
 
@@ -152,6 +218,8 @@ def predict_with_active_model(
             else None
         ),
         "class_probabilities": class_probabilities,
+        "model_loading_ms": model_loading_ms,
+        "inference_ms": inference_ms,
     }
 
     if prediction_target == TrainingJob.PredictionTarget.BINARY_FORM:
@@ -168,7 +236,7 @@ def predict_with_active_model(
                     "status": "not_assessed",
                     "reason": "unsupported_class_label",
                     "detail": (
-                        "The active binary-form model returned an unsupported "
+                        "The selected binary-form model returned an unsupported "
                         f"class label: {predicted_class!r}."
                     ),
                     "is_correct": None,

@@ -60,6 +60,48 @@ def _paced_complete_rep(amplitude=55.0, phase_frames=30):
 
 
 class RepetitionSegmentationRegressionTests(APITestCase):
+    def test_twelve_reps_survive_standing_tracking_jitter(self):
+        values = [95.0] * 12
+        for _ in range(12):
+            values.extend(np.linspace(95, 155, 25)[1:])
+            values.extend(np.linspace(155, 95, 25)[1:])
+            values.extend(95 + 3 * np.sin(np.linspace(0, 4 * np.pi, 24)))
+        values.extend([95.0] * 12)
+        repetitions = segment_reps([_hip_frame(y) for y in values])
+        self.assertEqual(len(repetitions), 12)
+        self.assertTrue(all(left["end"] <= right["start"] for left, right in zip(repetitions, repetitions[1:])))
+
+    def test_bottom_hold_tracking_jitter_does_not_hide_complete_reps(self):
+        values = [95.0] * 12
+        for _ in range(3):
+            values.extend(np.linspace(95, 155, 25)[1:])
+            values.extend(155 + 3 * np.sin(np.linspace(0, 4 * np.pi, 24)))
+            values.extend(np.linspace(155, 95, 25)[1:])
+            values.extend([95.0] * 12)
+        self.assertEqual(len(segment_reps([_hip_frame(y) for y in values])), 3)
+
+    def test_counts_first_and_last_reps_between_standing_holds(self):
+        values = [95.0] * 12
+        for _ in range(3):
+            values.extend(np.linspace(95, 155, 25)[1:])
+            values.extend([155.0] * 8)
+            values.extend(np.linspace(155, 95, 25)[1:])
+            values.extend([95.0] * 12)
+        self.assertEqual(len(segment_reps([_hip_frame(y) for y in values])), 3)
+
+    def test_pause_during_descent_does_not_split_a_rep(self):
+        values = [95.0] * 12
+        values.extend(np.linspace(95, 125, 16)[1:])
+        values.extend([125.0] * 12)
+        values.extend(np.linspace(125, 155, 16)[1:])
+        values.extend(np.linspace(155, 95, 31)[1:])
+        values.extend([95.0] * 12)
+        self.assertEqual(len(segment_reps([_hip_frame(y) for y in values])), 1)
+
+    def test_unfinished_descent_is_not_counted(self):
+        values = [95.0] * 12 + np.linspace(95, 155, 31)[1:].tolist() + [155.0] * 12
+        self.assertEqual(segment_reps([_hip_frame(y) for y in values]), [])
+
     def test_rejects_timed_candidate_without_meaningful_movement(self):
         self.assertEqual(segment_reps(_complete_rep(amplitude=20.0)), [])
 
@@ -180,6 +222,14 @@ class FppaFeatureTests(APITestCase):
         self.assertEqual(set(M0_FEATURES), set(features).intersection(M0_FEATURES))
         self.assertTrue(features["fppa_l_bottom"] > 0)
         self.assertTrue(features["fppa_r_bottom"] > 0)
+        self.assertNotIn("trace", metadata)
+        traced_features, traced_metadata = extract_fppa_features(
+            frames, frame_width=100, frame_height=100, native_fps=30, include_trace=True,
+        )
+        self.assertEqual(traced_features, features)
+        for side in ("left", "right"):
+            self.assertEqual(len(traced_metadata["trace"][side]), len(frames))
+            self.assertEqual(max(traced_metadata["trace"][side], key=abs), features[f"fppa_{side[0]}_peak"])
 
 
 def _create_session_with_reps(user, variant, hybrid_score, created_at=None):

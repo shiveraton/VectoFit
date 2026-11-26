@@ -9,6 +9,7 @@ import ThisWeekSection from "../components/home/ThisWeekSection";
 import { capitalize } from "../utils/formatters";
 import useAuthStore from "../stores/useAuthStore";
 import styles from "../styles/HomeScreenStyles";
+import { startSquatAssessment } from "../navigation/startSquatAssessment";
 
 interface UserState {
   name: string;
@@ -108,9 +109,7 @@ interface SquatExerciseProps {
 
 function SquatExercise({ navigation }: SquatExerciseProps) {
   const handleSubmit = () => {
-    navigation.navigate("CameraPose", {
-      exercise: "bodyweight_squat",
-    });
+    startSquatAssessment(navigation);
   };
 
   return (

@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .inference_views import InferenceSimulationViewSet
 from .views import (
     ModelRegistryViewSet,
     ModelStateView,
@@ -11,6 +12,7 @@ from .views import (
 
 router = DefaultRouter()
 
+router.register("inference-simulations", InferenceSimulationViewSet, basename="inference-simulation")
 router.register("jobs", TrainingJobViewSet, basename="training-job")
 router.register("models", ModelRegistryViewSet, basename="model-registry")
 

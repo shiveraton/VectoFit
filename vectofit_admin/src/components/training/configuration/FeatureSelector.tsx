@@ -6,7 +6,11 @@ import {
   scopeAttributes,
 } from "../../../presentation";
 import styles from "./FeatureSelector.module.css";
-export default function FeatureSelector(input: { features: FeatureOption[] }) {
+export default function FeatureSelector(input: {
+  features: FeatureOption[];
+  onToggle: (id: string) => void;
+  disabled?: boolean;
+}) {
   const props = { ...{}, ...input };
   const cx = bindStyles(styles);
   const featureDescriptions: Record<string, string> = {
@@ -28,27 +32,28 @@ export default function FeatureSelector(input: { features: FeatureOption[] }) {
         <div data-v-feature-selector="" className={cx("configuration-label")}>
           <div data-v-feature-selector="">
             <strong data-v-feature-selector="">
-              {"FPPA v2 Feature Schema"}
+              {"Input features"}
             </strong>
             <span data-v-feature-selector="">
-              {"Six fixed inputs used by the current M1 model."}
+              {"Choose FPPA v2 inputs for this run. All six are selected by default."}
             </span>
           </div>
         </div>
         <div data-v-feature-selector="" className={cx("feature-selection")}>
           {each(props.features).map(([_index, feature]) => (
-            <div
+            <label
               data-v-feature-selector=""
               key={feature.id}
               className={cx(["feature-option", { selected: feature.selected }])}
             >
-              <span
+              <input
                 data-v-feature-selector=""
-                aria-hidden="true"
+                type="checkbox"
+                checked={feature.selected}
+                disabled={props.disabled}
+                onChange={() => props.onToggle(feature.id)}
                 className={cx("check-box")}
-              >
-                {display(feature.selected ? "✓" : "")}
-              </span>
+              />
               <span data-v-feature-selector="" className={cx("feature-copy")}>
                 <strong data-v-feature-selector="">
                   {display(feature.name)}
@@ -60,13 +65,14 @@ export default function FeatureSelector(input: { features: FeatureOption[] }) {
                   )}
                 </small>
               </span>
-            </div>
+            </label>
           ))}
         </div>
-        <p data-v-feature-selector="" className={cx("feature-note")}>
-          {
-            " The fixed schema keeps training inputs aligned with frontal-plane FPPA assessment and model provenance. "
-          }
+        <p data-v-feature-selector="" role="status" className={cx("feature-note")}>
+          {props.features.filter((feature) => feature.selected).length} of {props.features.length} selected.
+          {props.features.every((feature) => !feature.selected)
+            ? " Select at least one feature to start training."
+            : " Selection is saved with the model; changing inputs requires a new training run."}
         </p>
       </section>
     </>

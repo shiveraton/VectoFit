@@ -3,6 +3,7 @@ from collections import Counter
 from typing import Any
 
 import numpy as np
+from scipy.signal import find_peaks
 
 logger = logging.getLogger(__name__)
 
@@ -19,13 +20,6 @@ def split_contiguous_pose_runs(
     landmark_data: list[dict[str, Any]],
     expected_frame_step: int,
 ) -> list[list[dict[str, Any]]]:
-    """
-    Split sampled video entries at missing poses or original-frame gaps.
-
-    The entries remain dictionaries containing their original frame_index, so
-    callers can segment by local array position and persist the real video
-    frame later.
-    """
     if expected_frame_step < 1:
         raise ValueError("expected_frame_step must be at least 1.")
 
@@ -64,7 +58,6 @@ def split_contiguous_pose_runs(
 
 
 def _landmark_y(landmark):
-    """Extract the vertical coordinate from a landmark representation."""
     if isinstance(landmark, dict):
         return float(landmark["y"])
 
@@ -72,7 +65,6 @@ def _landmark_y(landmark):
 
 
 def _hip_midpoint_y(landmark_series):
-    """Calculate the vertical midpoint between the left and right hips."""
     values = []
 
     for frame_index, frame in enumerate(landmark_series):
@@ -93,7 +85,6 @@ def _hip_midpoint_y(landmark_series):
 
 
 def _smooth(signal, window=SMOOTHING_WINDOW):
-    """Apply a centered moving average while preserving signal length."""
     signal = np.asarray(signal, dtype=float)
 
     if window <= 1 or len(signal) < window:
@@ -118,31 +109,40 @@ def _smooth(signal, window=SMOOTHING_WINDOW):
 
 
 def _turning_points(signal):
-    """Find local bottoms and tops using changes in vertical velocity."""
     if len(signal) < 3:
         return [], []
 
     velocity = np.diff(signal)
-
+    moving = np.flatnonzero(np.abs(velocity) > 1e-9)
     bottoms = []
     tops = []
+    if not len(moving):
+        return bottoms, tops
 
-    for frame_index in range(1, len(velocity)):
-        previous_velocity = velocity[frame_index - 1]
-        current_velocity = velocity[frame_index]
+    first, last = int(moving[0]), int(moving[-1])
+    if first > 0 and velocity[first] > 0:
+        tops.append(first)
 
-        if previous_velocity > 0 and current_velocity <= 0:
-            bottoms.append(frame_index)
+    for previous, current in zip(moving, moving[1:]):
+        turning = int((previous + 1 + current) // 2)
+        if velocity[previous] < 0 and velocity[current] > 0:
+            tops.append(turning)
 
-        elif previous_velocity < 0 and current_velocity >= 0:
-            tops.append(frame_index)
+    if last < len(velocity) - 1 and velocity[last] < 0:
+        tops.append(last + 1)
 
-    return bottoms, tops
+    bottoms = find_peaks(
+        signal,
+        prominence=min(MIN_DESCENT_AMPLITUDE, MIN_RECOVERY_AMPLITUDE),
+    )[0].tolist()
+    boundaries = [-1, *bottoms, len(signal)]
+    cycle_tops = []
+    for start, end in zip(boundaries, boundaries[1:]):
+        candidates = [top for top in tops if start < top < end]
+        if candidates:
+            cycle_tops.append(min(candidates, key=lambda top: signal[top]))
 
-
-def _has_minimum_amplitude(signal, start, end, bottom, threshold):
-    """Check whether a top-to-bottom excursion meets the amplitude threshold."""
-    return signal[bottom] - signal[start] >= threshold
+    return bottoms, cycle_tops
 
 
 def _find_cycle_bounds(tops, bottom):
@@ -151,39 +151,32 @@ def _find_cycle_bounds(tops, bottom):
     return start, end
 
 
-def _passes_excursion_checks(
-    signal,
-    bottom,
-    min_rep_frames,
-    min_phase_frames,
-    start=None,
-    end=None,
-):
-    """Reject bottoms without sufficient descent and recovery amplitude."""
-    if start is None or end is None:
-        excursion_window = max(2 * min_phase_frames, min_rep_frames)
-        left_start = max(0, bottom - excursion_window)
-        right_end = min(len(signal), bottom + excursion_window + 1)
-    else:
-        left_start = int(start)
-        right_end = int(end) + 1
+def _passes_excursion_checks(signal, start, bottom, end):
+    descent_values = signal[int(start) : bottom]
+    recovery_values = signal[bottom + 1 : int(end) + 1]
 
-    left_values = signal[left_start:bottom]
-    right_values = signal[bottom + 1 : right_end]
-
-    if left_values.size == 0 or right_values.size == 0:
+    if descent_values.size == 0 or recovery_values.size == 0:
         return False
 
-    left_base = left_start + int(np.argmin(left_values))
-    right_base = bottom + 1 + int(np.argmin(right_values))
-
-    descent_excursion = signal[bottom] - signal[left_base]
-    recovery_excursion = signal[bottom] - signal[right_base]
+    descent_excursion = signal[bottom] - descent_values.min()
+    recovery_excursion = signal[bottom] - recovery_values.min()
 
     return (
         descent_excursion >= MIN_DESCENT_AMPLITUDE
         and recovery_excursion >= MIN_RECOVERY_AMPLITUDE
     )
+
+
+def _rejection_reason(signal, start, bottom, end, min_rep_frames, min_phase_frames):
+    if start is None or end is None:
+        return "missing_boundary"
+    if bottom - start < min_phase_frames or end - bottom < min_phase_frames:
+        return "phase_duration"
+    if end - start < min_rep_frames:
+        return "duration"
+    if not _passes_excursion_checks(signal, start, bottom, end):
+        return "excursion"
+    return None
 
 
 def _find_repetition_candidates(
@@ -205,26 +198,14 @@ def _find_repetition_candidates(
         seen_bottoms.add(bottom)
         start, end = _find_cycle_bounds(tops, bottom)
 
-        if start is None or end is None:
-            reason = "missing_boundary"
-        elif (
-            bottom - start < min_phase_frames
-            or end - bottom < min_phase_frames
-        ):
-            reason = "phase_duration"
-        elif end - start < min_rep_frames:
-            reason = "duration"
-        elif not _passes_excursion_checks(
+        reason = _rejection_reason(
             signal,
+            start,
             bottom,
+            end,
             min_rep_frames,
             min_phase_frames,
-            start=start,
-            end=end,
-        ):
-            reason = "excursion"
-        else:
-            reason = None
+        )
 
         event = {
             "bottom": int(bottom),
@@ -237,14 +218,13 @@ def _find_repetition_candidates(
             candidate_events.append({**event, "status": "rejected", "reason": reason})
             continue
 
-        repetitions.append({"start": int(start), "bottom": int(bottom), "end": int(end)})
+        repetitions.append(event)
         candidate_events.append({**event, "status": "accepted"})
 
     return repetitions, rejection_counts, candidate_events
 
 
 def _repetition_depth_score(repetition, signal):
-    """Score a repetition by its vertical excursion depth."""
     start = repetition["start"]
     bottom = repetition["bottom"]
     end = repetition["end"]
@@ -253,7 +233,6 @@ def _repetition_depth_score(repetition, signal):
 
 
 def _overlap_ratio(first, second):
-    """Return overlap length relative to the shorter repetition."""
     overlap = max(
         0,
         min(first["end"], second["end"]) - max(first["start"], second["start"]) + 1,
@@ -271,7 +250,6 @@ def _overlap_ratio(first, second):
 
 
 def _deduplicate_repetitions(repetitions, signal):
-    """Keep the deeper candidate when repetition intervals substantially overlap."""
     ordered = sorted(
         repetitions,
         key=lambda repetition: (
@@ -312,12 +290,6 @@ def segment_reps(
     min_rep_frames=MIN_REP_FRAMES,
     min_phase_frames=MIN_PHASE_FRAMES,
 ):
-    """
-    Segment squat repetitions from hip vertical movement.
-
-    Returned start, bottom, and end values are indices into the supplied
-    landmark_series.
-    """
     if landmark_series is None or len(landmark_series) == 0:
         return []
 
@@ -327,10 +299,8 @@ def segment_reps(
     if min_phase_frames < 0:
         raise ValueError("min_phase_frames cannot be negative.")
 
-    signal = _smooth(
-        _hip_midpoint_y(landmark_series),
-        window=SMOOTHING_WINDOW,
-    )
+    hip_midpoints = _hip_midpoint_y(landmark_series)
+    signal = _smooth(hip_midpoints, window=SMOOTHING_WINDOW)
 
     if len(signal) < min_rep_frames:
         return []
@@ -349,14 +319,16 @@ def segment_reps(
     )
 
     repetitions = _deduplicate_repetitions(repetitions, signal)
+    hip_y_min = float(signal.min())
+    hip_y_max = float(signal.max())
 
     logger.info(
         "[Segmentation] %s",
         {
             "frames": len(signal),
-            "hip_y_min": round(float(signal.min()), 2),
-            "hip_y_max": round(float(signal.max()), 2),
-            "hip_y_excursion": round(float(signal.max() - signal.min()), 2),
+            "hip_y_min": round(hip_y_min, 2),
+            "hip_y_max": round(hip_y_max, 2),
+            "hip_y_excursion": round(hip_y_max - hip_y_min, 2),
             "turning_points": {"bottoms": len(bottoms), "tops": len(tops)},
             "rejection_counts": dict(rejection_counts),
             "candidate_events": candidate_events,
@@ -375,7 +347,6 @@ def segment_reps(
 
 
 def detect_bounce(velocities):
-    """Detect repeated direction reversals in an angular velocity series."""
     velocities = np.asarray(velocities, dtype=float)
 
     if len(velocities) < 2:

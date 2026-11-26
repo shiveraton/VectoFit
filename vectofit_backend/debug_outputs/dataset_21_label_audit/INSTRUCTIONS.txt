@@ -1,0 +1,32 @@
+Dataset 21 independent label audit
+
+Status: sample selection and scoring are ready. Human reviews and delivery are pending.
+
+Coordinator only: keep private_manifest.json and private_provenance.json private.
+The manifest freezes current labels and maps audit IDs to source video frame windows.
+Do not show existing labels, source filenames, model results, or the other review to either reviewer.
+Review templates do not contain clips. Provide corresponding video windows with neutral audit IDs before review.
+The existing annotation app may display a reviewer's previous rating; do not treat that as a blinded re-review.
+
+Give review_A.json and review_B.json to two independent reviewers, respectively.
+Both reviewers assess all 40 repetitions. Record actual reviewer identities separately.
+Use the same agreed knee rubric and record its exact version/text before review.
+The database rubric_version values are knee_v1; this metadata does not prove the displayed rubric version.
+For each knee choose grade aligned, borderline, deviated, or unassessable.
+For direction use valgus, varus, none, uncertain, or null as appropriate. Keep notes as text.
+Do not force borderline or unassessable knees into good/bad.
+Return files without changing audit IDs or production annotations.
+
+Selection: seed 42, 20 MDY and 20 ZEN repetitions, randomized participant round-robin.
+MDY covers 14 participants; ZEN covers 19 participants.
+Candidates were restricted to currently training-eligible good/bad repetitions.
+This audit does not estimate agreement for previously excluded repetitions.
+Equal source quotas and participant spreading differ from the dataset's repetition distribution.
+Report source-specific agreement as well as the combined result; 40 repetitions give a preliminary estimate.
+
+After both files are complete, run from vectofit_backend:
+.\.venv\Scripts\python.exe manage.py score_label_audit --manifest debug_outputs/dataset_21_label_audit/private_manifest.json --review-a debug_outputs/dataset_21_label_audit/review_A.json --review-b debug_outputs/dataset_21_label_audit/review_B.json --output debug_outputs/dataset_21_label_audit/agreement.json
+
+The scorer reports A vs frozen labels, B vs frozen labels, and A vs B, overall and per source.
+It retains borderline/unassessable outcomes in the agreement calculation and rejects incomplete files.
+Kappa is chance-corrected agreement; a value below 0.7 is not a mathematical 80% model-accuracy ceiling.

@@ -1,6 +1,8 @@
 import type { Dataset } from "../../../services/datasetService";
 import type { FeatureOption } from "../../../services/trainingService";
 import AlgorithmSelector from "./AlgorithmSelector";
+import SplitSelector from "./SplitSelector";
+import type { TrainingSplit } from "../../../services/trainingService";
 import DatasetSelector from "./DatasetSelector";
 import FeatureSelector from "./FeatureSelector";
 import HyperparameterPanel from "./HyperparameterPanel";
@@ -20,8 +22,13 @@ interface Props {
   summaryText: string;
   canStartTraining: boolean;
   isTraining: boolean;
+  trainingSplit: TrainingSplit;
+  onSplitChange: (value: TrainingSplit) => void;
+  testSize: number;
+  onTestSizeChange: (value: number) => void;
 }
 type Callbacks = {
+  onToggleFeature: (id: string) => void;
   onToggleDataset?: (id: DatasetId) => void;
   onSetHyperparameter?: (key: string, value: number) => void;
   onStartTraining?: () => void;
@@ -36,7 +43,6 @@ export default function TrainingConfiguration(input: Props & Callbacks) {
     selectedViewAngle,
     features,
     hyperparameters,
-    summaryText,
     canStartTraining,
     isTraining,
   } = props;
@@ -81,8 +87,19 @@ export default function TrainingConfiguration(input: Props & Callbacks) {
         <FeatureSelector
           data-v-training-configuration=""
           features={features}
+          onToggle={props.onToggleFeature}
+          disabled={isTraining}
         ></FeatureSelector>
-        <AlgorithmSelector data-v-training-configuration=""></AlgorithmSelector>
+        <div className={styles.modelSection}>
+          <AlgorithmSelector data-v-training-configuration=""></AlgorithmSelector>
+          <SplitSelector
+            value={props.trainingSplit}
+            onChange={props.onSplitChange}
+            testSize={props.testSize}
+            onTestSizeChange={props.onTestSizeChange}
+            disabled={isTraining}
+          />
+        </div>
         <HyperparameterPanel
           data-v-training-configuration=""
           hyperparameters={hyperparameters}
@@ -96,14 +113,6 @@ export default function TrainingConfiguration(input: Props & Callbacks) {
         data-v-training-configuration=""
         className={cx("configuration-footer")}
       >
-        <div data-v-training-configuration="" className={cx("summary-copy")}>
-          <span data-v-training-configuration="" className={cx("footer-label")}>
-            {"Configuration Summary"}
-          </span>
-          <strong data-v-training-configuration="">
-            {display(summaryText)}
-          </strong>
-        </div>
         <button
           data-v-training-configuration=""
           type="button"

@@ -1,311 +1,174 @@
-import hashlib
-import json
-import logging
+from pathlib import Path
 
-from django.core.files.base import ContentFile
-from django.db import IntegrityError, transaction
+import numpy as np
+import pandas as pd
+from django.core.management.base import BaseCommand
 from django.utils import timezone
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import GroupKFold, LeaveOneGroupOut
+from xgboost import XGBClassifier
 
 from apps.analytics.services.feature_schemas import schema_for_target
+from apps.training.services.trainer import train_and_evaluate
 
 from ..config import default_hyperparameters, locked_hyperparameters
-from ..models import ModelRegistry, TrainingJob
-from .data_loader import build_samples, resolve_datasets
-from .trainer import serialize_model, train_and_evaluate, training_environment
+from ..services.data_loader import build_samples, resolve_datasets
+from ..models import TrainingJob
 
-logger = logging.getLogger(__name__)
+TARGET = "knee_alignment"
 
 
-def _next_version(model_name: str) -> str:
-    last_entry = (
-        ModelRegistry.objects.filter(name=model_name).order_by("-created_at").first()
+def _first_attr(obj, names):
+    for name in names:
+        if hasattr(obj, name):
+            return getattr(obj, name)
+    available = [a for a in dir(obj) if not a.startswith("_")]
+    raise AttributeError(f"sample_set has none of {names}. Available: {available}")
+
+
+def load_training_frame(dataset_id, features=None):
+    datasets = resolve_datasets([dataset_id])
+    schema = schema_for_target(TARGET)
+    selected = [f for f in schema.feature_order if not features or f in features]
+    sample_set = build_samples(
+        datasets=datasets,
+        selected_features=selected,
+        view_angle="frontal",
+        prediction_target=TARGET,
     )
-    if not last_entry:
-        return "1.0"
-    try:
-        major, minor = map(int, last_entry.version.split("."))
-        return f"{major}.{minor + 1}"
-    except (ValueError, AttributeError):
-        return "1.0"
 
+    X = np.asarray(sample_set.rows, dtype=float)
+    y = np.asarray(
+        _first_attr(sample_set, ("labels", "y", "targets", "target"))
+    ).astype(int)
 
-def _register_model(job, model_name, serialized_model, metrics):
-    for attempt in range(5):
-        try:
-            with transaction.atomic():
-                list(
-                    ModelRegistry.objects.select_for_update()
-                    .filter(name=model_name)
-                    .values_list("id", flat=True)
-                )
-                version = _next_version(model_name)
-                entry = ModelRegistry.objects.create(
-                    name=model_name,
-                    version=version,
-                    training_job=job,
-                    algorithm=job.algorithm,
-                    metrics=metrics,
-                )
-                entry.artifact.save(
-                    f"{model_name}_v{version}.json",
-                    ContentFile(serialized_model),
-                    save=True,
-                )
-                return entry
-        except IntegrityError:
-            if attempt == 4:
-                raise
-    raise RuntimeError("Could not allocate a unique model registry version.")
+    meta = pd.DataFrame(sample_set.sample_metadata)
+    meta.insert(0, "sample_id", list(sample_set.sample_ids))
 
-
-def _build_manifest(
-    job, datasets, sample_set, result, view_angle, prediction_target
-):
-    sample_rows = []
-    for index, metadata in enumerate(sample_set.sample_metadata):
-        row = dict(metadata)
-        row["split"] = "out_of_fold"
-        row["features"] = {
-            feature_name: float(value)
-            for feature_name, value in zip(
-                sample_set.feature_names, sample_set.rows[index]
+    for name in ("groups", "participants", "participant_ids"):
+        if hasattr(sample_set, name):
+            groups = np.asarray(getattr(sample_set, name))
+            break
+    else:
+        col = next(
+            (
+                c
+                for c in ("participant", "participant_id", "participant_name")
+                if c in meta.columns
+            ),
+            None,
+        )
+        if col is None:
+            raise KeyError(
+                f"No participant field. sample_metadata keys: {list(meta.columns)}"
             )
-        }
-        sample_rows.append(row)
-
-    fold_rows = []
-    for fold in result["folds"]:
-        row = {
-            "participant": fold["participant"],
-            "train_sample_ids": [sample_set.sample_ids[i] for i in fold["train_idx"]],
-            "test_sample_ids": [sample_set.sample_ids[i] for i in fold["test_idx"]],
-        }
-        if "scale_pos_weight" in fold:
-            row["scale_pos_weight"] = fold["scale_pos_weight"]
-        fold_rows.append(row)
-
-    environment = training_environment()
-    manifest = {
-        "manifest_version": 2,
-        "environment": environment,
-        "job_id": job.pk,
-        "created_at": timezone.now().isoformat(),
-        "dataset_ids": [dataset.pk for dataset in datasets],
-        "datasets": [
-            {"id": dataset.pk, "name": dataset.name, "purpose": dataset.purpose}
-            for dataset in datasets
-        ],
-        "view_angle": view_angle,
-        "prediction_target": prediction_target,
-        "feature_schema_version": job.feature_schema_version,
-        "selected_features": list(sample_set.feature_names),
-        "algorithm": job.algorithm,
-        "hyperparameters": result["hyperparameters"],
-        "user_hyperparameters": {
-            name: result["hyperparameters"][name] for name in default_hyperparameters()
-        },
-        "task_profile": result["task_profile"],
-        "locked_hyperparameters": locked_hyperparameters(prediction_target, len(result["target_names"])),
-        "seed": result["seed"],
-        "xgboost_version": environment["xgboost"],
-        "split_strategy": "leave_one_participant_out",
-        "folds": fold_rows,
-        "sample_count": len(sample_set),
-        "train_sample_ids": [
-            sample_set.sample_ids[index] for index in result["train_idx"]
-        ],
-        "test_sample_ids": [
-            sample_set.sample_ids[index] for index in result["test_idx"]
-        ],
-        "samples": sample_rows,
-        "class_mapping": result["class_mapping"],
-        "target_names": result["target_names"],
-        "metrics": result["metrics"],
-        "feature_warnings": list(sample_set.warnings),
-        "data_warnings": list(sample_set.errors[:250]),
-        "data_warning_count": len(sample_set.errors),
-        "timing_source_counts": {
-            source: sum(
-                1 for sample in sample_set.sample_metadata
-                if sample.get("timing_source") == source
-            )
-            for source in sorted(
-                {sample.get("timing_source") for sample in sample_set.sample_metadata}
-                - {None}
-            )
-        },
-    }
-    if result["task_profile"] == "quality":
-        manifest["final_scale_pos_weight"] = result["final_scale_pos_weight"]
-    if prediction_target == "knee_alignment":
-        manifest.update({
-            "eligibility_policy_version": sample_set.eligibility_policy_version,
-            "exclusions": sample_set.exclusions,
-            "eligibility_summary": sample_set.readiness_report(),
-            "annotation_evidence": sample_set.annotation_evidence,
-        })
-    canonical_manifest = json.dumps(
-        manifest,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    ).encode("utf-8")
-    manifest["manifest_sha256"] = hashlib.sha256(canonical_manifest).hexdigest()
-    return manifest
+        groups = meta[col].to_numpy()
+    meta["participant"] = groups
+    return X, y, groups, meta
 
 
-def run_training_job(
-    job: TrainingJob,
-    dataset_ids: list[int] | None = None,
-    feature_selection: list[str] | None = None,
-    hyperparameters: dict | None = None,
-    register_model: bool = True,
-    model_name: str = "vectofit-squat-classifier",
-    view_angle: str | None = None,
-    prediction_target: str | None = None,
-) -> TrainingJob:
+def model_params():
+    params = {**default_hyperparameters(), **locked_hyperparameters(TARGET, 2)}
+    params.pop("scale_pos_weight", None)  # recomputed per fold below
+    params.setdefault("random_state", 42)
+    return params
+
+
+def run_training_job(job):
     job.status = TrainingJob.Status.RUNNING
     job.started_at = timezone.now()
-    job.error_message = ""
-    job.save(update_fields=["status", "started_at", "error_message"])
+    job.save(update_fields=["status", "started_at"])
 
-    try:
-        target_ids = dataset_ids or list(job.datasets.values_list("id", flat=True))
-        datasets = resolve_datasets(target_ids)
-        prediction_target = (
-            prediction_target
-            or job.prediction_target
-            or TrainingJob.PredictionTarget.BINARY_FORM
-        )
-        schema = schema_for_target(prediction_target)
-        selected_features = feature_selection or list(schema.feature_order)
-        if prediction_target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT:
-            if set(selected_features) != set(schema.feature_order):
-                raise ValueError("Registered M1 training requires all six FPPA features.")
-            selected_features = list(schema.feature_order)
+    dataset_ids = job.datasets.values_list("pk", flat=True)
+    datasets = resolve_datasets(dataset_ids)
 
-        sample_set = build_samples(
-            datasets=datasets,
-            selected_features=selected_features,
-            view_angle=view_angle or job.view_angle or None,
-            prediction_target=prediction_target,
-        )
-        view_angle = sample_set.view_angle
-
-        result = train_and_evaluate(
-            sample_set=sample_set,
-            hyperparameters=hyperparameters or {},
-        )
-        serialized_model = serialize_model(result["model"])
-        job.feature_schema_version = schema.version
-        manifest = _build_manifest(
-            job,
-            datasets,
-            sample_set,
-            result,
-            view_angle,
-            prediction_target,
-        )
-
-        job.datasets.set(datasets)
-        job.view_angle = view_angle
-        job.prediction_target = prediction_target
-        job.random_seed = result["seed"]
-        job.split_strategy = "leave_one_participant_out"
-        job.model_artifact.save(
-            f"training_jobs/job_{job.pk}_model.json",
-            ContentFile(serialized_model),
-            save=False,
-        )
-        job.sample_count = len(sample_set)
-        job.train_count = len(result["train_idx"])
-        job.test_count = len(result["test_idx"])
-        job.feature_selection = selected_features
-        job.hyperparameters = result["hyperparameters"]
-        job.metrics = result["metrics"]
-        job.feature_warnings = list(sample_set.warnings)
-        job.training_manifest = manifest
-        if register_model:
-            _register_model(job, model_name, serialized_model, result["metrics"])
-
-        job.status = TrainingJob.Status.COMPLETED
-        job.completed_at = timezone.now()
-        job.save()
-
-        logger.info("TrainingJob %s completed successfully.", job.pk)
-        return job
-
-    except Exception as exc:
-        logger.exception("TrainingJob %s failed with error: %s", job.pk, exc)
-
-        for registry_entry in ModelRegistry.objects.filter(training_job=job):
-            if registry_entry.artifact:
-                registry_entry.artifact.delete(save=False)
-        ModelRegistry.objects.filter(training_job=job).delete()
-        if job.model_artifact:
-            job.model_artifact.delete(save=False)
-
-        job.status = TrainingJob.Status.FAILED
-        job.error_message = str(exc)
-        job.completed_at = timezone.now()
-        job.sample_count = 0
-        job.train_count = 0
-        job.test_count = 0
-        job.metrics = {}
-        job.feature_warnings = []
-        job.training_manifest = {}
-        job.save(
-            update_fields=[
-                "status",
-                "error_message",
-                "completed_at",
-                "sample_count",
-                "train_count",
-                "test_count",
-                "metrics",
-                "feature_warnings",
-                "training_manifest",
-                "model_artifact",
-            ]
-        )
-        return job
-
-
-if __name__ == "__main__":
-    import argparse
-    import json
-    import os
-    import sys
-
-    import django
-
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-    django.setup()
-    parser = argparse.ArgumentParser(description="Run VectoFit Training Job CLI")
-    parser.add_argument("--job-id", type=int, required=True)
-    parser.add_argument("--dataset-ids", nargs="+", type=int)
-    parser.add_argument("--features", nargs="*")
-    parser.add_argument("--hyperparameters", type=str, default="{}")
-    parser.add_argument("--view-angle", choices=["diagonal", "frontal", "sagittal"])
-    parser.add_argument(
-        "--prediction-target",
-        choices=["binary_form", "error_type", "knee_alignment"],
-        default="binary_form",
+    sample_set = build_samples(
+        datasets=datasets,
+        selected_features=job.feature_selection,
+        view_angle=job.view_angle or None,
+        prediction_target=job.prediction_target,
     )
-    args = parser.parse_args()
-    try:
-        training_job = TrainingJob.objects.get(pk=args.job_id)
-        hparams = json.loads(args.hyperparameters)
-        run_training_job(
-            job=training_job,
-            dataset_ids=args.dataset_ids,
-            feature_selection=args.features,
-            hyperparameters=hparams,
-            view_angle=args.view_angle,
-            prediction_target=args.prediction_target,
+
+    result = train_and_evaluate(
+        sample_set,
+        hyperparameters=job.hyperparameters,
+        split_strategy=job.split_strategy,
+        test_size=job.test_size,
+    )
+    job.status = TrainingJob.Status.COMPLETED
+    job.completed_at = timezone.now()
+
+    job.metrics = result["metrics"]
+    job.hyperparameters = result["hyperparameters"]
+    job.feature_selection = result["feature_names"]
+    job.train_count = len(result["train_idx"])
+    job.test_count = len(result["test_idx"])
+    job.sample_count = len(sample_set.rows)
+    job.save(
+        update_fields=[
+            "status",
+            "completed_at",
+            "metrics",
+            "hyperparameters",
+            "feature_selection",
+            "train_count",
+            "test_count",
+            "sample_count",
+        ]
+    )
+
+
+class Command(BaseCommand):
+    help = "Out-of-fold predictions and confident-error list (participant-grouped)."
+
+    def add_arguments(self, parser):
+        parser.add_argument("--dataset", type=int, required=True)
+        parser.add_argument("--split", choices=["gkf5", "lopo"], default="gkf5")
+        parser.add_argument("--features", nargs="*")
+        parser.add_argument("--out", default="outputs/audit")
+        parser.add_argument("--top", type=int, default=20)
+
+    def handle(self, *args, **opts):
+        X, y, groups, meta = load_training_frame(opts["dataset"], opts["features"])
+        splitter = (
+            LeaveOneGroupOut() if opts["split"] == "lopo" else GroupKFold(n_splits=5)
         )
-    except TrainingJob.DoesNotExist:
-        print(
-            f"Error: TrainingJob with ID {args.job_id} does not exist.", file=sys.stderr
+        params = model_params()
+
+        proba = np.zeros(len(y))
+        for tr, te in splitter.split(X, y, groups):
+            spw = (y[tr] == 0).sum() / max((y[tr] == 1).sum(), 1)
+            model = XGBClassifier(scale_pos_weight=spw, **params)
+            model.fit(X[tr], y[tr])
+            proba[te] = model.predict_proba(X[te])[:, 1]
+
+        pred = (proba >= 0.5).astype(int)
+        df = meta.reset_index(drop=True).assign(
+            y=y,
+            p_bad=proba,
+            pred=pred,
+            conf=np.where(pred == 1, proba, 1 - proba),
+            wrong=pred != y,
         )
-        sys.exit(1)
+
+        out = Path(opts["out"])
+        out.mkdir(parents=True, exist_ok=True)
+        tag = opts["split"]
+        df.to_csv(out / f"oof_predictions_{tag}.csv", index=False)
+        df[df.wrong].sort_values("conf", ascending=False).head(opts["top"]).to_csv(
+            out / f"top_confident_errors_{tag}.csv", index=False
+        )
+        (
+            df.groupby("participant")
+            .agg(n=("y", "size"), error_rate=("wrong", "mean"))
+            .sort_values("error_rate", ascending=False)
+            .to_csv(out / f"error_by_participant_{tag}.csv")
+        )
+
+        baseline = max(y.mean(), 1 - y.mean())
+        self.stdout.write(
+            f"{tag}: acc={accuracy_score(y, pred):.3f} "
+            f"macroF1={f1_score(y, pred, average='macro'):.3f} "
+            f"majority_baseline={baseline:.3f} n={len(y)}"
+        )
+        self.stdout.write(f"Wrote 3 CSVs to {out.resolve()}")

@@ -7,14 +7,12 @@ from django.utils import timezone
 
 from apps.analytics.services.fppa import (
     FEATURE_SCHEMA_VERSION as FPPA_SCHEMA_VERSION,
+)
+from apps.analytics.services.fppa import (
     evaluate_fppa,
     extract_fppa_features,
 )
-from apps.analytics.services.features import FeatureExtractionError
-from apps.analytics.services.segmentation import (
-    segment_reps,
-    split_contiguous_pose_runs,
-)
+from apps.analytics.services.schemav1.features import FeatureExtractionError
 from apps.analytics.services.session_report import build_session_report
 from apps.training.services.model_inference import (
     ModelInferenceError,
@@ -22,6 +20,7 @@ from apps.training.services.model_inference import (
 )
 
 from ..models import AssessmentSession, RepAssessment
+from .repetition_extractor import collect_repetition_entries
 from .snapshot_overlay import reference_template_from_profile
 from .video_processor import VideoProcessor
 
@@ -33,90 +32,6 @@ def _scale_factor_for_session(session):
         return None
 
     return session.body_profile.scale_factor or None
-
-def _split_contiguous_pose_runs(
-    landmark_data: list[dict[str, Any]],
-    expected_frame_step: int,
-) -> list[list[dict[str, Any]]]:
-    return split_contiguous_pose_runs(
-        landmark_data,
-        expected_frame_step,
-    )
-
-def _collect_repetition_entries(
-    session_id: int,
-    landmark_data: list[dict[str, Any]],
-    expected_frame_step: int,
-) -> list[dict[str, Any]]:
-    pose_runs = _split_contiguous_pose_runs(
-        landmark_data,
-        expected_frame_step=expected_frame_step,
-    )
-
-    repetition_entries: list[dict[str, Any]] = []
-
-    run_gaps = [
-        (previous[-1]["frame_index"], current[0]["frame_index"])
-        for previous, current in zip(pose_runs, pose_runs[1:])
-    ]
-    logger.info(
-        "[RepCount] session=%s pose_runs=%s run_lengths=%s "
-        "run_ranges=%s gaps=%s",
-        session_id,
-        len(pose_runs),
-        [len(run) for run in pose_runs],
-        [
-            (run[0]["frame_index"], run[-1]["frame_index"])
-            for run in pose_runs
-        ],
-        run_gaps,
-    )
-
-    for run_index, run in enumerate(pose_runs, start=1):
-        if len(run) < 3:
-            continue
-
-        landmark_series = [entry["landmarks"] for entry in run]
-
-        repetitions = segment_reps(landmark_series)
-
-        logger.info(
-            "[RepCount] session=%s run=%s frames=%s reps=%s",
-            session_id,
-            run_index,
-            len(run),
-            len(repetitions),
-        )
-
-        for repetition in repetitions:
-            try:
-                start_index = int(repetition["start"])
-                bottom_index = int(repetition["bottom"])
-                end_index = int(repetition["end"])
-            except (KeyError, TypeError, ValueError) as exc:
-                raise RuntimeError(
-                    f"Invalid repetition boundaries: {repetition}"
-                ) from exc
-
-            if not (0 <= start_index <= bottom_index <= end_index < len(run)):
-                raise RuntimeError(f"Invalid repetition range: {repetition}")
-
-            rep_entries = run[start_index : end_index + 1]
-
-            if rep_entries:
-                repetition_entries.append(
-                    {
-                        "entries": rep_entries,
-                        "key_frame_index": rep_entries[bottom_index - start_index][
-                            "frame_index"
-                        ],
-                    }
-                )
-
-    if not repetition_entries:
-        raise RuntimeError("No complete squat repetitions were detected.")
-
-    return repetition_entries
 
 def _prepare_assessments(
     session: AssessmentSession,
@@ -187,6 +102,7 @@ def _prepare_assessments(
                     frame_width=frame_width,
                     frame_height=frame_height,
                     native_fps=native_fps,
+                    include_trace=True,
                 )
                 if not fppa_metadata.get("valid") or fppa_features is None:
                     analysis_result["fppa"] = {
@@ -356,7 +272,7 @@ def process_assessment_session(session: AssessmentSession) -> None:
             round(native_fps / 30.0),
         )
 
-        repetition_entries = _collect_repetition_entries(
+        repetition_entries = collect_repetition_entries(
             session_id=session.pk,
             landmark_data=landmark_data,
             expected_frame_step=expected_frame_step,

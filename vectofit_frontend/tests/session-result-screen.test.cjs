@@ -5,166 +5,135 @@ const vm = require("node:vm");
 const { test } = require("node:test");
 const ts = require("typescript");
 
-const filename = path.join(__dirname, "../src/screens/SessionResultScreen.tsx");
-const source = fs.readFileSync(filename, "utf8");
-const compiled = ts.transpileModule(
-  `${source}\nexport { CoachingContent };`,
-  {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      jsx: ts.JsxEmit.React,
-      esModuleInterop: true,
-    },
-  },
-).outputText;
-
-function renderSession(reps, findings = [], selectedIndex = 0) {
-  const react = {
-    createElement: (type, props, ...children) => ({
-      type,
-      props: { ...props, children },
-    }),
-    Fragment: "Fragment",
-    useState: (initial) => [typeof initial === "number" ? selectedIndex : initial, () => {}],
-  };
-  const styles = new Proxy({}, { get: (_, key) => key });
-  const context = {
-    exports: {},
-    require(name) {
-      if (name === "react") return react;
-      if (name === "react-native") {
-        return Object.fromEntries(
-          ["ActivityIndicator", "Image", "Pressable", "ScrollView", "Text", "View"].map(
-            (name) => [name, name],
-          ),
-        );
-      }
-      if (name === "react-native-safe-area-context") return { SafeAreaView: "SafeAreaView" };
-      if (name.endsWith("useAuthStore")) return { default: (select) => select({ token: null }), __esModule: true };
-      if (name.endsWith("sessionStructure")) return { getAssessmentRepSnapshotUrl: (id) => `/snapshot/${id}` };
-      if (name.endsWith("designTokens")) return { COLORS: {} };
-      if (name.endsWith("SessionResultScreenStyles")) return { default: styles, __esModule: true };
-      throw new Error(`Unexpected import ${name}`);
-    },
-  };
-  vm.runInNewContext(compiled, context, { filename });
-
-  const nodes = [];
-  function expand(node) {
-    if (node == null || typeof node === "boolean") return "";
-    if (Array.isArray(node)) return node.map(expand).join("");
-    if (typeof node !== "object") return String(node);
-    if (typeof node.type === "function") return expand(node.type(node.props));
-    nodes.push(node);
-    return expand(node.props.children);
-  }
-  const text = expand(context.exports.CoachingContent({ session: { reps, report: { findings } } }));
-  const chips = nodes.filter((node) => node.type === "Pressable");
-  return { text, chips };
+function compile(relative, requireMock, dev = false) {
+  const filename = path.join(__dirname, "../src", relative);
+  const exports = {};
+  const output = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
+  }).outputText;
+  vm.runInNewContext(output, { exports, require: requireMock, __DEV__: dev }, { filename });
+  return exports;
 }
 
-function repetition(predictedClass, deviation = false, id = 1) {
-  return {
-    id,
-    rep_number: id,
-    analysis_result: {
-      model_prediction: {
-        status: "assessed",
-        prediction_target: "knee_alignment",
-        view_angle: "frontal",
-        predicted_class: predictedClass,
-        probability: 0.82,
-      },
-      fppa: {
-        status: "assessed",
-        cutoff_degrees: 10,
-        knees: {
-          left: { peak_degrees: deviation ? 15 : 5, state: deviation ? "deviation" : "aligned", direction: deviation ? "inward" : null },
-          right: { peak_degrees: 3, state: "aligned", direction: null },
-        },
-      },
+function hookHarness(data, overrides = {}) {
+  const auth = { token: "session-token", user: { id: "owner-1" } };
+  const calls = [];
+  let queryOptions, mutationOptions;
+  const query = { data, isError: false, isFetching: false, refetch: async () => { calls.push("refresh"); }, ...overrides };
+  const store = select => select(auth);
+  store.getState = () => auth;
+  const mutation = { isPending: false, isError: false, reset: () => calls.push("reset"),
+    mutateAsync: async () => {
+      const result = await mutationOptions.mutationFn();
+      await mutationOptions.onSuccess(result);
     },
   };
-}
-
-const finding = {
-  code: "VALGUS_LEFT",
-  affected_reps: [1],
-  severity: "minor",
-  summary: "Left knee exceeded the inward FPPA cutoff.",
-  cue: "Keep the left knee tracking over the left foot.",
-};
-
-test("agreement displays model class, confidence, FPPA and matching coaching", () => {
-  const good = renderSession([repetition("good")]);
-  assert.match(good.text, /1 assessed \| 0 unassessed/);
-  assert.match(good.text, /1 good \| 0 bad/);
-  assert.match(good.text, /Model confidence: 82%/);
-  assert.match(good.chips[0].props.accessibilityLabel, /Good/);
-  assert.equal(good.chips[0].props.style[1], "repChipGood");
-
-  const bad = renderSession([repetition("bad", true)], [finding]);
-  assert.match(bad.text, /0 good \| 1 bad/);
-  assert.match(bad.text, /FPPA-based coaching/);
-  assert.ok(bad.text.includes(finding.cue));
-  assert.equal(bad.chips[0].props.style[1], "repChipBad");
-});
-
-for (const [label, deviation] of [["good", true], ["bad", false]]) {
-  test(`disagreement for model ${label} preserves both results and requests review`, () => {
-    const { text } = renderSession([repetition(label, deviation)], [finding]);
-    assert.match(text, /Results disagree/);
-    assert.match(text, /Review conflicting results/);
-    assert.ok(text.includes(`Model knee alignment: ${label === "good" ? "Good" : "Bad"}`));
-    assert.ok(text.includes(`FPPA threshold result · ${deviation ? "Deviation" : "Aligned"}`));
-    assert.ok(!text.includes(finding.cue));
+  const module = compile("features/session-results/hooks/useSessionResult.ts", name => {
+    if (name === "@tanstack/react-query") return {
+      useQueryClient: () => ({ setQueryData: (key, value) => calls.push({ key, value }) }),
+      useQuery: options => { queryOptions = options; return query; },
+      useMutation: options => { mutationOptions = options; return mutation; },
+    };
+    if (name === "axios") return { isAxiosError: value => Boolean(value?.isAxiosError) };
+    if (name.endsWith("useAuthStore")) return { default: store, __esModule: true };
+    if (name.endsWith("sessionResultService")) return {
+      getLiveSession: async (id, signal) => { calls.push({ get: id, signal }); return data; },
+      retryLiveSession: async id => { calls.push({ retry: id }); return { id, status: "PENDING" }; },
+    };
+    throw new Error("Unexpected import " + name);
   });
+  return { module, run: id => module.default(id), auth, query, mutation, calls,
+    options: () => queryOptions };
 }
 
-test("mixed results count assessed and unassessed without counting missing predictions as good", () => {
-  const missing = repetition("good", false, 3);
-  delete missing.analysis_result.model_prediction;
-  const { text, chips } = renderSession([repetition("good"), repetition("bad", true, 2), missing], [], 2);
-  assert.match(text, /2 assessed \| 1 unassessed/);
-  assert.match(text, /1 good \| 1 bad/);
-  assert.match(text, /Model knee alignment assessment unavailable/);
-  assert.equal(chips[2].props.style[1], "repChipUnavailable");
+test("saved sessions use live results; fixtures require an explicit development branch", () => {
+  const Live = () => null, Preview = () => null;
+  const load = dev => compile("screens/SessionResultScreen.tsx", name => {
+    if (name === "react/jsx-runtime") return { jsx: (type, props) => ({ type, props }) };
+    if (name.endsWith("SessionResultLive")) return { default: Live, __esModule: true };
+    if (name.endsWith("SessionResultPreview")) return { default: Preview, __esModule: true };
+    throw new Error(name);
+  }, dev).default;
+  const props = { route: { params: { sessionId: 12, previewFixture: "main" } } };
+  assert.equal(load(false)(props).type, Live);
+  assert.equal(load(true)(props).type, Preview);
+  assert.equal(load(true)({ route: { params: { sessionId: 12 } } }).type, Live);
 });
 
-test("unavailable inference, unsupported views and legacy output show unavailable", () => {
-  const unavailable = repetition("good");
-  unavailable.analysis_result.model_prediction.status = "not_assessed";
-  const unsupported = repetition("good");
-  unsupported.analysis_result.model_prediction.view_angle = "sagittal";
-  unsupported.analysis_result.fppa = { status: "not_assessed", reason: "view_not_supported" };
-  for (const rep of [unavailable, unsupported, { id: 1, rep_number: 1, analysis_result: null }]) {
-    const { text, chips } = renderSession([rep], [finding]);
-    assert.match(text, /Assessment unavailable/);
-    assert.match(text, /0 assessed \| 1 unassessed/);
-    assert.match(text, /0 good \| 0 bad/);
-    assert.ok(!text.includes("Results disagree"));
-    assert.equal(chips[0].props.style[1], "repChipUnavailable");
-  }
-  assert.match(renderSession([unsupported]).text, /requires a frontal camera view/);
+test("live state mapping does not invent processing stages or successful results", () => {
+  const h = hookHarness();
+  assert.equal(h.module.sessionState({ status: "PROCESSING" }).status, "loading");
+  assert.equal(h.module.sessionState({ status: "PROCESSING" }).stage, undefined);
+  assert.equal(h.module.sessionState({ status: "COMPLETED", view_angle: "frontal", session_result: null }).status, "error");
+  assert.equal(h.module.sessionState({ status: "FAILED", session_saved: false }).error.sessionSaved, false);
+  assert.equal(h.module.sessionState({ status: "FAILED", session_saved: true }).error.sessionSaved, true);
+  const result = { sessionId: "12" };
+  assert.equal(h.module.sessionState({ status: "COMPLETED", session_result: result }).data, result);
 });
 
-test("malformed predictions and invalid FPPA measurements are handled independently", () => {
-  for (const probability of [null, undefined, NaN, Infinity, -0.1, 1.1, "0.8"]) {
-    const rep = repetition("good");
-    rep.analysis_result.model_prediction.probability = probability;
-    assert.match(renderSession([rep]).text, /0 assessed \| 1 unassessed/);
-  }
-  const rep = repetition("bad", true);
-  rep.analysis_result.fppa.knees.left.peak_degrees = NaN;
-  const { text } = renderSession([rep], [finding]);
-  assert.match(text, /1 assessed \| 0 unassessed/);
-  assert.match(text, /FPPA measurements unavailable/);
-  assert.ok(!text.includes(finding.cue));
+test("live queries are scoped to owner and session, consume cancellation and poll only processing states", async () => {
+  const h = hookHarness({ id: 12, status: "PENDING" });
+  assert.equal(h.run(12).state.status, "loading");
+  assert.equal(h.options().queryKey.join(","), "session-result,owner-1,12");
+  assert.equal(h.options().refetchInterval({ state: { data: { status: "PENDING" } } }), 3000);
+  assert.equal(h.options().refetchInterval({ state: { data: { status: "COMPLETED" } } }), false);
+  const signal = {};
+  await h.options().queryFn({ signal });
+  assert.equal(h.calls[0].signal, signal);
+  h.auth.token = null;
+  assert.equal(h.run(12).state.status, "error");
+  assert.equal(h.options().enabled, false);
 });
 
-test("empty session explicitly shows unavailable and zero totals", () => {
-  const { text, chips } = renderSession([]);
-  assert.match(text, /Assessment unavailable/);
-  assert.match(text, /0 assessed \| 0 unassessed/);
-  assert.equal(chips.length, 0);
+test("network failures refresh GET while failed processing uses the confirmed retry endpoint", async () => {
+  const network = hookHarness(undefined, { isError: true, error: { isAxiosError: true } });
+  assert.equal(network.run(12).state.error.kind, "network");
+  await network.run(12).retry();
+  assert.equal(network.calls.join(","), "refresh");
+  const failed = hookHarness({ id: 12, status: "FAILED", session_saved: true });
+  await failed.run(12).retry();
+  assert.equal(failed.calls[0].retry, 12);
+  assert.equal(failed.calls[1].value.status, "PENDING");
+  assert.equal(failed.calls[2], "refresh");
+});
+
+test("a retry response arriving after sign-out cannot repopulate another session's cache", async () => {
+  const h = hookHarness({ id: 12, status: "FAILED" });
+  const hook = h.run(12);
+  h.auth.token = "different-login";
+  await hook.retry();
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.calls[0].retry, 12);
+});
+
+test("conflicting retry is refreshed and owner-denied responses never become saved results", async () => {
+  const h = hookHarness({ id: 12, status: "FAILED" });
+  h.mutation.mutateAsync = async () => { throw { isAxiosError: true, response: { status: 409 } }; };
+  await h.run(12).retry();
+  assert.equal(h.calls.join(","), "reset,refresh");
+  const denied = hookHarness(undefined, { isError: true, error: { isAxiosError: true, response: { status: 404 } } });
+  assert.equal(denied.run(12).state.status, "error");
+  assert.equal(denied.run(12).state.error.kind, "unknown");
+});
+
+test("live service requests only the confirmed JSON endpoint and rejects mismatched identities", async () => {
+  const calls = [];
+  let result = { id: 12, status: "COMPLETED", session_result: { sessionId: "12" } };
+  const service = compile("features/session-results/services/sessionResultService.ts", name => {
+    if (name.endsWith("api/client")) return { __esModule: true, default: {
+      get: async (url, options) => { calls.push({ url, options }); return { data: result }; },
+      post: async url => { calls.push({ url }); return { data: { id: 12, status: "PENDING" } }; },
+    } };
+    if (name.endsWith("validation")) return { assertSessionResult() {} };
+    throw new Error(name);
+  });
+  const signal = {};
+  await service.getLiveSession(12, signal);
+  assert.equal(calls[0].url, "/assessments/sessions/12/");
+  assert.equal(calls[0].options.params.include, "reps");
+  assert.equal(calls[0].options.signal, signal);
+  await service.retryLiveSession(12);
+  assert.equal(calls[1].url, "/assessments/sessions/12/retry/");
+  result.session_result.sessionId = "99";
+  await assert.rejects(service.getLiveSession(12), /identity mismatch/);
 });

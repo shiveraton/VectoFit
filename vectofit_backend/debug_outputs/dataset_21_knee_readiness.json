@@ -1,0 +1,1324 @@
+{
+  "eligibility_policy_version": "knee_alignment_v1",
+  "inspected_count": 369,
+  "eligible_count": 299,
+  "eligible_sample_ids": [
+    525,
+    526,
+    527,
+    528,
+    529,
+    530,
+    532,
+    534,
+    535,
+    536,
+    537,
+    538,
+    540,
+    541,
+    542,
+    543,
+    544,
+    545,
+    547,
+    548,
+    549,
+    550,
+    551,
+    552,
+    553,
+    554,
+    555,
+    556,
+    557,
+    558,
+    559,
+    560,
+    561,
+    562,
+    563,
+    564,
+    566,
+    567,
+    568,
+    569,
+    570,
+    571,
+    572,
+    573,
+    576,
+    577,
+    579,
+    580,
+    581,
+    582,
+    583,
+    584,
+    585,
+    586,
+    587,
+    588,
+    589,
+    590,
+    591,
+    592,
+    593,
+    594,
+    595,
+    597,
+    598,
+    599,
+    600,
+    601,
+    602,
+    603,
+    604,
+    605,
+    606,
+    607,
+    609,
+    610,
+    611,
+    612,
+    614,
+    622,
+    624,
+    625,
+    626,
+    627,
+    628,
+    629,
+    630,
+    631,
+    632,
+    633,
+    634,
+    635,
+    636,
+    637,
+    638,
+    639,
+    640,
+    641,
+    642,
+    643,
+    644,
+    645,
+    651,
+    653,
+    656,
+    657,
+    658,
+    659,
+    660,
+    662,
+    663,
+    666,
+    670,
+    671,
+    672,
+    673,
+    674,
+    675,
+    676,
+    677,
+    678,
+    679,
+    680,
+    681,
+    682,
+    683,
+    684,
+    685,
+    690,
+    691,
+    692,
+    693,
+    697,
+    698,
+    699,
+    700,
+    701,
+    702,
+    703,
+    705,
+    706,
+    707,
+    708,
+    710,
+    711,
+    712,
+    713,
+    714,
+    715,
+    716,
+    719,
+    720,
+    722,
+    723,
+    725,
+    726,
+    727,
+    728,
+    729,
+    731,
+    732,
+    733,
+    734,
+    735,
+    736,
+    737,
+    738,
+    739,
+    740,
+    741,
+    742,
+    743,
+    744,
+    745,
+    746,
+    747,
+    748,
+    749,
+    750,
+    751,
+    752,
+    753,
+    754,
+    755,
+    756,
+    757,
+    758,
+    759,
+    760,
+    761,
+    763,
+    764,
+    765,
+    766,
+    770,
+    771,
+    772,
+    773,
+    774,
+    775,
+    776,
+    777,
+    778,
+    779,
+    780,
+    781,
+    782,
+    783,
+    784,
+    785,
+    786,
+    787,
+    788,
+    789,
+    790,
+    791,
+    792,
+    793,
+    794,
+    795,
+    796,
+    797,
+    798,
+    799,
+    800,
+    801,
+    802,
+    803,
+    804,
+    805,
+    807,
+    808,
+    809,
+    810,
+    811,
+    812,
+    813,
+    814,
+    816,
+    817,
+    819,
+    820,
+    821,
+    822,
+    823,
+    829,
+    830,
+    831,
+    832,
+    833,
+    834,
+    836,
+    837,
+    838,
+    839,
+    840,
+    841,
+    842,
+    844,
+    845,
+    846,
+    847,
+    848,
+    852,
+    853,
+    854,
+    855,
+    856,
+    857,
+    858,
+    859,
+    860,
+    861,
+    862,
+    863,
+    864,
+    865,
+    866,
+    867,
+    869,
+    870,
+    873,
+    874,
+    875,
+    876,
+    877,
+    878,
+    879,
+    880,
+    881,
+    882,
+    883,
+    884,
+    885,
+    886,
+    887,
+    888,
+    889,
+    890
+  ],
+  "class_counts": {
+    "good": 182,
+    "bad": 117
+  },
+  "excluded_count": 70,
+  "exclusion_counts": {
+    "borderline": 62,
+    "unassessable": 4,
+    "feature_extraction_failure": 4
+  },
+  "participants": {
+    "11": {
+      "eligible": 17,
+      "good": 13,
+      "bad": 4,
+      "excluded": 3
+    },
+    "12": {
+      "eligible": 27,
+      "good": 25,
+      "bad": 2,
+      "excluded": 3
+    },
+    "13": {
+      "eligible": 24,
+      "good": 24,
+      "bad": 0,
+      "excluded": 3
+    },
+    "14": {
+      "eligible": 13,
+      "good": 4,
+      "bad": 9,
+      "excluded": 10
+    },
+    "15": {
+      "eligible": 7,
+      "good": 0,
+      "bad": 7,
+      "excluded": 0
+    },
+    "16": {
+      "eligible": 18,
+      "good": 18,
+      "bad": 0,
+      "excluded": 8
+    },
+    "17": {
+      "eligible": 7,
+      "good": 6,
+      "bad": 1,
+      "excluded": 6
+    },
+    "18": {
+      "eligible": 18,
+      "good": 2,
+      "bad": 16,
+      "excluded": 4
+    },
+    "19": {
+      "eligible": 18,
+      "good": 18,
+      "bad": 0,
+      "excluded": 5
+    },
+    "20": {
+      "eligible": 22,
+      "good": 17,
+      "bad": 5,
+      "excluded": 5
+    },
+    "21": {
+      "eligible": 13,
+      "good": 1,
+      "bad": 12,
+      "excluded": 0
+    },
+    "22": {
+      "eligible": 10,
+      "good": 8,
+      "bad": 2,
+      "excluded": 1
+    },
+    "24": {
+      "eligible": 14,
+      "good": 0,
+      "bad": 14,
+      "excluded": 0
+    },
+    "25": {
+      "eligible": 22,
+      "good": 1,
+      "bad": 21,
+      "excluded": 1
+    },
+    "26": {
+      "eligible": 3,
+      "good": 0,
+      "bad": 3,
+      "excluded": 0
+    },
+    "27": {
+      "eligible": 5,
+      "good": 2,
+      "bad": 3,
+      "excluded": 0
+    },
+    "28": {
+      "eligible": 2,
+      "good": 2,
+      "bad": 0,
+      "excluded": 2
+    },
+    "29": {
+      "eligible": 5,
+      "good": 0,
+      "bad": 5,
+      "excluded": 0
+    },
+    "31": {
+      "eligible": 4,
+      "good": 4,
+      "bad": 0,
+      "excluded": 0
+    },
+    "32": {
+      "eligible": 4,
+      "good": 4,
+      "bad": 0,
+      "excluded": 1
+    },
+    "33": {
+      "eligible": 5,
+      "good": 0,
+      "bad": 5,
+      "excluded": 0
+    },
+    "34": {
+      "eligible": 2,
+      "good": 2,
+      "bad": 0,
+      "excluded": 1
+    },
+    "35": {
+      "eligible": 3,
+      "good": 3,
+      "bad": 0,
+      "excluded": 0
+    },
+    "36": {
+      "eligible": 1,
+      "good": 1,
+      "bad": 0,
+      "excluded": 3
+    },
+    "37": {
+      "eligible": 5,
+      "good": 5,
+      "bad": 0,
+      "excluded": 0
+    },
+    "38": {
+      "eligible": 5,
+      "good": 5,
+      "bad": 0,
+      "excluded": 0
+    },
+    "39": {
+      "eligible": 5,
+      "good": 5,
+      "bad": 0,
+      "excluded": 0
+    },
+    "40": {
+      "eligible": 2,
+      "good": 1,
+      "bad": 1,
+      "excluded": 3
+    },
+    "41": {
+      "eligible": 5,
+      "good": 5,
+      "bad": 0,
+      "excluded": 0
+    },
+    "42": {
+      "eligible": 4,
+      "good": 1,
+      "bad": 3,
+      "excluded": 0
+    },
+    "43": {
+      "eligible": 4,
+      "good": 1,
+      "bad": 3,
+      "excluded": 0
+    },
+    "44": {
+      "eligible": 4,
+      "good": 3,
+      "bad": 1,
+      "excluded": 0
+    },
+    "45": {
+      "eligible": 1,
+      "good": 1,
+      "bad": 0,
+      "excluded": 3
+    },
+    "23": {
+      "eligible": 0,
+      "good": 0,
+      "bad": 0,
+      "excluded": 3
+    },
+    "30": {
+      "eligible": 0,
+      "good": 0,
+      "bad": 0,
+      "excluded": 5
+    }
+  },
+  "exclusions": [
+    {
+      "dataset_id": 21,
+      "sample_id": 531,
+      "participant_id": 11,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 533,
+      "participant_id": 11,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 539,
+      "participant_id": 11,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 546,
+      "participant_id": 12,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 565,
+      "participant_id": 12,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 574,
+      "participant_id": 12,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 575,
+      "participant_id": 13,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 578,
+      "participant_id": 13,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 596,
+      "participant_id": 13,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 608,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 613,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 615,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 616,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 617,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 618,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 619,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 620,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 621,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 623,
+      "participant_id": 14,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 646,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 647,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 648,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 649,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 650,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 652,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 654,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 655,
+      "participant_id": 16,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 661,
+      "participant_id": 17,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 664,
+      "participant_id": 17,
+      "reason_code": "unassessable",
+      "detail": "Knee target unassessable was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 665,
+      "participant_id": 17,
+      "reason_code": "unassessable",
+      "detail": "Knee target unassessable was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 667,
+      "participant_id": 17,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 668,
+      "participant_id": 17,
+      "reason_code": "unassessable",
+      "detail": "Knee target unassessable was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 669,
+      "participant_id": 17,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 686,
+      "participant_id": 18,
+      "reason_code": "feature_extraction_failure",
+      "detail": "FPPA extraction was invalid: invalid_bottom_frame"
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 687,
+      "participant_id": 18,
+      "reason_code": "feature_extraction_failure",
+      "detail": "FPPA extraction was invalid: invalid_bottom_frame"
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 688,
+      "participant_id": 18,
+      "reason_code": "feature_extraction_failure",
+      "detail": "FPPA extraction was invalid: invalid_bottom_frame"
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 689,
+      "participant_id": 18,
+      "reason_code": "feature_extraction_failure",
+      "detail": "FPPA extraction was invalid: invalid_bottom_frame"
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 694,
+      "participant_id": 19,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 695,
+      "participant_id": 19,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 696,
+      "participant_id": 19,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 704,
+      "participant_id": 19,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 709,
+      "participant_id": 19,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 717,
+      "participant_id": 20,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 718,
+      "participant_id": 20,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 721,
+      "participant_id": 20,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 724,
+      "participant_id": 20,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 730,
+      "participant_id": 20,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 762,
+      "participant_id": 22,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 767,
+      "participant_id": 23,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 768,
+      "participant_id": 23,
+      "reason_code": "unassessable",
+      "detail": "Knee target unassessable was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 769,
+      "participant_id": 23,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 806,
+      "participant_id": 25,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 815,
+      "participant_id": 28,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 818,
+      "participant_id": 28,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 824,
+      "participant_id": 30,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 825,
+      "participant_id": 30,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 826,
+      "participant_id": 30,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 827,
+      "participant_id": 30,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 828,
+      "participant_id": 30,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 835,
+      "participant_id": 32,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 843,
+      "participant_id": 34,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 849,
+      "participant_id": 36,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 850,
+      "participant_id": 36,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 851,
+      "participant_id": 36,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 868,
+      "participant_id": 40,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 871,
+      "participant_id": 40,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 872,
+      "participant_id": 40,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 891,
+      "participant_id": 45,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 892,
+      "participant_id": 45,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    },
+    {
+      "dataset_id": 21,
+      "sample_id": 893,
+      "participant_id": 45,
+      "reason_code": "borderline",
+      "detail": "Knee target borderline was excluded from training."
+    }
+  ],
+  "training_blockers": [],
+  "sources": {
+    "bw_dataset_v2/videos/mdy_P01_front_v1.mp4": {
+      "good": 7,
+      "bad": 1,
+      "participants": [
+        11
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P01_front_v2.mp4": {
+      "good": 6,
+      "bad": 3,
+      "participants": [
+        11
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P02_front_v1.mp4": {
+      "good": 15,
+      "bad": 1,
+      "participants": [
+        12
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P02_front_v2.mp4": {
+      "good": 10,
+      "bad": 1,
+      "participants": [
+        12
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P03_front_v1.mp4": {
+      "good": 10,
+      "bad": 0,
+      "participants": [
+        13
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P03_front_v2.mp4": {
+      "good": 14,
+      "bad": 0,
+      "participants": [
+        13
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P04_front_v1.mp4": {
+      "good": 1,
+      "bad": 9,
+      "participants": [
+        14
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P04_front_v2.mp4": {
+      "good": 3,
+      "bad": 0,
+      "participants": [
+        14
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P05_front_v2.mp4": {
+      "good": 0,
+      "bad": 7,
+      "participants": [
+        15
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P06_front_v1.mp4": {
+      "good": 12,
+      "bad": 0,
+      "participants": [
+        16
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P06_front_v2.mp4": {
+      "good": 6,
+      "bad": 0,
+      "participants": [
+        16
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P07_front_v1.mp4": {
+      "good": 1,
+      "bad": 1,
+      "participants": [
+        17
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P07_front_v2.mp4": {
+      "good": 5,
+      "bad": 0,
+      "participants": [
+        17
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P08_front_v1.mp4": {
+      "good": 1,
+      "bad": 7,
+      "participants": [
+        18
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P08_front_v2.mp4": {
+      "good": 1,
+      "bad": 9,
+      "participants": [
+        18
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P09_front_v1.mp4": {
+      "good": 10,
+      "bad": 0,
+      "participants": [
+        19
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P09_front_v2.mp4": {
+      "good": 8,
+      "bad": 0,
+      "participants": [
+        19
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P10_front_v1.mp4": {
+      "good": 8,
+      "bad": 1,
+      "participants": [
+        20
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P10_front_v2.mp4": {
+      "good": 9,
+      "bad": 4,
+      "participants": [
+        20
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P11_front_v1.mp4": {
+      "good": 1,
+      "bad": 12,
+      "participants": [
+        21
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P12_front_v2.mp4": {
+      "good": 8,
+      "bad": 2,
+      "participants": [
+        22
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P14_front_v2.mp4": {
+      "good": 0,
+      "bad": 14,
+      "participants": [
+        24
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P15_front_v1.mp4": {
+      "good": 0,
+      "bad": 13,
+      "participants": [
+        25
+      ]
+    },
+    "bw_dataset_v2/videos/mdy_P15_front_v2.mp4": {
+      "good": 1,
+      "bad": 8,
+      "participants": [
+        25
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P01_front.mp4": {
+      "good": 0,
+      "bad": 3,
+      "participants": [
+        26
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P02_front.mp4": {
+      "good": 2,
+      "bad": 3,
+      "participants": [
+        27
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P03_front.mp4": {
+      "good": 2,
+      "bad": 0,
+      "participants": [
+        28
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P04_front.mp4": {
+      "good": 0,
+      "bad": 5,
+      "participants": [
+        29
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P06_front.mp4": {
+      "good": 4,
+      "bad": 0,
+      "participants": [
+        31
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P07_front.mp4": {
+      "good": 4,
+      "bad": 0,
+      "participants": [
+        32
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P08_front.mp4": {
+      "good": 0,
+      "bad": 5,
+      "participants": [
+        33
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P09_front.mp4": {
+      "good": 2,
+      "bad": 0,
+      "participants": [
+        34
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P10_front.mp4": {
+      "good": 3,
+      "bad": 0,
+      "participants": [
+        35
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P11_front.mp4": {
+      "good": 1,
+      "bad": 0,
+      "participants": [
+        36
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P12_front.mp4": {
+      "good": 5,
+      "bad": 0,
+      "participants": [
+        37
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P13_front.mp4": {
+      "good": 5,
+      "bad": 0,
+      "participants": [
+        38
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P14_front.mp4": {
+      "good": 5,
+      "bad": 0,
+      "participants": [
+        39
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P15_front.mp4": {
+      "good": 1,
+      "bad": 1,
+      "participants": [
+        40
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P16_front.mp4": {
+      "good": 5,
+      "bad": 0,
+      "participants": [
+        41
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P17_front.mp4": {
+      "good": 1,
+      "bad": 3,
+      "participants": [
+        42
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P18_front.mp4": {
+      "good": 1,
+      "bad": 3,
+      "participants": [
+        43
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P19_front.mp4": {
+      "good": 3,
+      "bad": 1,
+      "participants": [
+        44
+      ]
+    },
+    "bw_dataset_v2/videos/zen_P20_front.mp4": {
+      "good": 1,
+      "bad": 0,
+      "participants": [
+        45
+      ]
+    }
+  }
+}

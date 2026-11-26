@@ -70,6 +70,7 @@ export async function uploadSquatAssessmentVideo(
   exercise: SquatExerciseType,
   viewAngle: AssessmentViewAngle,
   onCreated?: (sessionId: number) => void,
+  captureMirrored?: boolean | null,
 ): Promise<AssessmentSessionDetail> {
   if (!videoPath.trim()) {
     throw new Error("No recorded video path was provided.");
@@ -101,6 +102,7 @@ export async function uploadSquatAssessmentVideo(
 
   formData.append("exercise_variant", String(variant.id));
   formData.append("view_angle", viewAngle);
+  if (captureMirrored !== null && captureMirrored !== undefined) formData.append("capture_mirrored", String(captureMirrored));
   formData.append("video_file", {
     uri,
     name: filename.endsWith(".mp4") ? filename : `${filename}.mp4`,

@@ -1,4 +1,3 @@
-
 .parameter-card[data-v-hyperparameter-card] {
   position: relative;
   min-width: 0;
@@ -162,11 +161,12 @@
 }
 .help-fade-enter-active[data-v-hyperparameter-card],
 .help-fade-leave-active[data-v-hyperparameter-card] {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .help-fade-enter-from[data-v-hyperparameter-card],
 .help-fade-leave-to[data-v-hyperparameter-card] {
   opacity: 0;
   transform: translateY(-3px);
 }
-

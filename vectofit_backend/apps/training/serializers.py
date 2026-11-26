@@ -4,7 +4,6 @@ from typing import ClassVar
 from rest_framework import serializers
 
 from apps.analytics.services.feature_schemas import schema_for_target
-from apps.analytics.services.features import AVAILABLE_FEATURES, FEATURE_ORDER
 
 from .config import default_hyperparameters, validate_hyperparameters
 from .models import ModelRegistry, TrainingJob
@@ -93,6 +92,10 @@ class TrainingJobRequestSerializer(serializers.Serializer):
         choices=TrainingJob.Algorithm.choices,
         default=TrainingJob.Algorithm.XGBOOST,
     )
+    split_strategy = serializers.ChoiceField(
+        choices=TrainingJob.TrainingSplit.choices,
+        default=TrainingJob.TrainingSplit.HOLDOUT,
+    )
     view_angle = serializers.ChoiceField(
         choices=[
             ("diagonal", "Diagonal"),
@@ -107,22 +110,21 @@ class TrainingJobRequestSerializer(serializers.Serializer):
     )
     feature_selection = serializers.ListField(
         child=serializers.CharField(),
-        allow_empty=True,
+        allow_empty=False,
         required=False,
-        help_text=(
-            f"Feature names to use. Empty/omitted means all of {FEATURE_ORDER}. "
-            f"Accepted aliases: {AVAILABLE_FEATURES}."
-        ),
+        help_text="Non-empty input feature subset. Omitted means all features for the target schema.",
     )
-    hyperparameters = serializers.DictField(required=False, default=default_hyperparameters)
+    hyperparameters = serializers.DictField(
+        required=False, default=default_hyperparameters
+    )
+    test_size = serializers.FloatField(default=0.3, min_value=0.1, max_value=0.5)
 
     def to_internal_value(self, data):
         unknown = sorted(set(data) - set(self.fields))
         if unknown:
-            raise serializers.ValidationError({
-                name: "Unknown training field; evaluation uses LOPO with a fixed seed."
-                for name in unknown
-            })
+            raise serializers.ValidationError(
+                {name: "Unknown training field." for name in unknown}
+            )
         return super().to_internal_value(data)
 
     def validate_hyperparameters(self, value):
@@ -156,15 +158,7 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"view_angle": "FPPA training requires the frontal view."}
                 )
-            if selected_features and set(selected_features) != set(
-                schema.feature_order
-            ):
-                raise serializers.ValidationError(
-                    {"feature_selection": "M1 training requires all six FPPA features."}
-                )
-            attrs["feature_selection"] = list(schema.feature_order)
-            selected_features = attrs["feature_selection"]
-        if not selected_features:
+        if selected_features is None:
             attrs["feature_selection"] = list(schema.feature_order)
         elif set(selected_features) - set(schema.feature_order):
             raise serializers.ValidationError(
@@ -175,6 +169,9 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                     )
                 }
             )
+        attrs["feature_selection"] = [
+            name for name in schema.feature_order if name in attrs["feature_selection"]
+        ]
         datasets = list(
             Dataset.objects.select_related("view_angle")
             .prefetch_related("videos__view_angle")
@@ -274,6 +271,14 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                 }
             )
 
+        if (
+            attrs["split_strategy"] == TrainingJob.TrainingSplit.HOLDOUT
+            and len(participant_ids) < 3
+        ):
+            raise serializers.ValidationError(
+                {"split_strategy": "Holdout needs at least three participants."}
+            )
+
         if target == TrainingJob.PredictionTarget.BINARY_FORM and binary_classes != {
             False,
             True,
@@ -301,10 +306,14 @@ class TrainingJobRequestSerializer(serializers.Serializer):
                     )
                 }
             )
-        if target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT and target_classes != {
-            "good",
-            "bad",
-        }:
+        if (
+            target == TrainingJob.PredictionTarget.KNEE_ALIGNMENT
+            and target_classes
+            != {
+                "good",
+                "bad",
+            }
+        ):
             raise serializers.ValidationError(
                 {
                     "prediction_target": (

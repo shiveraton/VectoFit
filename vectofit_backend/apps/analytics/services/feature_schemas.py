@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from . import features, fppa
+from . import fppa
+from .schemav1 import features
 
 
 @dataclass(frozen=True)

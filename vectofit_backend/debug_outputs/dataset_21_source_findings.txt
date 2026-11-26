@@ -1,0 +1,53 @@
+Dataset 21 source diagnostic
+
+Original stored-coordinate features; class 0=bad, 1=good. Thresholds fit to training-fold balanced accuracy only.
+
+max_abs_peak distribution (degrees):
+source label n mean sd min p10 median p90 max
+mdy good 137 59.1 23.5 22.2 36.7 56.7 80.1 175.2
+mdy bad 93 79.9 22.2 13.1 57.4 78.2 111.3 162.6
+zen good 45 55.9 17.8 16.2 37.3 52.9 81.0 106.9
+zen bad 24 54.8 8.3 44.1 47.2 53.4 63.4 78.6
+
+Accuracy (%) using fixed model parameters and identical participant splits:
+experiment rule raw_XGBoost magnitude_monotone_XGBoost magnitude_logistic
+pooled_lopo 73.6 66.2 72.9 72.6
+mdy_lopo 78.7 70.0 75.2 73.9
+mdy_to_other 55.1 53.6 50.7 62.3
+zen_lopo 46.4 58.0 76.8 69.6
+zen_to_other 55.7 56.1 57.4 63.0
+
+Pooled LOPO bad-class recall by source:
+mdy fppa_rule: 67/93 = 72.0%
+mdy xgboost: 53/93 = 57.0%
+zen fppa_rule: 2/24 = 8.3%
+zen xgboost: 13/24 = 54.2%
+
+Upright-reference normalization, pooled LOPO accuracy (%):
+majority: 60.9
+fppa_rule: 70.9
+xgboost: 65.2
+magnitude_monotone_xgboost: 68.2
+magnitude_logistic: 73.6
+This is an unverified standing proxy using unlabeled upright frames across all reps of each held-out participant; it is exploratory test-time calibration.
+
+Geometry:
+mdy good: median peak 56.7; median bottom-window magnitude 53.9
+mdy bad: median peak 78.2; median bottom-window magnitude 73.3
+zen good: median peak 52.9; median bottom-window magnitude 52.4
+zen bad: median peak 53.4; median bottom-window magnitude 50.6
+The FPPA implementation measures signed 2D thigh-shank angular separation, with zero for a straight projected leg.
+Peaks are taken after median and Savitzky-Golay smoothing.
+The current processor letterboxes. Sample 697 source-frame overlay validates letterbox coordinates; the apparent native-aspect correction was rejected and is marked invalid.
+There is no demonstrated aspect-ratio bug in the evaluated stored coordinates. Large typical angles persist near the bottom; isolated-frame noise is not established as the main cause.
+The default 10-degree cutoff would mark every eligible rep bad; its calibration does not match the rubric-derived target distribution.
+
+Video coverage: 25 MDY videos and 20 ZEN videos registered.
+MDY P05 has only v2; P11 only v1; P12 only v2; P13 only v1; P14 only v2. Other MDY participants have two videos.
+MDY P13 exists, but its 2 borderline and 1 unassessable reps are excluded. ZEN P05 has 5 borderline reps, all excluded.
+Import intent cannot be established from the registered-video list.
+
+Borderline secondary result: 44/282 MDY, 18/87 ZEN, 62/369 total. The 40-rep human audit remains pending; its current primary selection excludes borderline reps.
+Reviewer identities and independent returned ratings are required before kappa can be computed.
+
+Nine focused tests passed. Production feature schema, trained models, and annotations were not changed.

@@ -1,0 +1,94 @@
+.selector {
+  min-width: 0;
+  margin: 0;
+  padding: 24px 22px;
+  border: 0;
+}
+
+.title {
+  float: left;
+  width: 100%;
+  padding: 0;
+  color: var(--vf-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.description {
+  clear: both;
+  margin: 0 0 15px;
+  padding-top: 4px;
+  color: var(--vf-light-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.options {
+  display: grid;
+  gap: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px;
+  background: #ffffff;
+  border: 1px solid var(--vf-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.option:has(input:checked) {
+  background: var(--vf-orange-soft);
+  border-color: #fb923c;
+}
+
+.option:has(input:focus-visible) {
+  outline: 2px solid var(--vf-orange-dark);
+  outline-offset: 2px;
+}
+
+.option input {
+  flex-shrink: 0;
+  margin: 2px 0 0;
+  accent-color: var(--vf-orange-dark);
+}
+
+.copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.copy strong {
+  color: var(--vf-text);
+  font-size: 12px;
+}
+
+.copy span {
+  color: var(--vf-light-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.selector:disabled {
+  opacity: 0.6;
+}
+
+.testSize {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--vf-text);
+  font-size: 12px;
+}
+
+.testSize input {
+  width: 100%;
+  accent-color: var(--vf-orange-dark);
+}
+
+.selector:disabled .option {
+  cursor: not-allowed;
+}

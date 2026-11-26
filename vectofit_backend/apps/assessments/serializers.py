@@ -4,6 +4,7 @@ import cv2
 from rest_framework import serializers
 
 from .models import AssessmentSession, BodyProfile, RepAssessment
+from .services.session_result import build_session_result
 
 
 class LandmarkInputSerializer(serializers.Serializer):
@@ -142,6 +143,7 @@ class AssessmentSessionSerializer(serializers.ModelSerializer):
             "body_profile",
             "view_angle",
             "video_file",
+            "capture_mirrored",
             "status",
             "created_at",
             "processed_at",
@@ -161,9 +163,20 @@ class AssessmentSessionSerializer(serializers.ModelSerializer):
 
 class AssessmentSessionDetailSerializer(AssessmentSessionSerializer):
     reps = RepAssessmentSerializer(many=True, read_only=True, required=False)
+    session_result = serializers.SerializerMethodField()
+    session_saved = serializers.SerializerMethodField()
+
+    def get_session_result(self, obj):
+        return build_session_result(obj)
+
+    def get_session_saved(self, obj):
+        try:
+            return bool(obj.video_file.name and obj.video_file.storage.exists(obj.video_file.name))
+        except (OSError, ValueError):
+            return False
 
     class Meta(AssessmentSessionSerializer.Meta):
-        fields = AssessmentSessionSerializer.Meta.fields + ["reps"]
+        fields = AssessmentSessionSerializer.Meta.fields + ["reps", "session_result", "session_saved"]
 
     def get_fields(self):
         fields = super().get_fields()
@@ -171,5 +184,6 @@ class AssessmentSessionDetailSerializer(AssessmentSessionSerializer):
 
         if request is None or request.query_params.get("include") != "reps":
             fields.pop("reps", None)
+            fields.pop("session_result", None)
 
         return fields

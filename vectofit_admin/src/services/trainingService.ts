@@ -5,6 +5,8 @@ export type PredictionTarget = "binary_form" | "error_type" | "knee_alignment";
 
 export type TrainingJobStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
 
+export type TrainingSplit = "holdout" | "leave_one_participant_out";
+
 export interface TrainingJob {
   id: number;
   dataset_ids: number[];
@@ -78,6 +80,8 @@ export const trainingService = {
     prediction_target: PredictionTarget;
     feature_selection: string[];
     hyperparameters: Record<string, unknown>;
+    split_strategy: TrainingSplit;
+    test_size?: number;
   }): Promise<TrainingJob> {
     const response = await client.post<TrainingJob>(
       "/training/jobs/create/",
@@ -127,7 +131,7 @@ export const trainingService = {
       {
         id: "xgboost",
         code: "xgb",
-        name: "XGBoost M1",
+        name: "XGBoost",
         description:
           "Predicts human-reviewed good/bad knee-alignment labels from FPPA v2 features.",
       },

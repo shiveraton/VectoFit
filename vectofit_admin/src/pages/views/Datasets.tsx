@@ -7,7 +7,6 @@ import { VIEW_ANGLE_BY_ID, type Dataset } from "../../services/datasetService";
 import DatasetAssignments from "../../components/datasets/DatasetAssignments";
 import SummaryCard from "../../components/datasets/SummaryCard";
 import DatasetEmptyState from "../../components/datasets/DatasetEmptyState";
-import StructureGrid from "../../components/datasets/StructureGrid";
 import CreateDatasetModal from "../../components/datasets/CreateDatasetModal";
 import DatasetImportModal from "../../components/datasets/DatasetImportModal";
 import { bindStyles, each, display, scopeAttributes } from "../../presentation";
@@ -592,15 +591,8 @@ export default function Datasets(input: {}) {
             <div data-v-datasets="" className={cx("section-header")}>
               <div data-v-datasets="" className={cx("section-title-row")}>
                 <div data-v-datasets="" className={cx("section-marker")}></div>
-                <div data-v-datasets="">
-                  <h2 data-v-datasets="">{"Dataset Structure"}</h2>
-                  <p data-v-datasets="">
-                    {"Each completed squat repetition represents one sample."}
-                  </p>
-                </div>
               </div>
             </div>
-            <StructureGrid data-v-datasets=""></StructureGrid>
           </section>
         ) : (
           <section
