@@ -606,6 +606,7 @@ export default function DatasetAnnotation(input: {}) {
                           handleCautionChange("poor_visibility", event)
                         }
                       />
+                      Poor Visibility
                     </label>
                   </div>
                   <label
