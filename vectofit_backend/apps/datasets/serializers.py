@@ -82,7 +82,7 @@ class KneeAnnotationField(serializers.Field):
         if not isinstance(value, dict):
             raise serializers.ValidationError("Expected an annotation object or null.")
         required = {"left", "right", "notes"}
-        allowed = required | {"symmetry_observation"}
+        allowed = required | {"symmetry_observation", "cautions"}
         if not required.issubset(value) or set(value) - allowed:
             raise serializers.ValidationError(
                 "Annotation fields are incomplete or unexpected."
@@ -93,18 +93,43 @@ class KneeAnnotationField(serializers.Field):
             item = value[side]
             if not isinstance(item, dict) or set(item) != {"grade", "direction"}:
                 raise serializers.ValidationError(f"Invalid {side} knee annotation.")
-            if not isinstance(item["grade"], str) or item["grade"] not in allowed_grades:
+            if (
+                not isinstance(item["grade"], str)
+                or item["grade"] not in allowed_grades
+            ):
                 raise serializers.ValidationError(f"Invalid {side} knee grade.")
             direction = item["direction"]
             if not isinstance(direction, str) or direction not in allowed_directions:
                 raise serializers.ValidationError(f"Invalid {side} knee direction.")
             if item["grade"] == "aligned" and direction != "none":
-                raise serializers.ValidationError(f"Aligned {side} knee must have no deviation direction.")
+                raise serializers.ValidationError(
+                    f"Aligned {side} knee must have no deviation direction."
+                )
             if item["grade"] == "deviated" and direction not in {"valgus", "varus"}:
-                raise serializers.ValidationError(f"Choose valgus or varus for the {side} deviated knee.")
+                raise serializers.ValidationError(
+                    f"Choose valgus or varus for the {side} deviated knee."
+                )
         if not isinstance(value["notes"], str):
             raise serializers.ValidationError("Notes must be text.")
-        return {key: value[key] for key in required}
+
+        annotation = {key: value[key] for key in required}
+
+        if "cautions" in value:
+            cautions = value["cautions"]
+            caution_fields = {"lateral_foot_shift", "poor_visibility"}
+
+            if (
+                not isinstance(cautions, dict)
+                or set(cautions) != caution_fields
+                or any(not isinstance(item, bool) for item in cautions.values())
+            ):
+                raise serializers.ValidationError(
+                    "Cautions must contain lateral_foot_shift and poor_visibility booleans."
+                )
+
+            annotation["cautions"] = cautions.copy()
+
+        return annotation
 
 
 class DatasetSampleSerializer(serializers.ModelSerializer):
@@ -114,7 +139,9 @@ class DatasetSampleSerializer(serializers.ModelSerializer):
             from .services.assignments import review_samples
 
             if not review_samples().filter(pk=self.instance.pk).exists():
-                raise serializers.ValidationError("This sample is not available for annotation.")
+                raise serializers.ValidationError(
+                    "This sample is not available for annotation."
+                )
         return super().validate(attrs)
 
     knee_annotation = KneeAnnotationField(required=False, allow_null=True)
@@ -333,19 +360,27 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     def get_ready_video_count(self, obj):
         if hasattr(obj, "summary_videos"):
-            return sum(video.status == DatasetVideo.Status.READY for video in obj.summary_videos)
+            return sum(
+                video.status == DatasetVideo.Status.READY
+                for video in obj.summary_videos
+            )
         return obj.videos.filter(status="READY").count()
 
     def get_failed_video_count(self, obj):
         if hasattr(obj, "summary_videos"):
-            return sum(video.status == DatasetVideo.Status.FAILED for video in obj.summary_videos)
+            return sum(
+                video.status == DatasetVideo.Status.FAILED
+                for video in obj.summary_videos
+            )
         return obj.videos.filter(status="FAILED").count()
 
     def get_inherited_labelled_sample_count(self, obj):
         if hasattr(obj, "summary_samples"):
             return sum(
-                sample.is_correct is not None and sample.annotator_id is None
-                and sample.annotated_at is None for sample in obj.summary_samples
+                sample.is_correct is not None
+                and sample.annotator_id is None
+                and sample.annotated_at is None
+                for sample in obj.summary_samples
             )
         return obj.samples.filter(
             is_correct__isnull=False,
@@ -361,10 +396,17 @@ class DatasetSerializer(serializers.ModelSerializer):
         if cache is None:
             cache = self._review_progress_cache = {}
         if obj.pk not in cache:
-            samples = list(review_samples().filter(dataset=obj).prefetch_related("knee_annotation_records"))
+            samples = list(
+                review_samples()
+                .filter(dataset=obj)
+                .prefetch_related("knee_annotation_records")
+            )
             reviewed = sum(
-                any(record["annotator_id"] is not None and record["annotation"] is not None
-                    for record in knee_label_evidence(sample)["annotations"])
+                any(
+                    record["annotator_id"] is not None
+                    and record["annotation"] is not None
+                    for record in knee_label_evidence(sample)["annotations"]
+                )
                 for sample in samples
             )
             cache[obj.pk] = (len(samples), reviewed)
@@ -382,7 +424,13 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     def get_participant_count(self, obj):
         if hasattr(obj, "summary_videos"):
-            return len({video.participant_id for video in obj.summary_videos if video.participant_id})
+            return len(
+                {
+                    video.participant_id
+                    for video in obj.summary_videos
+                    if video.participant_id
+                }
+            )
         return (
             obj.videos.filter(participant__isnull=False)
             .values("participant_id")
@@ -392,10 +440,13 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     def get_view_angles(self, obj):
         if hasattr(obj, "summary_videos"):
-            angles = sorted({
-                video.view_angle.angle_variant for video in obj.summary_videos
-                if video.view_angle_id is not None
-            })
+            angles = sorted(
+                {
+                    video.view_angle.angle_variant
+                    for video in obj.summary_videos
+                    if video.view_angle_id is not None
+                }
+            )
             if not angles and obj.view_angle_id and obj.view_angle:
                 angles = [obj.view_angle.angle_variant]
             return angles
@@ -478,26 +529,36 @@ class DatasetSerializer(serializers.ModelSerializer):
         for angle in self.get_view_angles(obj):
             if has_videos:
                 angle_videos = [
-                    video for video in videos
+                    video
+                    for video in videos
                     if video.status == DatasetVideo.Status.READY
                     and video.view_angle_id is not None
                     and video.view_angle.angle_variant == angle
                 ]
                 angle_samples = [
-                    sample for sample in samples
+                    sample
+                    for sample in samples
                     if sample.dataset_video_id is not None
                     and sample.dataset_video.status == DatasetVideo.Status.READY
                     and sample.dataset_video.view_angle.angle_variant == angle
                 ]
-                participant_count = len({
-                    video.participant_id for video in angle_videos if video.participant_id
-                })
+                participant_count = len(
+                    {
+                        video.participant_id
+                        for video in angle_videos
+                        if video.participant_id
+                    }
+                )
             else:
                 angle_videos = []
-                angle_samples = [sample for sample in samples if sample.dataset_video_id is None]
+                angle_samples = [
+                    sample for sample in samples if sample.dataset_video_id is None
+                ]
                 participant_count = 1 if obj.participant_id else 0
 
-            labelled = [sample for sample in angle_samples if sample.is_correct is not None]
+            labelled = [
+                sample for sample in angle_samples if sample.is_correct is not None
+            ]
             incorrect = [sample for sample in labelled if sample.is_correct is False]
             error_labels = {}
             for sample in incorrect:
@@ -505,8 +566,10 @@ class DatasetSerializer(serializers.ModelSerializer):
                 if label and label != "correct_form":
                     error_labels[label] = error_labels.get(label, 0) + 1
             knee_counts = {
-                "good": 0, "bad": 0,
-                "disputed": 0, "missing": 0,
+                "good": 0,
+                "bad": 0,
+                "disputed": 0,
+                "missing": 0,
             }
             for sample in angle_samples:
                 target = final_knee_target(sample)
@@ -516,7 +579,9 @@ class DatasetSerializer(serializers.ModelSerializer):
                 "labelled_sample_count": len(labelled),
                 "good_count": sum(sample.is_correct is True for sample in labelled),
                 "bad_count": len(incorrect),
-                "error_type_sample_count": sum(sample.is_correct is True for sample in labelled)
+                "error_type_sample_count": sum(
+                    sample.is_correct is True for sample in labelled
+                )
                 + sum(error_labels.values()),
                 "error_label_counts": error_labels,
                 "knee_target_sample_count": knee_counts["good"] + knee_counts["bad"],
@@ -531,7 +596,9 @@ class DatasetListSerializer(DatasetSerializer):
     """Dataset summaries without the full sample payload unused by the table."""
 
     class Meta(DatasetSerializer.Meta):
-        fields = [field for field in DatasetSerializer.Meta.fields if field != "samples"]
+        fields = [
+            field for field in DatasetSerializer.Meta.fields if field != "samples"
+        ]
 
 
 class DatasetVideoSerializer(serializers.ModelSerializer):

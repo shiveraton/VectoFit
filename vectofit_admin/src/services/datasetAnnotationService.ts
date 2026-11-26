@@ -17,7 +17,13 @@ export interface KneeSideAnnotation {
 export interface KneeAnnotation {
   left: KneeSideAnnotation;
   right: KneeSideAnnotation;
+  cautions?: AnnotationCautions;
   notes: string;
+}
+
+export interface AnnotationCautions {
+  lateral_foot_shift: boolean;
+  poor_visibility: boolean;
 }
 
 export interface RepAssessment {
@@ -87,6 +93,10 @@ export const emptyKneeAnnotation = (): KneeAnnotation => ({
   left: { grade: null, direction: null },
   right: { grade: null, direction: null },
   notes: "",
+  cautions: {
+    lateral_foot_shift: false,
+    poor_visibility: false,
+  },
 });
 
 export const datasetAnnotationService = {
@@ -135,7 +145,10 @@ export const datasetAnnotationService = {
   },
 };
 
-export function annotationRequestError(error: unknown, fallback: string): string {
+export function annotationRequestError(
+  error: unknown,
+  fallback: string,
+): string {
   if (!axios.isAxiosError(error)) {
     return error instanceof Error ? error.message : fallback;
   }
@@ -153,8 +166,11 @@ export function annotationRequestError(error: unknown, fallback: string): string
     );
     if (messages.length) return messages.join(" ");
   }
-  if (status === 401) return "Your session expired. Sign in again before saving.";
-  if (status === 403) return "Saving was denied. Reload the page and check your annotation access.";
-  if (status === 404) return "This repetition is no longer available for your account. Reload the dataset.";
+  if (status === 401)
+    return "Your session expired. Sign in again before saving.";
+  if (status === 403)
+    return "Saving was denied. Reload the page and check your annotation access.";
+  if (status === 404)
+    return "This repetition is no longer available for your account. Reload the dataset.";
   return `${fallback} The server returned HTTP ${status}.`;
 }

@@ -7,6 +7,7 @@ import {
   type AnnotationSession,
   type DatasetSample,
   type KneeAnnotation,
+  type AnnotationCautions,
   type KneeAlignmentGrade,
   type KneeDeviationDirection,
   type TargetLabel,
@@ -22,7 +23,12 @@ export function deriveTargetLabel(
     right = annotation.right.grade;
   if (left === null || right === null) return null;
   for (const side of [annotation.left, annotation.right]) {
-    if (side.grade === "deviated" && side.direction !== "valgus" && side.direction !== "varus") return null;
+    if (
+      side.grade === "deviated" &&
+      side.direction !== "valgus" &&
+      side.direction !== "varus"
+    )
+      return null;
     if (side.grade === "aligned" && side.direction !== "none") return null;
   }
   if (left === "deviated" || right === "deviated") return "bad";
@@ -126,7 +132,9 @@ export function useDatasetAnnotation(datasetId: number) {
   async function saveAndNext() {
     if (lock.current) return false;
     if (!currentSample || targetLabel === null) {
-      setError("Assess both knees and choose a direction for each deviated knee before saving.");
+      setError(
+        "Assess both knees and choose a direction for each deviated knee before saving.",
+      );
       return false;
     }
     lock.current = true;
@@ -163,7 +171,9 @@ export function useDatasetAnnotation(datasetId: number) {
       }
       return true;
     } catch (error) {
-      setError(annotationRequestError(error, "Failed to save knee annotation."));
+      setError(
+        annotationRequestError(error, "Failed to save knee annotation."),
+      );
       return false;
     } finally {
       lock.current = false;
@@ -182,7 +192,9 @@ export function useDatasetAnnotation(datasetId: number) {
       });
       setAnnotation(emptyKneeAnnotation());
     } catch (error) {
-      setError(annotationRequestError(error, "Failed to clear knee annotation."));
+      setError(
+        annotationRequestError(error, "Failed to clear knee annotation."),
+      );
     } finally {
       lock.current = false;
     }
@@ -216,8 +228,7 @@ export function useDatasetAnnotation(datasetId: number) {
         let direction = previous[side].direction;
         if (grade === null) direction = null;
         else if (grade === "aligned") direction = "none";
-        else if (direction === null || direction === "none")
-          direction = null;
+        else if (direction === null || direction === "none") direction = null;
         return { ...previous, [side]: { grade, direction } };
       }),
     setKneeDirection: (
@@ -230,6 +241,16 @@ export function useDatasetAnnotation(datasetId: number) {
       })),
     setNotes: (value: string) =>
       setAnnotation((previous) => ({ ...previous, notes: value })),
+    setCaution: (name: keyof AnnotationCautions, checked: boolean) =>
+      setAnnotation((previous) => ({
+        ...previous,
+        cautions: {
+          lateral_foot_shift: false,
+          poor_visibility: false,
+          ...previous.cautions,
+          [name]: checked,
+        },
+      })),
     saveAndNext,
     clear,
     previous: () => {

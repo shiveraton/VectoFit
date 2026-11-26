@@ -2,14 +2,18 @@ import { useState, useRef } from "react";
 import { useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
+
 import { useDatasetAnnotation } from "../../hooks/useDatasetAnnotation";
+import { bindStyles, each, display, scopeAttributes } from "../../presentation";
+import styles from "./DatasetAnnotation.module.css";
+
+import { annotationVideoUrl } from "../../services/frontalAnnotation";
+import type { AnnotationCautions } from "../../services/datasetAnnotationService";
 import type {
   KneeAlignmentGrade,
   KneeDeviationDirection,
 } from "../../services/datasetAnnotationService";
-import { bindStyles, each, display, scopeAttributes } from "../../presentation";
-import styles from "./DatasetAnnotation.module.css";
-import { annotationVideoUrl } from "../../services/frontalAnnotation";
+
 import SquatReferenceModal from "../../components/datasets/SquatReferenceModal";
 
 export default function DatasetAnnotation(input: {}) {
@@ -26,10 +30,7 @@ export default function DatasetAnnotation(input: {}) {
   const [videoError, setVideoError] = useState("");
   const [reviewingCompleted, setReviewingCompleted] = useState(false);
   const kneeSides = ["left", "right"] as const;
-  const kneeGrades: KneeAlignmentGrade[] = [
-    "aligned",
-    "deviated",
-  ];
+  const kneeGrades: KneeAlignmentGrade[] = ["aligned", "deviated"];
   function handleDirectionChange(
     side: "left" | "right",
     event: ChangeEvent<HTMLSelectElement>,
@@ -38,6 +39,12 @@ export default function DatasetAnnotation(input: {}) {
       side,
       (event.target as HTMLSelectElement).value as KneeDeviationDirection,
     );
+  }
+  function handleCautionChange(
+    name: keyof AnnotationCautions,
+    event: ChangeEvent<HTMLInputElement>,
+  ): void {
+    setCaution(name, event.currentTarget.checked);
   }
   function handleNotesInput(event: ChangeEvent<HTMLTextAreaElement>) {
     setNotes((event.target as HTMLTextAreaElement).value);
@@ -59,6 +66,7 @@ export default function DatasetAnnotation(input: {}) {
     error,
     setKneeGrade,
     setKneeDirection,
+    setCaution,
     setNotes,
     saveAndNext,
     clear,
@@ -538,7 +546,11 @@ export default function DatasetAnnotation(input: {}) {
                         <select
                           data-v-dataset-annotation=""
                           aria-label={`${side} knee deviation direction`}
-                          value={annotation[side].grade === "aligned" ? "" : annotation[side].direction ?? ""}
+                          value={
+                            annotation[side].grade === "aligned"
+                              ? ""
+                              : (annotation[side].direction ?? "")
+                          }
                           disabled={
                             annotation[side].grade === null ||
                             annotation[side].grade === "aligned"
@@ -547,8 +559,14 @@ export default function DatasetAnnotation(input: {}) {
                             handleDirectionChange(side, event);
                           }}
                         >
-                          <option data-v-dataset-annotation="" value="" disabled>
-                            {annotation[side].grade === "aligned" ? "No deviation" : "Select direction"}
+                          <option
+                            data-v-dataset-annotation=""
+                            value=""
+                            disabled
+                          >
+                            {annotation[side].grade === "aligned"
+                              ? "No deviation"
+                              : "Select direction"}
                           </option>
                           <option data-v-dataset-annotation="" value="valgus">
                             {"Valgus (inward)"}
@@ -559,6 +577,36 @@ export default function DatasetAnnotation(input: {}) {
                         </select>
                       </div>
                     ))}
+                  </div>
+                  <div>
+                    <h3 id="annotation-cautions-heading">Optional Cautions</h3>
+                    <p>
+                      These flags do not change the knee rating or exclude this
+                      sample.
+                    </p>
+
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={
+                          annotation.cautions?.lateral_foot_shift ?? false
+                        }
+                        onChange={(event) =>
+                          handleCautionChange("lateral_foot_shift", event)
+                        }
+                      />
+                      Lateral Foot Shift
+                    </label>
+
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={annotation.cautions?.poor_visibility ?? false}
+                        onChange={(event) =>
+                          handleCautionChange("poor_visibility", event)
+                        }
+                      />
+                    </label>
                   </div>
                   <label
                     data-v-dataset-annotation=""
