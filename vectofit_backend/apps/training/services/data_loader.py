@@ -10,7 +10,7 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from apps.analytics.services import fppa
 from apps.analytics.services.feature_schemas import schema_for_target
-from apps.analytics.services.schemav1.features import (
+from apps.analytics.services.features import (
     FeatureExtractionError,
     extract_rep_features,
     to_feature_row,
@@ -21,9 +21,6 @@ from apps.datasets.services.knee_label import (
     knee_label_evidence,
 )
 from apps.datasets.services.frontal import sample_angle
-
-from sklearn.model_selection import GroupShuffleSplit
-from ..models import TrainingJob
 
 from ..config import TARGET_TASK_PROFILES
 

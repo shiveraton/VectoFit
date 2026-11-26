@@ -14,6 +14,7 @@ from apps.training.services.data_loader import (
     FrameTimingError, prepare_knee_samples, build_samples,
 )
 from apps.training.services.run_training_job import _build_manifest
+from apps.training.config import default_hyperparameters
 
 
 def rating(left="aligned", right="aligned"):
@@ -160,14 +161,16 @@ class FrontalProtocolTests(APITestCase):
         self.assertEqual(prepared.sample_ids, trained.sample_ids)
         self.assertEqual(prepared.readiness_report()["class_counts"], {"good": 1, "bad": 1})
         job = SimpleNamespace(pk=1, feature_schema_version="fppa_v2", algorithm="xgboost")
-        result = {"train_idx": [0], "test_idx": [1], "hyperparameters": {},
-                  "class_mapping": {}, "target_names": [], "metrics": {}}
+        result = {"train_idx": [0], "test_idx": [1], "hyperparameters": default_hyperparameters(),
+                  "class_mapping": {"0": "bad", "1": "good"}, "target_names": ["bad", "good"],
+                  "metrics": {}, "task_profile": "quality", "seed": 42, "final_scale_pos_weight": 1.0,
+                  "folds": [{"participant": "held-out", "train_idx": [0], "test_idx": [1]}]}
         with patch("apps.training.services.run_training_job.timezone.now") as now:
             now.return_value.isoformat.return_value = "fixed"
-            first = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment", .3, 42)
+            first = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment")
             trained.eligibility_policy_version = "changed"
-            changed = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment", .3, 42)
+            changed = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment")
             self.assertNotEqual(first["manifest_sha256"], changed["manifest_sha256"])
             trained.annotation_evidence[0]["annotations"][0]["annotation"]["notes"] = "updated"
-            annotated = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment", .3, 42)
+            annotated = _build_manifest(job, [self.dataset], trained, result, "frontal", "knee_alignment")
             self.assertNotEqual(changed["manifest_sha256"], annotated["manifest_sha256"])
