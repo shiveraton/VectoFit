@@ -21,6 +21,10 @@ export function deriveTargetLabel(
   const left = annotation.left.grade,
     right = annotation.right.grade;
   if (left === null || right === null) return null;
+  for (const side of [annotation.left, annotation.right]) {
+    if (side.grade === "deviated" && side.direction !== "valgus" && side.direction !== "varus") return null;
+    if (side.grade === "aligned" && side.direction !== "none") return null;
+  }
   if (left === "deviated" || right === "deviated") return "bad";
   return "good";
 }
@@ -122,7 +126,7 @@ export function useDatasetAnnotation(datasetId: number) {
   async function saveAndNext() {
     if (lock.current) return false;
     if (!currentSample || targetLabel === null) {
-      setError("Assess both knees before saving.");
+      setError("Assess both knees and choose a direction for each deviated knee before saving.");
       return false;
     }
     lock.current = true;
@@ -213,7 +217,7 @@ export function useDatasetAnnotation(datasetId: number) {
         if (grade === null) direction = null;
         else if (grade === "aligned") direction = "none";
         else if (direction === null || direction === "none")
-          direction = "uncertain";
+          direction = null;
         return { ...previous, [side]: { grade, direction } };
       }),
     setKneeDirection: (

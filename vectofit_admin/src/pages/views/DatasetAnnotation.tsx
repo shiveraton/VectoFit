@@ -538,7 +538,7 @@ export default function DatasetAnnotation(input: {}) {
                         <select
                           data-v-dataset-annotation=""
                           aria-label={`${side} knee deviation direction`}
-                          value={annotation[side].direction ?? ""}
+                          value={annotation[side].grade === "aligned" ? "" : annotation[side].direction ?? ""}
                           disabled={
                             annotation[side].grade === null ||
                             annotation[side].grade === "aligned"
@@ -547,11 +547,8 @@ export default function DatasetAnnotation(input: {}) {
                             handleDirectionChange(side, event);
                           }}
                         >
-                          <option
-                            data-v-dataset-annotation=""
-                            value="uncertain"
-                          >
-                            {"Direction uncertain"}
+                          <option data-v-dataset-annotation="" value="" disabled>
+                            {annotation[side].grade === "aligned" ? "No deviation" : "Select direction"}
                           </option>
                           <option data-v-dataset-annotation="" value="valgus">
                             {"Valgus (inward)"}

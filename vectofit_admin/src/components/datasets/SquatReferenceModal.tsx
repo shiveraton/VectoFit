@@ -113,8 +113,8 @@ export default function SquatReferenceModal({
           <h3>Deviation direction</h3>
           <p>
             <strong>Valgus:</strong> inward. <strong>Varus:</strong> outward.
-            Choose <strong>Direction uncertain</strong> when the direction
-            cannot be judged reliably.
+            For each deviated knee, choose the visible inward or outward
+            direction before saving.
           </p>
         </section>
       </div>

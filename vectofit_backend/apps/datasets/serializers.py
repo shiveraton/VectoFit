@@ -88,18 +88,20 @@ class KneeAnnotationField(serializers.Field):
                 "Annotation fields are incomplete or unexpected."
             )
         allowed_grades = {"aligned", "deviated"}
-        allowed_directions = {"valgus", "varus", "none", "uncertain"}
+        allowed_directions = {"valgus", "varus", "none"}
         for side in ("left", "right"):
             item = value[side]
             if not isinstance(item, dict) or set(item) != {"grade", "direction"}:
                 raise serializers.ValidationError(f"Invalid {side} knee annotation.")
             if not isinstance(item["grade"], str) or item["grade"] not in allowed_grades:
                 raise serializers.ValidationError(f"Invalid {side} knee grade.")
-            if (
-                item["direction"] is not None
-                and (not isinstance(item["direction"], str) or item["direction"] not in allowed_directions)
-            ):
+            direction = item["direction"]
+            if not isinstance(direction, str) or direction not in allowed_directions:
                 raise serializers.ValidationError(f"Invalid {side} knee direction.")
+            if item["grade"] == "aligned" and direction != "none":
+                raise serializers.ValidationError(f"Aligned {side} knee must have no deviation direction.")
+            if item["grade"] == "deviated" and direction not in {"valgus", "varus"}:
+                raise serializers.ValidationError(f"Choose valgus or varus for the {side} deviated knee.")
         if not isinstance(value["notes"], str):
             raise serializers.ValidationError("Notes must be text.")
         return {key: value[key] for key in required}

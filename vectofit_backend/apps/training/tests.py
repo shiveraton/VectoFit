@@ -365,7 +365,7 @@ class DBAndAPITests(APITestCase):
             KneeAnnotation.objects.create(
                 sample=sample, annotator=self.admin,
                 annotation={
-                    "left": {"grade": "aligned" if sample.is_correct else "deviated", "direction": "uncertain"},
+                    "left": {"grade": "aligned" if sample.is_correct else "deviated", "direction": "none" if sample.is_correct else "valgus"},
                     "right": {"grade": "aligned", "direction": "none"},
                     "notes": "",
                 },
@@ -459,7 +459,7 @@ class DBAndAPITests(APITestCase):
             KneeAnnotation.objects.create(
                 sample=sample,
                 annotation={
-                    "left": {"grade": grade, "direction": "uncertain"},
+                    "left": {"grade": grade, "direction": "none" if grade == "aligned" else "valgus"},
                     "right": {"grade": "aligned", "direction": "none"},
                     "notes": "",
                 },

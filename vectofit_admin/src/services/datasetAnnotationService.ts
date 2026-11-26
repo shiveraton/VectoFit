@@ -5,7 +5,7 @@ const isPublic = import.meta.env.MODE === "public";
 
 export type KneeAlignmentGrade = "aligned" | "deviated";
 
-export type KneeDeviationDirection = "valgus" | "varus" | "none" | "uncertain";
+export type KneeDeviationDirection = "valgus" | "varus" | "none";
 
 export type TargetLabel = "good" | "bad";
 

@@ -18,8 +18,8 @@ from apps.training.config import default_hyperparameters
 
 
 def rating(left="aligned", right="aligned"):
-    return {"left": {"grade": left, "direction": "uncertain"},
-            "right": {"grade": right, "direction": "uncertain"},
+    return {"left": {"grade": left, "direction": "none" if left == "aligned" else "valgus"},
+            "right": {"grade": right, "direction": "none" if right == "aligned" else "varus"},
             "notes": ""}
 
 
@@ -38,6 +38,12 @@ class FrontalProtocolTests(APITestCase):
         self.assertEqual(report["exclusion_counts"], {reason: 1})
         self.assertEqual(report["inspected_count"], report["eligible_count"] + report["excluded_count"])
         self.assertTrue(report["training_blockers"])
+
+    def test_uncertain_direction_is_excluded_from_training(self):
+        annotation = rating("deviated")
+        annotation["left"]["direction"] = "uncertain"
+        self.annotate(annotation)
+        self.assert_exclusion("incomplete_annotation")
 
     def test_incomplete_values_never_become_good(self):
         for value in ({}, None, rating(None), rating("deviated", None), rating([], "aligned")):

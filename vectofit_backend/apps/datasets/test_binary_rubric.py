@@ -12,8 +12,8 @@ from .models import Dataset, DatasetSample, KneeAnnotation
 
 
 def rating(left="aligned", right="aligned"):
-    return {"left": {"grade": left, "direction": "uncertain"},
-            "right": {"grade": right, "direction": "uncertain"}, "notes": ""}
+    return {"left": {"grade": left, "direction": "none" if left == "aligned" else "valgus"},
+            "right": {"grade": right, "direction": "none" if right == "aligned" else "varus"}, "notes": ""}
 
 
 class BinaryRubricTests(APITestCase):
